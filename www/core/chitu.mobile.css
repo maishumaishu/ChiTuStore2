@@ -1,0 +1,26 @@
+page .view {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+page .loading {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  font-size: 120px;
+  text-align: center;
+  padding-top: 80px;
+  color: #bbb;
+}
+page .error {
+  width: 100%;
+  height: 100%;
+}
+page .header {
+  top: 0px;
+  position: absolute;
+}
+page .footer {
+  bottom: 0px;
+  position: absolute;
+}
