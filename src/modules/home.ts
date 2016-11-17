@@ -3,16 +3,18 @@ import * as services from 'services';
 import Vue = require('vue');
 
 export default action(function (page: Page) {
-    return Promise.all([services.home.proudcts(), services.home.brands()])
+    let result = Promise.all([services.home.proudcts(), services.home.brands()])
         .then((args) => {
             let products = args[0];
             let brands = args[1];
-            window.setTimeout(() => {
-                var app = new Vue({
-                    el: '.view',
-                    data: { products, brands }
-                });
-            }, 10);
-            // return Promise.resolve();
+
+            var vue = new Vue({
+                el: page.elements.view,
+                data: { products, brands },
+            });
+            page.elements.view = vue.$el;
         });
+
+    return result;
+
 });

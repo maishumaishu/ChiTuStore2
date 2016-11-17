@@ -4,7 +4,8 @@
 // });
 
 declare class Vue {
-    constructor(options: { el: string, data: any })
+    constructor(options: { el: string | HTMLElement, data: any, methods?: any });
+    $el: HTMLElement;
 }
 
 declare module 'vue' {
