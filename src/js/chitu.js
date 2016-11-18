@@ -7,21 +7,45 @@
             })(function() {var chitu;
 (function (chitu) {
     const DEFAULT_FILE_BASE_PATH = 'modules';
-    class RouteParser {
-        constructor(basePath) {
+    class RouteData {
+        constructor(basePath, routeString) {
+            this._parameters = {};
             this.path_string = '';
             this.path_spliter_char = '/';
             this.param_spliter = '?';
             this.name_spliter_char = '.';
-            this._actionPath = '';
-            this._cssPath = '';
-            this._parameters = {};
-            this._pageName = '';
             this._pathBase = '';
-            this.HASH_MINI_LENGTH = 2;
-            this._pathBase = basePath || '';
+            if (!basePath)
+                throw chitu.Errors.argumentNull('basePath');
+            if (!routeString)
+                throw chitu.Errors.argumentNull('routeString');
+            this._routeString = routeString;
+            this._pathBase = basePath;
+            this.parseRouteString();
+            this._resources = [];
+            let routeData = this;
+            this._resources['_push'] = this.resources.push;
+            this._resources.push = function (...items) {
+                let tmp = this;
+                for (let i = 0; i < tmp.length; i++) {
+                    for (let j = 0; j < items.length; j++) {
+                        if (tmp[i].name == items[j].name) {
+                            throw chitu.Errors.resourceExists(tmp[i].name, routeData.pageName);
+                        }
+                    }
+                }
+                for (let i = 0; i < items.length; i++) {
+                    for (let j = i + 1; j < items.length; j++) {
+                        if (items[i].name == items[j].name) {
+                            throw chitu.Errors.resourceExists(items[i].name, routeData.pageName);
+                        }
+                    }
+                }
+                return this._push(...items);
+            };
         }
-        parseRouteString(routeString) {
+        parseRouteString() {
+            let routeString = this.routeString;
             let routePath;
             let search;
             let param_spliter_index = routeString.indexOf(this.param_spliter);
@@ -42,17 +66,8 @@
                 throw chitu.Errors.canntParseRouteString(routeString);
             }
             let file_path = path_parts.join(this.path_spliter_char);
-            let page_name = path_parts.join(this.name_spliter_char);
-            var result = {
-                actionPath: (this.basePath ? chitu.combinePath(this.basePath, file_path) : file_path),
-                values: this._parameters,
-                pageName: page_name,
-                routeString
-            };
-            return result;
-        }
-        get basePath() {
-            return this._pathBase;
+            this._pageName = path_parts.join(this.name_spliter_char);
+            this._actionPath = (this.basePath ? chitu.combinePath(this.basePath, file_path) : file_path);
         }
         pareeUrlQuery(query) {
             let match, pl = /\+/g, search = /([^&=]+)=?([^&]*)/g, decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); };
@@ -61,8 +76,26 @@
                 urlParams[decode(match[1])] = decode(match[2]);
             return urlParams;
         }
+        get basePath() {
+            return this._pathBase;
+        }
+        get values() {
+            return this._parameters;
+        }
+        get pageName() {
+            return this._pageName;
+        }
+        get resources() {
+            return this._resources;
+        }
+        get routeString() {
+            return this._routeString;
+        }
+        get actionPath() {
+            return this._actionPath;
+        }
     }
-    chitu.RouteParser = RouteParser;
+    chitu.RouteData = RouteData;
     var PAGE_STACK_MAX_SIZE = 16;
     var ACTION_LOCATION_FORMATER = '{controller}/{action}';
     var VIEW_LOCATION_FORMATER = '{controller}/{action}';
@@ -76,8 +109,8 @@
             this.backFail = chitu.Callbacks();
         }
         parseRouteString(routeString) {
-            let urlParser = new RouteParser(this.fileBasePath);
-            return urlParser.parseRouteString(routeString);
+            let routeData = new RouteData(this.fileBasePath, routeString);
+            return routeData;
         }
         on_pageCreated(page) {
             return chitu.fireCallback(this.pageCreated, this, page);
@@ -164,7 +197,7 @@
             if (routeData == null) {
                 throw chitu.Errors.noneRouteMatched(routeString);
             }
-            routeData.values = chitu.extend(routeData.values, args || {});
+            Object.assign(routeData.values, args || {});
             let previous = this.currentPage;
             let result = new Promise((resolve, reject) => {
                 let page = this.createPage(routeData);
@@ -284,8 +317,15 @@ var chitu;
             let msg = `Cannt find action in page '${pageName}', is the exports has default field?`;
             return new Error(msg);
         }
+        static exportsCanntNull(pageName) {
+            let msg = `Exports of page '${pageName}' is null.`;
+        }
         static scrollerElementNotExists() {
             let msg = "Scroller element is not exists.";
+            return new Error(msg);
+        }
+        static resourceExists(resourceName, pageName) {
+            let msg = `Rosource '${resourceName}' is exists in the resources of page '${pageName}'.`;
             return new Error(msg);
         }
     }
@@ -345,8 +385,8 @@ var chitu;
             this._displayer = params.displayer;
             this.loadPageAction(params.routeData);
         }
-        on_load(...resources) {
-            return chitu.fireCallback(this.load, this, resources);
+        on_load(args) {
+            return chitu.fireCallback(this.load, this, args);
         }
         on_showing() {
             return chitu.fireCallback(this.showing, this);
@@ -411,6 +451,8 @@ var chitu;
         loadPageAction(routeData) {
             var action_deferred = new Promise((reslove, reject) => {
                 this.createActionDeferred(routeData).then((actionResult) => {
+                    if (!actionResult)
+                        throw chitu.Errors.exportsCanntNull(routeData.pageName);
                     let actionName = 'default';
                     let action = actionResult[actionName];
                     if (action == null) {
@@ -431,9 +473,16 @@ var chitu;
                     reject(err);
                 });
             });
-            let result = Promise.all([action_deferred, chitu.loadjs(...routeData.resource || [])]).then((results) => {
-                let resourceResults = results[1];
-                this.on_load(...resourceResults);
+            let resourcePaths = routeData.resources.map(o => o.path);
+            let resourceNames = routeData.resources.map(o => o.name);
+            let result = Promise.all([action_deferred, chitu.loadjs(...resourcePaths || [])]).then((data) => {
+                let resourceResults = data[1];
+                let args = {};
+                for (let i = 0; i < resourceResults.length; i++) {
+                    let name = resourceNames[i];
+                    args[name] = resourceResults[i];
+                }
+                this.on_load(args);
             });
             return result;
         }
@@ -458,17 +507,6 @@ var chitu;
 
 var chitu;
 (function (chitu) {
-    function extend(obj1, obj2) {
-        if (obj1 == null)
-            throw chitu.Errors.argumentNull('obj1');
-        if (obj2 == null)
-            throw chitu.Errors.argumentNull('obj2');
-        for (let key in obj2) {
-            obj1[key] = obj2[key];
-        }
-        return obj1;
-    }
-    chitu.extend = extend;
     function combinePath(path1, path2) {
         if (!path1)
             throw chitu.Errors.argumentNull('path1');

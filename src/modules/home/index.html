@@ -1,0 +1,6 @@
+<h1>Home</h1>
+<div v-for="item in products">
+  <div>
+      <a v-bind:href="`#home/product?id=${item.ProductId}`">{{ item.Name }}</a>
+  </div>
+</div>

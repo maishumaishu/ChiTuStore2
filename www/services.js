@@ -61,9 +61,14 @@ define(["require", "exports", 'fetch'], function (require, exports, fetch) {
         }
         home.proudcts = proudcts;
         function brands() {
-            let url = config.service.shop + '/Product/GetBrands';
+            let url = config.service.shop + 'Product/GetBrands';
             return ajax(url);
         }
         home.brands = brands;
+        function getProduct(productId) {
+            let url = config.service.shop + 'Product/GetProduct';
+            return ajax(url, { productId: productId });
+        }
+        home.getProduct = getProduct;
     })(home = exports.home || (exports.home = {}));
 });

@@ -15,34 +15,39 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
     class Page extends chitu.Page {
         constructor(params) {
             super(params);
+            this.views = ['view', 'loading', 'error'];
             this.app = params.app;
-            let header = this.createChildElement('header');
-            let view = this.createChildElement('view');
-            let loading = this.createChildElement('loading');
-            let error = this.createChildElement('error');
-            let footer = this.createChildElement('footer');
-            error.appendChild(document.createElement('span'));
-            this.elements = { header: header, loading: loading, view: view, error: error, footer: footer };
-            this.showElement('loading');
-            this.load.add((sender, html) => {
-                this.elements.view.innerHTML = html;
+            for (let className of ['header', 'footer'].concat(this.views)) {
+                this.createChildElement(className);
+            }
+            this.showView('loading');
+            this.load.add((sender, args) => {
+                this.childElement('view').innerHTML = args.viewHTML || '';
             });
         }
         createChildElement(className) {
             let childElement = document.createElement('div');
             childElement.className = className;
             this.element.appendChild(childElement);
-            childElement.style.display = 'none';
             return childElement;
         }
-        showElement(name) {
-            for (let key in this.elements) {
-                this.elements[key].style.display = key == name ? 'block' : 'none';
+        showView(name) {
+            for (let item of this.views) {
+                if (name == item)
+                    this.childElement(item).style.display = 'block';
+                else
+                    this.childElement(item).style.display = 'none';
             }
         }
         showError(err) {
-            this.elements.error.querySelector('span').innerHTML = err.message;
-            this.showElement('error');
+            let element = this.childElement('error');
+            console.assert(element != null);
+            element.innerHTML = `<span>${err.message}</span>`;
+            this.showView('error');
+        }
+        childElement(className) {
+            let element = this.element.querySelector(`.${className}`);
+            return element;
         }
     }
     exports.Page = Page;
@@ -54,9 +59,7 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
         }
         parseRouteString(routeString) {
             let routeData = super.parseRouteString(routeString);
-            routeData.resource = [
-                `text!${routeData.actionPath}.html`,
-            ];
+            routeData.resources.push({ name: 'viewHTML', path: `text!${routeData.actionPath}.html` });
             return routeData;
         }
     }
@@ -65,7 +68,7 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
         return (page) => {
             let p = (callback(page) || Promise.resolve());
             p.then(() => {
-                page.showElement('view');
+                page.showView('view');
             }).catch((err) => {
                 page.showError(err);
             });

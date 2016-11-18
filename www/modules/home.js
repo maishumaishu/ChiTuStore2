@@ -7,10 +7,9 @@ define(["require", "exports", 'core/chitu.mobile', 'services', 'vue'], function 
             let products = args[0];
             let brands = args[1];
             var vue = new Vue({
-                el: page.elements.view,
+                el: page.childElement('view'),
                 data: { products: products, brands: brands },
             });
-            page.elements.view = vue.$el;
         });
         return result;
     });

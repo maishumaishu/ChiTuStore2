@@ -70,7 +70,11 @@ export module home {
         return ajax(url, { pageIndex });
     }
     export function brands(): Promise<any> {
-        let url = config.service.shop + '/Product/GetBrands';
+        let url = config.service.shop + 'Product/GetBrands';
         return ajax(url);
+    }
+    export function getProduct(productId): Promise<any> {
+        let url = config.service.shop + 'Product/GetProduct';
+        return ajax(url, { productId });
     }
 }

@@ -12,30 +12,24 @@ class Exception extends Error {
     handled: boolean = false;
 }
 
+type ViewName = 'view' | 'loading' | 'error';
+type PageElementName = ViewName | 'header' | 'footer';
 export class Page extends chitu.Page {
     private app: Application;
-    elements: {
-        header: HTMLElement, loading: HTMLElement, view: HTMLElement,
-        error: HTMLElement, footer: HTMLElement
-    };
+    private views: ViewName[] = ['view', 'loading', 'error'];
+
     constructor(params: chitu.PageParams) {
         super(params);
 
         this.app = params.app as Application;
 
-        let header = this.createChildElement('header');
-        let view = this.createChildElement('view');
-        let loading = this.createChildElement('loading');
-        let error = this.createChildElement('error');
-        let footer = this.createChildElement('footer');
+        for (let className of ['header', 'footer'].concat(this.views)) {
+            this.createChildElement(className);
+        }
 
-        error.appendChild(document.createElement('span'));
-
-        this.elements = { header, loading, view, error, footer };
-        this.showElement('loading');
-
-        this.load.add((sender: Page, html: string) => {
-            this.elements.view.innerHTML = html;
+        this.showView('loading');
+        this.load.add((sender: Page, args: any) => {
+            this.childElement('view').innerHTML = args.viewHTML || '';
         });
     }
 
@@ -43,19 +37,28 @@ export class Page extends chitu.Page {
         let childElement = document.createElement('div');
         childElement.className = className;
         this.element.appendChild(childElement);
-        childElement.style.display = 'none';
         return childElement;
     }
 
-    showElement(name: 'loading' | 'view' | 'error') {
-        for (let key in this.elements) {
-            (this.elements[key] as HTMLElement).style.display = key == name ? 'block' : 'none';
+    showView(name: ViewName) {
+        for (let item of this.views) {
+            if (name == item)
+                this.childElement(item).style.display = 'block';
+            else
+                this.childElement(item).style.display = 'none';
         }
     }
 
     showError(err: Error) {
-        this.elements.error.querySelector('span').innerHTML = err.message;
-        this.showElement('error');
+        let element = this.childElement('error');
+        console.assert(element != null);
+        element.innerHTML = `<span>${err.message}</span>`;
+        this.showView('error');
+    }
+
+    childElement(className: PageElementName) {
+        let element = this.element.querySelector(`.${className}`) as HTMLElement;
+        return element;
     }
 }
 
@@ -70,9 +73,8 @@ export class Application extends chitu.Application {
 
     protected parseRouteString(routeString: string) {
         let routeData = super.parseRouteString(routeString);
-        routeData.resource = [
-            `text!${routeData.actionPath}.html`,
-        ];
+        routeData.resources.push({ name: 'viewHTML', path: `text!${routeData.actionPath}.html` });
+
         return routeData;
     }
 }
@@ -82,7 +84,7 @@ export function action(callback: ActionCallback) {
     return (page: Page) => {
         let p = (callback(page) || Promise.resolve()) as Promise<any>;
         p.then(() => {
-            page.showElement('view');
+            page.showView('view');
         }).catch((err: Error) => {
             page.showError(err);
         });

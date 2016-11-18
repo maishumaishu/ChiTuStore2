@@ -1,10 +1,27 @@
 declare namespace chitu {
-    interface RouteData {
-        actionPath: string;
+    class RouteData {
+        private _parameters;
+        private path_string;
+        private path_spliter_char;
+        private param_spliter;
+        private name_spliter_char;
+        private _pathBase;
+        private _pageName;
+        private _actionPath;
+        private _resources;
+        private _routeString;
+        constructor(routeString: string);
+        parseRouteString(): void;
+        private pareeUrlQuery(query);
+        basePath: string;
         values: any;
         pageName: string;
-        resource?: string[];
+        resources: Array<{
+            name: string;
+            path: string;
+        }>;
         routeString: string;
+        actionPath: string;
     }
     class RouteParser {
         private path_string;
@@ -68,7 +85,9 @@ declare namespace chitu {
         static createPageFail(pageName: string): Error;
         static actionTypeError(pageName: string): Error;
         static canntFindAction(pageName: any): Error;
+        static exportsCanntNull(pageName: string): void;
         static scrollerElementNotExists(): Error;
+        static resourceExists(resourceName: string, pageName: string): Error;
     }
 }
 
@@ -120,7 +139,7 @@ declare namespace chitu {
         closing: Callback<Page>;
         closed: Callback<Page>;
         constructor(params: PageParams);
-        on_load(...resources: Array<any>): void;
+        on_load(args: any): void;
         on_showing(): void;
         on_shown(): void;
         on_hiding(): void;

@@ -48,11 +48,29 @@ module.exports = function (grunt) {
                         ext: '.mobile.css'
                     }]
             },
+        },
+        less: {
+            app: {
+                files: [{
+                    expand: true,
+                    cwd: `${src_root}/content/app`,
+                    src: ['**/*.less'],
+                    dest: `${dest_root}/content/app`,
+                    ext: '.css'
+                }]
+            },
+            bootstrap: {
+                files: [{
+                    src: [`${src_root}/content/bootstrap-3.3.5/bootstrap.less`],
+                    dest: `${dest_root}/content/css/bootstrap.css`
+                }]
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-stylus');
-    grunt.registerTask('default', ['ts', 'copy', 'stylus']);
+    grunt.loadNpmTasks('grunt-contrib-less');
+    grunt.registerTask('default', ['ts', 'copy', 'stylus', 'less']);
 }

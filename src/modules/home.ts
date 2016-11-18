@@ -9,10 +9,9 @@ export default action(function (page: Page) {
             let brands = args[1];
 
             var vue = new Vue({
-                el: page.elements.view,
+                el: page.childElement('view'),
                 data: { products, brands },
             });
-            page.elements.view = vue.$el;
         });
 
     return result;

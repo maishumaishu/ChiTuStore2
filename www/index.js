@@ -18,4 +18,6 @@ requirejs.config({
         vue: 'js/vue',
     }
 });
-requirejs(['app']);
+requirejs(['application', 'vue'], function (args, vue) {
+    window['Vue'] = vue;
+});
