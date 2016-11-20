@@ -127,7 +127,6 @@
             let previous_page = this.pages[this.pages.length - 1];
             let element = this.createPageElement(routeData);
             let displayer = new chitu.PageDisplayerImplement();
-            element.setAttribute('name', routeData.pageName);
             console.assert(this.pageType != null);
             let page = new this.pageType({
                 app: this,
@@ -342,16 +341,15 @@ var chitu;
         }
         add(func) {
             this.element.addEventListener(this.event_name, (event) => {
-                const sender = event.detail.sender;
-                const args = event.detail.args;
-                func(sender, ...args);
+                let { sender, args } = event.detail;
+                func(sender, args);
             });
         }
         remove(func) {
             this.element.removeEventListener(this.event_name, func);
         }
-        fire(args) {
-            this.event.initCustomEvent(this.event_name, true, false, args);
+        fire(sender, args) {
+            this.event.initCustomEvent(this.event_name, true, false, { sender, args });
             this.element.dispatchEvent(this.event);
         }
     }
@@ -360,8 +358,8 @@ var chitu;
         return new Callback();
     }
     chitu.Callbacks = Callbacks;
-    function fireCallback(callback, sender, ...args) {
-        callback.fire({ sender, args });
+    function fireCallback(callback, sender, args) {
+        callback.fire(sender, args);
     }
     chitu.fireCallback = fireCallback;
 })(chitu || (chitu = {}));
@@ -389,22 +387,22 @@ var chitu;
             return chitu.fireCallback(this.load, this, args);
         }
         on_showing() {
-            return chitu.fireCallback(this.showing, this);
+            return chitu.fireCallback(this.showing, this, {});
         }
         on_shown() {
-            return chitu.fireCallback(this.shown, this);
+            return chitu.fireCallback(this.shown, this, {});
         }
         on_hiding() {
-            return chitu.fireCallback(this.hiding, this);
+            return chitu.fireCallback(this.hiding, this, {});
         }
         on_hidden() {
-            return chitu.fireCallback(this.hidden, this);
+            return chitu.fireCallback(this.hidden, this, {});
         }
         on_closing() {
-            return chitu.fireCallback(this.closing, this);
+            return chitu.fireCallback(this.closing, this, {});
         }
         on_closed() {
-            return chitu.fireCallback(this.closed, this);
+            return chitu.fireCallback(this.closed, this, {});
         }
         show() {
             this.on_showing();

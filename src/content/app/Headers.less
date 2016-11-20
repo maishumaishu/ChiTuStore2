@@ -1,54 +1,9 @@
 @import "../bootstrap-3.3.5/variables.less";
 @import "Common.less";
-header {
-    padding: 0;
-    margin: 0;
-    border: 0;
-    width: 100%;
-    height: @header-height;
-    position: fixed;
-    z-index: @page-zindex + 20;  
-    background-color: @brand-primary; 
-    
-    nav{
-        padding: 4px 4px 0px 4px;
-        top: 0px;
-        position: relative;
-        text-align: center;
-        width: 100%;
-         
-        h4 {
-            font-size: @header-title-font-size;
-        }
-        .rightButton {
-            position: absolute;
-            font-size: 18px;
-            top: 10px;
-            right: 12px;
-        }
-        .leftButton {
-            position: absolute;
-            font-size: 18px;
-            top: 10px;
-            left: 12px;
-        }
-    }
-    
-   
-}
+
 
  .immersion {
     header {
-        height: @header-height + @immersion-height;
-        // top-bar {
-        //     top: @immersion-height;
-        //     position: fixed;
-        //     width: 100%;
-        // }
-        // .topbar {
-        //         top: @immersion-height;
-        //         position: fixed;
-        // }
         nav {
             top: @immersion-height;
             position: fixed;
@@ -57,6 +12,40 @@ header {
 }
 
 .Home-Index {
+    header {
+        padding: 0;
+        margin: 0;
+        border: 0;
+        width: 100%;
+        position: fixed;
+        z-index: @page-zindex + 20;  
+        background-color: @brand-primary; 
+        top: 0px;
+
+        nav{
+            padding: 4px 4px 0px 4px;
+            /*top: 0px;*/
+            /*position: relative;*/
+            text-align: center;
+            width: 100%;
+            
+            h4 {
+                font-size: @header-title-font-size;
+            }
+            .rightButton {
+                position: absolute;
+                font-size: 18px;
+                top: 10px;
+                right: 12px;
+            }
+            .leftButton {
+                position: absolute;
+                font-size: 18px;
+                top: 10px;
+                left: 12px;
+            }
+        }  
+    }
     .logo {
         position: absolute;
         top: 8px;

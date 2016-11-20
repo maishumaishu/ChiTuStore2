@@ -2,13 +2,14 @@ define(["require", "exports", 'core/chitu.mobile', 'services', 'vue'], function 
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = chitu_mobile_1.action(function (page) {
-        let result = Promise.all([services.home.proudcts(), services.home.brands()])
+        let result = Promise.all([services.home.proudcts(), services.home.brands(), services.home.advertItems()])
             .then((args) => {
             let products = args[0];
             let brands = args[1];
+            let advertItems = args[2];
             var vue = new Vue({
-                el: page.childElement('view'),
-                data: { products: products, brands: brands },
+                el: page.mainView,
+                data: { products: products, brands: brands, advertItems: advertItems },
             });
         });
         return result;

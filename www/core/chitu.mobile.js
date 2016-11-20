@@ -5,6 +5,14 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
             let msg = `Argument '${paramName}' can not be null`;
             return new Error(msg);
         }
+        static headerExists(pageName) {
+            let msg = `Header is exists in '${pageName}'.`;
+            return new Error(msg);
+        }
+        static footerExists(pageName) {
+            let msg = `Header is exists in '${pageName}'.`;
+            return new Error(msg);
+        }
     }
     class Exception extends Error {
         constructor(...args) {
@@ -12,21 +20,39 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
             this.handled = false;
         }
     }
+    const headerTagName = 'header';
+    const footerTagName = 'footer';
+    const viewTagName = 'section';
     class Page extends chitu.Page {
         constructor(params) {
             super(params);
-            this.views = ['view', 'loading', 'error'];
+            this.views = ['main', 'loading', 'error'];
+            this.headerHeight = 0;
+            this.footerHeight = 0;
+            this.resize = chitu.Callbacks();
             this.app = params.app;
-            for (let className of ['header', 'footer'].concat(this.views)) {
-                this.createChildElement(className);
+            for (let className of this.views) {
+                this.createView(className);
             }
             this.showView('loading');
             this.load.add((sender, args) => {
-                this.childElement('view').innerHTML = args.viewHTML || '';
+                this.view('main').innerHTML = args.viewHTML || '';
+            });
+            this.resize.add((sender, args) => {
+                let elements = this.element.querySelectorAll(viewTagName);
+                for (let i = 0; i < elements.length; i++) {
+                    let element = elements.item(i);
+                    let h = window.outerHeight - args.headerHeight - args.footerHeight;
+                    element.style.height = h + 'px';
+                    element.style.top = args.headerHeight + 'px';
+                }
+            });
+            window.addEventListener('resize', () => {
+                this.resize.fire(this, { headerHeight: this.headerHeight, footerHeight: this.footerHeight });
             });
         }
-        createChildElement(className) {
-            let childElement = document.createElement('div');
+        createView(className) {
+            let childElement = document.createElement(viewTagName);
             childElement.className = className;
             this.element.appendChild(childElement);
             return childElement;
@@ -34,20 +60,48 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
         showView(name) {
             for (let item of this.views) {
                 if (name == item)
-                    this.childElement(item).style.display = 'block';
+                    this.view(item).style.display = 'block';
                 else
-                    this.childElement(item).style.display = 'none';
+                    this.view(item).style.display = 'none';
             }
         }
         showError(err) {
-            let element = this.childElement('error');
+            let element = this.view('error');
             console.assert(element != null);
             element.innerHTML = `<span>${err.message}</span>`;
             this.showView('error');
         }
-        childElement(className) {
+        view(className) {
             let element = this.element.querySelector(`.${className}`);
             return element;
+        }
+        get mainView() {
+            return this.view('main');
+        }
+        get header() {
+            return this.element.querySelector(headerTagName);
+        }
+        get footer() {
+            return this.element.querySelector(footerTagName);
+        }
+        createHeader(headerHeight) {
+            if (this.header != null)
+                throw Errors.headerExists(this.routeData.pageName);
+            let headerElement = document.createElement(headerTagName);
+            this.headerHeight = headerHeight;
+            headerElement.style.height = headerHeight + 'px';
+            this.element.appendChild(headerElement);
+            this.resize.fire(this, { headerHeight: headerHeight, footerHeight: this.footerHeight });
+            return headerElement;
+        }
+        createFooter(footerHeight) {
+            if (this.footer != null)
+                throw Errors.footerExists(this.routeData.pageName);
+            let footerElement = document.createElement('footer');
+            footerElement.style.height = footerHeight + 'px';
+            this.element.appendChild(footerElement);
+            this.resize.fire(this, { headerHeight: this.headerHeight, footerHeight: footerHeight });
+            return footerElement;
         }
     }
     exports.Page = Page;
@@ -68,7 +122,7 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
         return (page) => {
             let p = (callback(page) || Promise.resolve());
             p.then(() => {
-                page.showView('view');
+                page.showView('main');
             }).catch((err) => {
                 page.showError(err);
             });

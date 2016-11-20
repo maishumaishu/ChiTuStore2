@@ -5,7 +5,7 @@ export default action((page: Page) => {
     let { id } = page.routeData.values
     let result = services.home.getProduct(id).then((product) => {
         let vm = new Vue({
-            el: page.childElement('view'),
+            el: page.mainView,
             data: {
                 product
             }

@@ -10,7 +10,7 @@ declare namespace chitu {
         private _actionPath;
         private _resources;
         private _routeString;
-        constructor(routeString: string);
+        constructor(basePath: any, routeString: string);
         parseRouteString(): void;
         private pareeUrlQuery(query);
         basePath: string;
@@ -23,30 +23,14 @@ declare namespace chitu {
         routeString: string;
         actionPath: string;
     }
-    class RouteParser {
-        private path_string;
-        private path_spliter_char;
-        private param_spliter;
-        private name_spliter_char;
-        private _actionPath;
-        private _cssPath;
-        private _parameters;
-        private _pageName;
-        private _pathBase;
-        private HASH_MINI_LENGTH;
-        constructor(basePath: string);
-        parseRouteString(routeString: string): RouteData;
-        basePath: string;
-        private pareeUrlQuery(query);
-    }
     class Application {
-        pageCreated: Callback<Application>;
+        pageCreated: Callback<Application, Page>;
         protected pageType: PageConstructor;
         private _runned;
         private zindex;
         private page_stack;
         fileBasePath: string;
-        backFail: Callback<Application>;
+        backFail: Callback<Application, {}>;
         constructor();
         protected parseRouteString(routeString: string): RouteData;
         private on_pageCreated(page);
@@ -92,17 +76,17 @@ declare namespace chitu {
 }
 
 declare namespace chitu {
-    class Callback<S> {
+    class Callback<S, A> {
         private event;
         private element;
         private event_name;
         constructor();
-        add(func: (sender: S, ...args: Array<any>) => any): void;
+        add(func: (sender: S, args: A) => any): void;
         remove(func: EventListener): void;
-        fire(args: any): void;
+        fire(sender: S, args: A): void;
     }
-    function Callbacks<S>(): Callback<S>;
-    function fireCallback<S>(callback: Callback<S>, sender: S, ...args: Array<any>): void;
+    function Callbacks<S, A>(): Callback<S, A>;
+    function fireCallback<S, A>(callback: Callback<S, A>, sender: S, args: A): void;
 }
 
 declare namespace chitu {
@@ -131,13 +115,13 @@ declare namespace chitu {
         private _app;
         private _routeData;
         private _displayer;
-        load: Callback<Page>;
-        showing: Callback<Page>;
-        shown: Callback<Page>;
-        hiding: Callback<Page>;
-        hidden: Callback<Page>;
-        closing: Callback<Page>;
-        closed: Callback<Page>;
+        load: Callback<Page, any>;
+        showing: Callback<Page, {}>;
+        shown: Callback<Page, {}>;
+        hiding: Callback<Page, {}>;
+        hidden: Callback<Page, {}>;
+        closing: Callback<Page, {}>;
+        closed: Callback<Page, {}>;
         constructor(params: PageParams);
         on_load(args: any): void;
         on_showing(): void;
@@ -163,7 +147,6 @@ declare namespace chitu {
 }
 
 declare namespace chitu {
-    function extend(obj1: any, obj2: any): any;
     function combinePath(path1: string, path2: string): string;
     function loadjs(...modules: string[]): Promise<Array<any>>;
 }

@@ -13,7 +13,7 @@ let config = {
 }
 
 let token = '';
-export function ajax(url: string, data?: any) {
+export function ajax<T>(url: string, data?: any): Promise<T> {
     //options = options || ({} as FetchOptions);
     data = data || {};
     Object.assign(data, { AppToken: config.appToken });
@@ -62,12 +62,19 @@ export function ajax(url: string, data?: any) {
         })
     });
 }
+
+const imageBasePath = 'http://service.alinq.cn:2015/Shop';
 export module home {
-    type Product = { Id: string, Name: string };
+    type Product = { Id: string, Name: string, ImagePath: string };
     export function proudcts(pageIndex?: number): Promise<Product[]> {
         pageIndex = pageIndex === undefined ? 0 : pageIndex;
         let url = config.service.site + 'Home/GetHomeProducts';
-        return ajax(url, { pageIndex });
+        return ajax<Product[]>(url, { pageIndex }).then((products) => {
+            for (let product of products) {
+                product.ImagePath = imageBasePath + product.ImagePath;
+            }
+            return products;
+        });
     }
     export function brands(): Promise<any> {
         let url = config.service.shop + 'Product/GetBrands';
@@ -76,5 +83,9 @@ export module home {
     export function getProduct(productId): Promise<any> {
         let url = config.service.shop + 'Product/GetProduct';
         return ajax(url, { productId });
+    }
+    export function advertItems(): Promise<any[]> {
+        let url = config.service.site + 'Home/GetAdvertItems'
+        return ajax(url);
     }
 }

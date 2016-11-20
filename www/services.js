@@ -52,12 +52,18 @@ define(["require", "exports", 'fetch'], function (require, exports, fetch) {
         });
     }
     exports.ajax = ajax;
+    const imageBasePath = 'http://service.alinq.cn:2015/Shop';
     var home;
     (function (home) {
         function proudcts(pageIndex) {
             pageIndex = pageIndex === undefined ? 0 : pageIndex;
             let url = config.service.site + 'Home/GetHomeProducts';
-            return ajax(url, { pageIndex: pageIndex });
+            return ajax(url, { pageIndex: pageIndex }).then((products) => {
+                for (let product of products) {
+                    product.ImagePath = imageBasePath + product.ImagePath;
+                }
+                return products;
+            });
         }
         home.proudcts = proudcts;
         function brands() {
@@ -70,5 +76,10 @@ define(["require", "exports", 'fetch'], function (require, exports, fetch) {
             return ajax(url, { productId: productId });
         }
         home.getProduct = getProduct;
+        function advertItems() {
+            let url = config.service.site + 'Home/GetAdvertItems';
+            return ajax(url);
+        }
+        home.advertItems = advertItems;
     })(home = exports.home || (exports.home = {}));
 });

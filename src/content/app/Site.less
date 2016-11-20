@@ -3,6 +3,90 @@
 body {
   overflow-x: hidden;
 }
+
+a {
+  text-decoration: none;
+  color: inherit;
+  &:hover,
+  &:active {
+    text-decoration: none;
+    color: inherit;
+  }
+  &.link {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
+.norecords {
+  text-align: center;
+  padding-top: @norecords-padding-top;
+  width: 100%;
+}
+.norecords .icon {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  left: 50%;
+  margin-left: -80px;
+  border-radius: 50%;
+  background-color: #eeeeee;
+}
+.norecords .icon i {
+  position: relative;
+  top: 30px;
+  font-size: 120px;
+  display: block;
+  color: white;
+}
+.immersion {
+  .norecords {
+      padding-top: @norecords-padding-top + @immersion-height;
+  }
+}
+
+/* 页面样式 开始*/
+page {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+header {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    width: 100%;
+    /*height: @header-height;*/
+    position: fixed;
+    background-color: @brand-primary; 
+    top: 0px;
+}
+
+footer {
+  width: 100%;
+  position: fixed;
+  bottom: 0px;
+}
+
+section {
+  position: absolute;
+  width: 100%;
+  overflow-y:scroll;
+  -webkit-user-drag:none;
+  user-select: none;
+  
+  &.loading {
+      width: 100%;
+
+      font-size: 120px;
+      text-align: center;  
+      padding-top: 80px;
+      color: #bbb;
+  }
+}
+/* 页面样式 开始*/
+
 .caption hr {
   margin-top: 10px;
 }
@@ -31,10 +115,6 @@ body {
   font-size: 13px;
   color: #d00;
 }
-.loading {
-  width: 100%;
-  padding-top: 100px;
-}
 .backtop {
   width: 30px;
   height: 40px;
@@ -57,19 +137,7 @@ dl dd {
 .border-no {
   border: none !important;
 }
-a {
-  text-decoration: none;
-  color: inherit;
-}
-a:hover,
-a:active {
-  text-decoration: none;
-  color: inherit;
-}
-a.link {
-  text-decoration: none;
-  color: inherit;
-}
+
 p {
   font-size: 13px;
   color: #555;
@@ -363,32 +431,7 @@ p {
   text-align: center;
 }
 
-.norecords {
-  text-align: center;
-  padding-top: @norecords-padding-top;
-  width: 100%;
-}
-.norecords .icon {
-  position: relative;
-  width: 160px;
-  height: 160px;
-  left: 50%;
-  margin-left: -80px;
-  border-radius: 50%;
-  background-color: #eeeeee;
-}
-.norecords .icon i {
-  position: relative;
-  top: 30px;
-  font-size: 120px;
-  display: block;
-  color: white;
-}
-.immersion {
-  .norecords {
-      padding-top: @norecords-padding-top + @immersion-height;
-  }
-}
+
 
 
 
