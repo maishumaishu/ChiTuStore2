@@ -1,21 +1,25 @@
 var es5 = true;
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
+var app_deps = [];
+
 if (es5) {
     chituPath = 'js/chitu.es5';
     modulesPath = 'modules.es5';
+    app_deps = ['js/polyfill']
 }
+
 
 requirejs.config({
     shim: {
-        app: {
-            deps: ['vue']
-        },
         fetch: {
             exports: 'fetch'
         },
         vue: {
             exports: 'Vue'
+        },
+        app: {
+            deps: app_deps
         }
     },
     paths: {
@@ -26,6 +30,8 @@ requirejs.config({
         text: 'js/text',
         move: 'js/move',
         vue: 'js/vue',
+        services: modulesPath + '/Services',
+        app: modulesPath + '/Application',
         'chitu.mobile': modulesPath + '/Core/chitu.mobile',
         'vue.ext': modulesPath + '/Core/vue.ext',
         'carousel': modulesPath + '/Core/carousel',
@@ -33,7 +39,7 @@ requirejs.config({
     }
 });
 
-requirejs(['application', 'vue', 'vue.ext'], function (args, vue, vue_ext) {
+requirejs(['app', 'vue', 'vue.ext'], function (args, vue, vue_ext) {
     window['Vue'] = vue;
     vue_ext.config.imageBaseUrl = 'http://service.alinq.cn:2015/Shop';
 });
