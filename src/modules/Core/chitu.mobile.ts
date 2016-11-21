@@ -55,7 +55,7 @@ export class Page extends chitu.Page {
             let elements = this.element.querySelectorAll(viewTagName);
             for (let i = 0; i < elements.length; i++) {
                 let element = elements.item(i) as HTMLElement;
-                let h = window.outerHeight - args.headerHeight - args.footerHeight;
+                let h =  window.innerHeight - args.headerHeight - args.footerHeight;
                 element.style.height = h + 'px';
                 element.style.top = args.headerHeight + 'px';
             }
