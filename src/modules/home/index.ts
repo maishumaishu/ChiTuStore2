@@ -1,8 +1,8 @@
-import { Page, action } from 'core/chitu.mobile';
+import { Page, action } from 'chitu.mobile';
 import * as services from 'services';
 //import Vue = require('vue');
-import { createVueInstance } from 'core/vue.ext'
-import Carousel = require('core/Carousel');
+import { createVueInstance } from 'vue.ext'
+import Carousel = require('carousel');
 
 export default action(function (page: Page) {
     let result = Promise.all([services.home.proudcts(), services.home.brands(), services.home.advertItems()])
@@ -16,6 +16,7 @@ export default action(function (page: Page) {
                 data: { products, brands, advertItems },
                 mounted: function () {
                     let e = page.element.querySelector('[name="ad-swiper"]') as HTMLElement;
+                    console.assert(e != null);
                     var c = new Carousel(e, { autoplay: true });
                 }
             });

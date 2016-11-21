@@ -17,13 +17,25 @@ module.exports = function (grunt) {
                 options: ts_options
             }
         },
+        babel: {
+            options: {
+                sourceMap: false,
+                presets: ["es2015"]
+            },
+            dist: {
+                files: [
+                    { expand: true, cwd: dest_root + '/modules', src: ['**/*.js'], dest: dest_root + '/modules.es5' }
+                ]
+            }
+        },
         copy: {
             src: {
                 files: [
                     {
                         expand: true, cwd: src_root, dest: dest_root,
-                        src: ['**/*.html', 'js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/*.*'],
+                        src: ['*.html', 'js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/*.*'],
                     },
+                    { expand: true, cwd: src_root + '/modules', dest: dest_root + '/pages', src: ['**/*.html'] }
                 ],
             }
         },
@@ -33,20 +45,8 @@ module.exports = function (grunt) {
                     compress: false,
                 },
                 files: [
-                    {
-                        expand: true,
-                        cwd: src_root,
-                        src: ['content/**/*.styl'],
-                        dest: dest_root,
-                        ext: '.css'
-                    },
-                    {
-                        expand: true,
-                        cwd: src_root,
-                        src: ['core/chitu.mobile.styl'],
-                        dest: dest_root,
-                        ext: '.mobile.css'
-                    }]
+                    { expand: true, cwd: src_root, src: ['content/**/*.styl'], dest: dest_root, ext: '.css' },
+                    { expand: true, cwd: src_root, src: ['core/chitu.mobile.styl'], dest: dest_root, ext: '.mobile.css' }]
             },
         },
         less: {
@@ -68,9 +68,10 @@ module.exports = function (grunt) {
         }
     });
 
+    grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-stylus');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.registerTask('default', ['ts', 'copy', 'stylus', 'less']);
+    grunt.registerTask('default', ['ts', 'stylus', 'less', 'copy', 'babel']);
 }

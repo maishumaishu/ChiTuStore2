@@ -1,5 +1,5 @@
 import * as services from 'services';
-import { Application, Page } from 'core/chitu.mobile';
+import { Application, Page } from 'chitu.mobile';
 
 class MyPage extends Page {
     constructor(params) {
@@ -12,7 +12,7 @@ class MyPage extends Page {
     }
 }
 
-class MyApplication extends Application {
+class MyApplication extends chitu.Application {
     constructor() {
         super();
         this.pageType = MyPage;
@@ -20,6 +20,10 @@ class MyApplication extends Application {
 
     protected parseRouteString(routeString: string) {
         let routeData = super.parseRouteString(routeString);
+
+
+
+        //routeData.basePath = 'pages';
         let headerPath, footerPath;
         switch (routeData.pageName) {
             case 'Home.Index':
@@ -40,6 +44,7 @@ class MyApplication extends Application {
         let path = routeData.actionPath.substr(routeData.basePath.length);
         let cssPath = `css!content/app` + path;
         routeData.resources.push({ name: 'pageCSS', path: cssPath });
+        routeData.resources.push({ name: 'viewHTML', path: `text!pages${path}.html` });
 
         return routeData;
     }

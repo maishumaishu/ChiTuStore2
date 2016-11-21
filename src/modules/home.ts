@@ -1,4 +1,4 @@
-import { Page, action } from 'core/chitu.mobile';
+import { Page, action } from 'chitu.mobile';
 import * as services from 'services';
 import Vue = require('vue');
 

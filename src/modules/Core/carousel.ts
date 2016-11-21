@@ -4,6 +4,13 @@ import move = require('move'); // 说明：使用 move.js 框加，比直接使�
 //TODO: 活动圆点的显示
 //TODO: 如果 items 为0,或者为 1 的情况。
 
+class Errors {
+    static argumentNull(parameterName) {
+        let msg = `Argument '${parameterName}' cannt be null.`;
+        return new Error(msg);
+    }
+}
+
 var animateTime = 400;//ms，这个数值，要和样式中的设定一致。
 const MOVE_PERSEND = 20;
 class Carousel {
@@ -21,7 +28,7 @@ class Carousel {
 
     constructor(element: HTMLElement, options?: { autoplay: boolean }) {
         if (element == null)
-            throw chitu.Errors.argumentNull('element');
+            throw Errors.argumentNull('element');
 
         this.items = new Array<HTMLElement>();
         let q = element.querySelectorAll('.item');

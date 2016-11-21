@@ -1,10 +1,10 @@
 (function(factory) { 
-                if (typeof define === 'function' && define['amd']) { 
-                    define(factory);  
-                } else { 
-                    factory(); 
-                } 
-            })(function() {var chitu;
+        if (typeof define === 'function' && define['amd']) { 
+            define(factory);  
+        } else { 
+            factory(); 
+        } 
+    })(function() {var chitu;
 (function (chitu) {
     const DEFAULT_FILE_BASE_PATH = 'modules';
     class RouteData {
