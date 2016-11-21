@@ -1,3 +1,5 @@
+/// <reference path="js/typings/require.d.ts"/>
+
 var es5 = true;
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
@@ -32,6 +34,7 @@ requirejs.config({
         vue: 'js/vue',
         services: modulesPath + '/Services',
         app: modulesPath + '/Application',
+        Controls: modulesPath + '/Controls',
         'chitu.mobile': modulesPath + '/Core/chitu.mobile',
         'vue.ext': modulesPath + '/Core/vue.ext',
         'carousel': modulesPath + '/Core/carousel',

@@ -35,7 +35,7 @@ export class Page extends chitu.Page {
     private headerHeight = 0;
     private footerHeight = 0;
     private resize = chitu.Callbacks<Page, { headerHeight: number, footerHeight: number }>();
-
+    private _viewCompleted: boolean = false;
 
     constructor(params: chitu.PageParams) {
         super(params);
@@ -48,6 +48,7 @@ export class Page extends chitu.Page {
 
         this.showView('loading');
         this.load.add((sender: Page, args: any) => {
+            this._viewCompleted = true;
             this.view('main').innerHTML = args.viewHTML || '';
         });
 
@@ -55,7 +56,7 @@ export class Page extends chitu.Page {
             let elements = this.element.querySelectorAll(viewTagName);
             for (let i = 0; i < elements.length; i++) {
                 let element = elements.item(i) as HTMLElement;
-                let h =  window.innerHeight - args.headerHeight - args.footerHeight;
+                let h = window.innerHeight - args.headerHeight - args.footerHeight;
                 element.style.height = h + 'px';
                 element.style.top = args.headerHeight + 'px';
             }
@@ -106,6 +107,10 @@ export class Page extends chitu.Page {
         return this.element.querySelector(footerTagName) as HTMLElement;
     }
 
+    get viewCompleted(): boolean {
+        return this._viewCompleted;
+    }
+
     createHeader(headerHeight: number): HTMLElement {
         if (this.header != null)
             throw Errors.headerExists(this.routeData.pageName);
@@ -150,6 +155,14 @@ export class Application extends chitu.Application {
 type ActionCallback = ((page) => Promise<any> | void);
 export function action(callback: ActionCallback) {
     return (page: Page) => {
+
+        let pageLoad = new Promise((reslove, reject) => {
+            if (page.viewCompleted)
+                reslove();
+
+            page.load.add(() => reslove());
+        });
+
         let p = (callback(page) || Promise.resolve()) as Promise<any>;
         p.then(() => {
             page.showView('main');

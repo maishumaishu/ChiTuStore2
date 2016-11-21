@@ -6,8 +6,8 @@ declare interface VueInstance {
 }
 
 interface VueOptions<T> {
-    el: string | HTMLElement,
-    data: T,
+    el?: string | HTMLElement,
+    data?: T | (() => T),
     methods?: any,
     mounted?: () => void,
     watch?: any,
@@ -15,13 +15,7 @@ interface VueOptions<T> {
 
 declare interface VueStatic {
     new <T>(options: VueOptions<T>): T & VueInstance;
-    component(name: string, options: {
-        data?: any,
-        mounted?: Function,
-        props?: any,
-        template: string,
-        watch?: Function,
-    });
+    component<T>(name: string, options: { template: string, props?: any } & VueOptions<T>): T & VueInstance;
     set(object: Object, key: string, value: any);
     nextTick(callback: Function, context?: any);
 }

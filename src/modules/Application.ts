@@ -31,7 +31,7 @@ class MyApplication extends chitu.Application {
                 footerPath = `text!ui/Menu.html`;
                 break;
             default:
-                headerPath = `text!ui/headers/default.html`;
+                headerPath = `text!ui/headers/DefaultWithBack.html`;
                 break
         }
 

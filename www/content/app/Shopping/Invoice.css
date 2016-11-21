@@ -1,0 +1,10 @@
+.Shopping-Invoice scroller,
+.Shopping-Invoice scroll-view[scroll-type="div"] scroller,
+.Shopping-Invoice scroll-view[scroll-type="iscroll"] scroller {
+  padding-top: 50px;
+}
+.Shopping-Invoice.immersion scroller,
+.Shopping-Invoice.immersion scroll-view[scroll-type="div"] scroller,
+.Shopping-Invoice.immersion scroll-view[scroll-type="iscroll"] scroller {
+  padding-top: 65px;
+}

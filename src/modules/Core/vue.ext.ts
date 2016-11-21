@@ -29,6 +29,7 @@ function processImageElement(element: HTMLImageElement) {
     var PREVIEW_IMAGE_DEFAULT_HEIGHT = 200;
 
     var src = element.getAttribute('src');
+    if (!src) return;
     // if (element.className.indexOf('img-full') < 0)
     //     element.className = element.className + ' img-full';
 
@@ -113,4 +114,5 @@ Vue.component(`cv-img`, {
         let self = this as VueInstance;
         processImageElement(self.$el as HTMLImageElement);
     }
-})
+});
+
