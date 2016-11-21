@@ -102,7 +102,7 @@ function getPreviewImage(img_width, img_height) {
 }
 
 
-Vue.component(`cv-img`, {
+Vue.component(`image-view`, {
     template: '<img v-bind:src="src"/>',
     props: ['src'],
     data: function () {

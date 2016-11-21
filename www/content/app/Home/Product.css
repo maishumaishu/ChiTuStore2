@@ -1,18 +1,3 @@
-.Home-Product scroller,
-.Home-Product scroll-view[scroll-type="div"] scroller,
-.Home-Product scroll-view[scroll-type="iscroll"] scroller {
-  padding-top: 50px;
-}
-.Home-Product.immersion scroller,
-.Home-Product.immersion scroll-view[scroll-type="div"] scroller,
-.Home-Product.immersion scroll-view[scroll-type="iscroll"] scroller {
-  padding-top: 65px;
-}
-.Home-Product scroller,
-.Home-Product scroll-view[scroll-type="div"] scroller,
-.Home-Product scroll-view[scroll-type="iscroll"] scroller {
-  padding-bottom: 50px;
-}
 .Home-Product .container {
   padding-top: 10px;
 }
@@ -44,7 +29,7 @@
   bottom: 0;
   z-index: 120;
 }
-.Home-Product scroll-view[name="product"] hr {
+.Home-Product hr {
   border-top-width: 20px;
   margin: 0;
 }

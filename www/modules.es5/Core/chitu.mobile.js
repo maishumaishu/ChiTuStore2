@@ -253,15 +253,11 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
     exports.Application = Application;
     function action(callback) {
         return function (page) {
-            var pageLoad = new Promise(function (reslove, reject) {
-                if (page.viewCompleted) reslove();
-                page.load.add(function () {
-                    return reslove();
-                });
-            });
             var p = callback(page) || Promise.resolve();
             p.then(function () {
-                page.showView('main');
+                window.setTimeout(function () {
+                    page.showView('main');
+                }, 100);
             }).catch(function (err) {
                 page.showError(err);
             });

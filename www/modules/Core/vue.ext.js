@@ -13,9 +13,7 @@ define(["require", "exports", 'vue'], function (require, exports, Vue) {
     function processImageElement(element) {
         var PREVIEW_IMAGE_DEFAULT_WIDTH = 200;
         var PREVIEW_IMAGE_DEFAULT_HEIGHT = 200;
-        var src = element.getAttribute('src');
-        if (!src)
-            return;
+        var src = element.getAttribute('src') || '';
         var img_width = PREVIEW_IMAGE_DEFAULT_WIDTH;
         var img_height = PREVIEW_IMAGE_DEFAULT_HEIGHT;
         var match = src.match(/_\d+_\d+/);

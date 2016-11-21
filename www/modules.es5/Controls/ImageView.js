@@ -65,7 +65,7 @@ define(["require", "exports", 'vue'], function (require, exports, Vue) {
         localStorage.setItem(img_name, img_src);
         return img_src;
     }
-    Vue.component("cv-img", {
+    Vue.component("image-view", {
         template: '<img v-bind:src="src"/>',
         props: ['src'],
         data: function data() {

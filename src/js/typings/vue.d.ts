@@ -7,6 +7,7 @@ declare interface VueInstance {
 
 interface VueOptions<T> {
     el?: string | HTMLElement,
+    computed?: any,
     data?: T | (() => T),
     methods?: any,
     mounted?: () => void,

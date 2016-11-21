@@ -19,11 +19,16 @@ define(["require", "exports", 'chitu.mobile'], function (require, exports, chitu
             let headerPath, footerPath;
             switch (routeData.pageName) {
                 case 'Home.Index':
+                case 'Home.Product':
                     headerPath = `text!ui/headers/${routeData.pageName}.html`;
-                    footerPath = `text!ui/Menu.html`;
                     break;
                 default:
                     headerPath = `text!ui/headers/DefaultWithBack.html`;
+                    break;
+            }
+            switch (routeData.pageName) {
+                case 'Home.Index':
+                    footerPath = `text!ui/Menu.html`;
                     break;
             }
             if (headerPath)
@@ -57,7 +62,7 @@ define(["require", "exports", 'chitu.mobile'], function (require, exports, chitu
             return page;
         }
     }
-    exports.app = new MyApplication();
+    exports.app = window['app'] = new MyApplication();
     exports.app.run();
     if (!location.hash) {
         exports.app.redirect('home/index');

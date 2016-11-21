@@ -156,18 +156,22 @@ type ActionCallback = ((page) => Promise<any> | void);
 export function action(callback: ActionCallback) {
     return (page: Page) => {
 
-        let pageLoad = new Promise((reslove, reject) => {
-            if (page.viewCompleted)
-                reslove();
+        // let pageLoad = new Promise((reslove, reject) => {
+        //     if (page.viewCompleted)
+        //         reslove();
 
-            page.load.add(() => reslove());
-        });
+        //     page.load.add(() => reslove());
+        // });
 
+        //page.load.add(() => {
         let p = (callback(page) || Promise.resolve()) as Promise<any>;
         p.then(() => {
-            page.showView('main');
+            window.setTimeout(function () {
+                page.showView('main');
+            }, 100);
         }).catch((err: Error) => {
             page.showError(err);
         });
+        //});
     };
 };

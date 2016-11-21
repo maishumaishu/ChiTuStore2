@@ -21,18 +21,21 @@ class MyApplication extends chitu.Application {
     protected parseRouteString(routeString: string) {
         let routeData = super.parseRouteString(routeString);
 
-
-
-        //routeData.basePath = 'pages';
         let headerPath, footerPath;
         switch (routeData.pageName) {
             case 'Home.Index':
+            case 'Home.Product':
                 headerPath = `text!ui/headers/${routeData.pageName}.html`;
-                footerPath = `text!ui/Menu.html`;
                 break;
             default:
                 headerPath = `text!ui/headers/DefaultWithBack.html`;
                 break
+        }
+
+        switch (routeData.pageName) {
+            case 'Home.Index':
+                footerPath = `text!ui/Menu.html`;
+                break;
         }
 
         if (headerPath)
@@ -78,7 +81,7 @@ class MyApplication extends chitu.Application {
 
 }
 
-export let app = new MyApplication();
+export let app = window['app'] = new MyApplication();
 app.run();
 
 if (!location.hash) {

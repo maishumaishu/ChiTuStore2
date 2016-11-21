@@ -1,17 +1,14 @@
-"use strict";
-
 define(["require", "exports", 'vue'], function (require, exports, Vue) {
     "use strict";
-
     function createVueInstance(options) {
-        var vm = new Vue(options);
+        let vm = new Vue(options);
         return vm;
         ;
     }
     exports.createVueInstance = createVueInstance;
     exports.config = {
         imageBaseUrl: '',
-        imageDisaplyText: ''
+        imageDisaplyText: '',
     };
     function processImageElement(element) {
         var PREVIEW_IMAGE_DEFAULT_WIDTH = 200;
@@ -47,7 +44,8 @@ define(["require", "exports", 'vue'], function (require, exports, Vue) {
         var scale = (img_height / img_width).toFixed(2);
         var img_name = 'img_log' + scale;
         var img_src = localStorage.getItem(img_name);
-        if (img_src) return img_src;
+        if (img_src)
+            return img_src;
         var MAX_WIDTH = 320;
         var width = MAX_WIDTH;
         var height = width * new Number(scale).valueOf();
@@ -65,14 +63,14 @@ define(["require", "exports", 'vue'], function (require, exports, Vue) {
         localStorage.setItem(img_name, img_src);
         return img_src;
     }
-    Vue.component("cv-img", {
+    Vue.component(`image-view`, {
         template: '<img v-bind:src="src"/>',
         props: ['src'],
-        data: function data() {
+        data: function () {
             return {};
         },
-        mounted: function mounted() {
-            var self = this;
+        mounted: function () {
+            let self = this;
             processImageElement(self.$el);
         }
     });

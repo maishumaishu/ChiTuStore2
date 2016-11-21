@@ -65,11 +65,11 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
 
 const imageBasePath = 'http://service.alinq.cn:2015/Shop';
 export module home {
-    type Product = { Id: string, Name: string, ImagePath: string };
-    export function proudcts(pageIndex?: number): Promise<Product[]> {
+    type HomeProduct = { Id: string, Name: string, ImagePath: string };
+    export function proudcts(pageIndex?: number): Promise<HomeProduct[]> {
         pageIndex = pageIndex === undefined ? 0 : pageIndex;
         let url = config.service.site + 'Home/GetHomeProducts';
-        return ajax<Product[]>(url, { pageIndex }).then((products) => {
+        return ajax<HomeProduct[]>(url, { pageIndex }).then((products) => {
             for (let product of products) {
                 product.ImagePath = imageBasePath + product.ImagePath;
             }
@@ -80,9 +80,26 @@ export module home {
         let url = config.service.shop + 'Product/GetBrands';
         return ajax(url);
     }
-    export function getProduct(productId): Promise<any> {
+
+    type Product = {
+        Id: string, Arguments: Array<{ key: string, value: string }>,
+        BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
+        GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
+        ProductCategoryId: string, Count: number,
+        CustomProperties: Array<{
+            Name: string,
+            Options: Array<{ Name: string, Selected: boolean, Value: string }>
+        }>
+    };
+    export function getProduct(productId): Promise<Product> {
         let url = config.service.shop + 'Product/GetProduct';
-        return ajax(url, { productId });
+        return ajax<Product>(url, { productId }).then(product => {
+            product.Count = 1;
+            if (!product.ImageUrls && product.ImageUrl != null)
+                product.ImageUrls = (<string>product.ImageUrl).split(',');
+
+            return product;
+        });
     }
     export function advertItems(): Promise<any[]> {
         let url = config.service.site + 'Home/GetAdvertItems'
