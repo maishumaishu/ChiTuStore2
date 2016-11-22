@@ -31,8 +31,7 @@
         <span v-if="product.Score" class="pull-left" style="display: none;">积分：<strong class="price">{{product.Score}}</strong></span>
         <span class="pull-right">{{product.Unit}}</span>
         <div class="clearfix"></div>
-        <p class="oldprice" v-if="product.MemberPrice != null && product.MemberPrice != product.Price"
-            style="display: none;">
+        <p class="oldprice" v-if="product.MemberPrice != null && product.MemberPrice != product.Price" style="display: none;">
             促销价：<span class="price">￥{{product.MemberPrice}}</span>
         </p>
     </div>
@@ -64,7 +63,13 @@
 
 <div class="pull-up-bar">
     <h4 class="text-center">
-        <i class="icon-chevron-up"></i>
-        <span data-bind="text:productPullUpText">上拉查看图文详情</span>
+        <div class="init">
+            <i class="icon-chevron-up"></i>
+            <span>上拉查看图文详情</span>
+        </div>
+        <div class="ready" style="display:none;">
+            <i class="icon-chevron-up"></i>
+            <span>释放查看图文详情</span>
+        </div>
     </h4>
 </div>

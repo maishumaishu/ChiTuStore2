@@ -44,6 +44,21 @@ page {
   height: 100%;
   position: absolute;
 }
+page section {
+  position: absolute;
+  width: 100%;
+  overflow-y: scroll;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -webkit-overflow-scrolling: touch;
+}
+page section.loading {
+  width: 100%;
+  font-size: 120px;
+  text-align: center;
+  padding-top: 80px;
+  color: #bbb;
+}
 header {
   padding: 0;
   margin: 0;
@@ -74,20 +89,6 @@ footer {
   width: 100%;
   position: fixed;
   bottom: 0px;
-}
-section {
-  position: absolute;
-  width: 100%;
-  overflow-y: scroll;
-  -webkit-user-drag: none;
-  user-select: none;
-}
-section.loading {
-  width: 100%;
-  font-size: 120px;
-  text-align: center;
-  padding-top: 80px;
-  color: #bbb;
 }
 /* 页面样式 开始*/
 .caption hr {

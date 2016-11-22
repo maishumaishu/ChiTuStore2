@@ -26,8 +26,38 @@ define(["require", "exports", 'chitu.mobile', 'services'], function (require, ex
                         str = str + product.Count + '件';
                         return str;
                     }
+                },
+                mounted: () => {
+                    on_mounted();
                 }
             });
         });
+        function on_mounted() {
+            let pullUpBar = page.element.querySelector('.pull-up-bar');
+            let beginTop;
+            let currentTop;
+            page.mainView.addEventListener('touchstart', function (event) {
+                let rect = pullUpBar.getBoundingClientRect();
+                beginTop = rect.top;
+            });
+            page.mainView.addEventListener('touchmove', function (event) {
+                let rect = pullUpBar.getBoundingClientRect();
+                currentTop = rect.top;
+                let deltaTop = beginTop - currentTop;
+                if (deltaTop > 20) {
+                    pullUpBar.querySelector('.ready').style.display = 'block';
+                    pullUpBar.querySelector('.init').style.display = 'none';
+                }
+                else {
+                    pullUpBar.querySelector('.ready').style.display = 'none';
+                    pullUpBar.querySelector('.init').style.display = 'block';
+                }
+            });
+            page.mainView.addEventListener('touchend', function (event) {
+                let deltaTop = currentTop - beginTop;
+                pullUpBar.querySelector('.ready').style.display = 'none';
+                pullUpBar.querySelector('.init').style.display = 'block';
+            });
+        }
     });
 });

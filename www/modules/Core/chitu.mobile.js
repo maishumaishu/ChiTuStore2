@@ -125,11 +125,16 @@ define(["require", "exports", 'chitu'], function (require, exports, chitu) {
     exports.Application = Application;
     function action(callback) {
         return (page) => {
-            let p = (callback(page) || Promise.resolve());
+            let pageLoadPromise = new Promise((reslove, reject) => {
+                if (page.viewCompleted)
+                    reslove();
+                page.load.add(() => reslove());
+            });
+            let p = (callback(page, pageLoadPromise) || Promise.resolve());
             p.then(() => {
                 window.setTimeout(function () {
                     page.showView('main');
-                }, 100);
+                }, 10);
             }).catch((err) => {
                 page.showError(err);
             });
