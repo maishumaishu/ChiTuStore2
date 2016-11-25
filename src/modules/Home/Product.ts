@@ -33,15 +33,22 @@ export default action((page: Page) => {
                 }
             },
             mounted: () => {
-                on_mounted();
+                window.setTimeout(() => {
+                    let viewTop = page.mainView.querySelector('.view-top') as HTMLElement;
+                    new HorizontalViewSwitchBar(viewTop, page.mainView.querySelector('.pull-up-bar') as HTMLElement)
+                }, 20);
             }
         })
     });
 
+
+
     function on_mounted() {
-        let pullUpBar = page.element.querySelector('.pull-up-bar') as HTMLElement;
+        let pullUpBar = page.mainView.querySelector('.pull-up-bar') as HTMLElement;
         let beginTop: number;
         let currentTop: number;
+
+        let viewHeight = page.mainView.getBoundingClientRect().height;
         page.mainView.addEventListener('touchstart', function (event) {
             let rect = pullUpBar.getBoundingClientRect();
             beginTop = rect.top;
@@ -50,7 +57,11 @@ export default action((page: Page) => {
             let rect = pullUpBar.getBoundingClientRect();
             currentTop = rect.top;
             let deltaTop = beginTop - currentTop;
-            if (deltaTop > 20) {
+            console.log(`scrollTop:${page.mainView.scrollTop}`);
+
+            let { scrollTop, scrollHeight } = page.mainView;
+            let scrollOnBottom = (scrollTop + viewHeight) >= scrollHeight;
+            if (deltaTop > 20 && scrollOnBottom) {
                 status('ready');
             }
             else {
@@ -59,9 +70,12 @@ export default action((page: Page) => {
         });
         page.mainView.addEventListener('touchend', function (event) {
             let deltaTop = currentTop - beginTop;
-            if (status() == 'ready') {
 
+            if (status() == 'ready') {
+                page.mainView.style.transform = 'translate3d(0%,-100%,0)';
+                page.mainView.style.transition = '0.4s';
             }
+            console.log(`status:${status()}`);
             status('init');
         });
 
@@ -83,12 +97,90 @@ export default action((page: Page) => {
             }
             return _status;
         }
-
-        // function setStatus(status: 'init' | 'ready' | 'finish' | 'cancel') {
-
-        // }
     }
 });
+
+class HorizontalViewSwitchBar {
+    private barElement: HTMLElement;
+    private view: HTMLElement;
+    //private bottomViewElement: HTMLElement;
+    private viewHeight: number;
+    private barBeginTop: number;
+    private barCurrentTop: number;
+
+    private barStatus: 'init' | 'ready' = 'init';
+
+    constructor(view: HTMLElement, barElement) {
+        this.view = view;
+        this.barElement = barElement;
+        this.viewHeight = view.getBoundingClientRect().height;
+
+        view.addEventListener('touchstart', (event) => this.topView_touchstart(event));
+        view.addEventListener('touchmove', (event) => this.topview_touchmove(event));
+        view.addEventListener('touchend', (event) => this.topView_touchend(event));
+    }
+
+    private topView_touchstart(event: TouchEvent) {
+        let rect = this.barElement.getBoundingClientRect();
+        this.barBeginTop = rect.top;
+    }
+
+    private topview_touchmove(event: TouchEvent) {
+        let rect = this.barElement.getBoundingClientRect();
+        this.barCurrentTop = rect.top;
+        let deltaTop = this.barBeginTop - this.barCurrentTop;
+
+        let { scrollTop, scrollHeight } = this.view;
+        let scrollOnBottom = (scrollTop + this.viewHeight) >= scrollHeight;
+        if (deltaTop > 20 && scrollOnBottom) {
+            this.status = 'ready';
+        }
+        else {
+            this.status = 'init';
+        }
+    }
+
+    private set status(value: 'init' | 'ready') {
+        this.barStatus = value;
+        if (value == 'init') {
+            (<HTMLElement>this.barElement.querySelector('.ready')).style.display = 'none';
+            (<HTMLElement>this.barElement.querySelector('.init')).style.display = 'block';
+        }
+        else if (value == 'ready') {
+            (<HTMLElement>this.barElement.querySelector('.ready')).style.display = 'block';
+            (<HTMLElement>this.barElement.querySelector('.init')).style.display = 'none';
+        }
+    }
+
+    private get status() {
+        return this.barStatus;
+    }
+
+    private topView_touchend(event: TouchEvent) {
+
+        if (this.status == 'ready') {
+
+            // (<HTMLElement>this.view.nextElementSibling).style.display = 'block';
+
+            // window.setTimeout(() => {
+                this.view.style.transform = 'translate3d(0%,-100%,0)';
+                this.view.style.transition = '0.4s';
+
+                (<HTMLElement>this.view.nextElementSibling).style.transform = 'translate3d(0%,-50px,0)';
+                (<HTMLElement>this.view.nextElementSibling).style.transition = '0.4s';
+                
+                window.setTimeout(()=>{ // (<HTMLElement>this.view.nextElementSibling).style.display = 'block';
+
+            // window.setTimeout(() => {
+                    (<HTMLElement>this.view.nextElementSibling).scrollTop = 0;
+                },600);
+
+            // }, 50);
+        }
+        this.status = 'init';
+        // this.direction = this.direction == 'up' ? 'down' : 'up';
+    }
+}
 
 
             // window.setTimeout(() => {

@@ -1,4 +1,4 @@
 /node_modules
 /.tscache
-/www
+www
 .baseDir.ts

@@ -59,7 +59,7 @@ class MyApplication extends chitu.Application {
             let { headerHTML, footerHTML } = args;
             console.assert(headerHTML != null);
             if (headerHTML) {
-                let element = page.createHeader(65);
+                let element = page.createHeader(50);
                 element.innerHTML = headerHTML;
             }
             if (footerHTML) {
@@ -68,7 +68,7 @@ class MyApplication extends chitu.Application {
             }
         });
         let className = routeData.pageName.split('.').join('-');
-        className = className + ' immersion';
+        //className = className + ' immersion';
         page.element.className = className;
         return page;
     }

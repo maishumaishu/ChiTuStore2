@@ -27,7 +27,7 @@ requirejs.config({
     paths: {
         chitu: chituPath,
         css: 'js/css',
-        fetch: 'js/fetch',
+        //fetch: 'js/fetch',
         hammer: 'js/hammer',
         text: 'js/text',
         move: 'js/move',

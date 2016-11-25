@@ -1,6 +1,6 @@
-import fetch = require('fetch');
+// import fetch = require('fetch');
 
-const SERVICE_HOST = 'service.alinq.cn:2014';//'service.alinq.cn:2014';///UserServices
+const SERVICE_HOST = 'localhost:2014/UserServices';//'service.alinq.cn:2014';///UserServices
 let config = {
     service: {
         shop: `http://${SERVICE_HOST}/Shop/`,
@@ -14,10 +14,8 @@ let config = {
 
 let token = '';
 export function ajax<T>(url: string, data?: any): Promise<T> {
-    //options = options || ({} as FetchOptions);
     data = data || {};
     Object.assign(data, { AppToken: config.appToken });
-
 
     var form = new FormData();
     for (let key in data) {
@@ -26,6 +24,9 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
 
     let options = {
         //headers: { appToken: config.appToken, token },
+        headers: {
+            'Application-Id': '7BBFA36C-8115-47AD-8D47-9E5'
+        },
         body: form,
         method: 'post'
     } as FetchOptions;
