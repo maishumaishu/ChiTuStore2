@@ -96,11 +96,7 @@ define(["require", "exports", 'fetch'], function (require, exports, fetch) {
         home.brands = brands;
         function getProduct(productId) {
             var url = config.service.shop + 'Product/GetProduct';
-            return ajax(url, { productId: productId }).then(function (product) {
-                product.Count = 1;
-                if (!product.ImageUrls && product.ImageUrl != null) product.ImageUrls = product.ImageUrl.split(',');
-                return product;
-            });
+            return ajax(url, { productId: productId });
         }
         home.getProduct = getProduct;
         function advertItems() {
