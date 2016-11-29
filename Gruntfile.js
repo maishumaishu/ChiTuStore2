@@ -40,7 +40,8 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: [
-                    { expand: true, cwd: dest_user_root + '/modules', src: ['**/*.js'], dest: dest_user_root + '/modules.es5' }
+                    { expand: true, cwd: dest_user_root + '/modules', src: ['**/*.js'], dest: dest_user_root + '/modules.es5' },
+                    { expand: true, cwd: dest_admin_root + '/modules', src: ['**/*.js'], dest: dest_admin_root + '/modules.es5' }
                 ]
             }
         },
@@ -56,7 +57,7 @@ module.exports = function (grunt) {
             },
             src_services: {
                 files: [
-                    { expand: true, cwd: 'src/services', dest: 'build/services', src: ['package.json'] }
+                    { expand: true, cwd: 'src/services', dest: 'build/services', src: ['package.json'] },
                 ]
             },
             src_admin: {
@@ -65,11 +66,12 @@ module.exports = function (grunt) {
                         expand: true, cwd: src_admin_root, dest: dest_admin_root,
                         src: ['*.html', '**/*.html', 'js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/*.*'],
                     },
+                    { expand: true, cwd: src_admin_root + '/modules', dest: dest_admin_root + '/pages', src: ['**/*.html'] },                    
                 ],
             }
         },
         stylus: {
-            src: {
+            src_user: {
                 options: {
                     compress: false,
                 },
@@ -77,14 +79,31 @@ module.exports = function (grunt) {
                     { expand: true, cwd: src_user_root, src: ['content/**/*.styl'], dest: dest_user_root, ext: '.css' },
                     { expand: true, cwd: src_user_root, src: ['core/chitu.mobile.styl'], dest: dest_user_root, ext: '.mobile.css' }]
             },
+            src_admin: {
+                options: {
+                    compress: false,
+                },
+                files: [
+                    { expand: true, cwd: src_admin_root, src: ['content/**/*.styl'], dest: dest_admin_root, ext: '.css' },
+                    { expand: true, cwd: src_admin_root, src: ['core/chitu.mobile.styl'], dest: dest_admin_root, ext: '.mobile.css' }]
+            },
         },
         less: {
-            app: {
+            user: {
                 files: [{
                     expand: true,
                     cwd: `${src_user_root}/content/app`,
                     src: ['**/*.less'],
                     dest: `${dest_user_root}/content/app`,
+                    ext: '.css'
+                }]
+            },
+            admin: {
+                files: [{
+                    expand: true,
+                    cwd: `${src_admin_root}/content/app`,
+                    src: ['**/*.less'],
+                    dest: `${dest_admin_root}/content/app`,
                     ext: '.css'
                 }]
             },

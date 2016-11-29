@@ -52,19 +52,19 @@ export class Page extends chitu.Page {
             this.view('main').innerHTML = args.viewHTML || '';
         });
 
-        this.resize.add((sender, args) => {
-            let elements = this.element.querySelectorAll(viewTagName);
-            for (let i = 0; i < elements.length; i++) {
-                let element = elements.item(i) as HTMLElement;
-                let h = window.innerHeight - args.headerHeight - args.footerHeight;
-                element.style.height = h + 'px';
-                element.style.top = args.headerHeight + 'px';
-            }
-        });
+        // this.resize.add((sender, args) => {
+        //     let elements = this.element.querySelectorAll(viewTagName);
+        //     for (let i = 0; i < elements.length; i++) {
+        //         let element = elements.item(i) as HTMLElement;
+        //         let h = window.innerHeight - args.headerHeight - args.footerHeight;
+        //         element.style.height = h + 'px';
+        //         element.style.top = args.headerHeight + 'px';
+        //     }
+        // });
 
-        window.addEventListener('resize', () => {
-            this.resize.fire(this, { headerHeight: this.headerHeight, footerHeight: this.footerHeight });
-        })
+        // window.addEventListener('resize', () => {
+        //     this.resize.fire(this, { headerHeight: this.headerHeight, footerHeight: this.footerHeight });
+        // })
     }
 
     private createView(className: string) {

@@ -5,5 +5,8 @@ import Carousel = require('carousel');
 
 export default action(function (page: Page, pageLoadPromise) {
 
+    return new Promise((reslove, reject) => {
+        window.setTimeout(() => reslove(), 3000);
+    })
 
 });

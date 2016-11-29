@@ -13,6 +13,10 @@ class MyPage extends Page {
 }
 
 class MyApplication extends chitu.Application {
+    private headerText: string;
+    private pageTitles = {
+        'User.Register': '注册'
+    }
     constructor() {
         super();
         this.pageType = MyPage;
@@ -24,6 +28,8 @@ class MyApplication extends chitu.Application {
         let headerPath, footerPath;
         switch (routeData.pageName) {
             case 'Home.Index':
+                headerPath = `text!ui/headers/Default.html`;
+                break;
             case 'Home.Product':
                 headerPath = `text!ui/headers/${routeData.pageName}.html`;
                 break;
@@ -33,10 +39,12 @@ class MyApplication extends chitu.Application {
         }
 
         switch (routeData.pageName) {
-            case 'Home.Index':
-                footerPath = `text!ui/Menu.html`;
-                break;
+            // case 'Home.Index':
+            //     footerPath = `text!ui/Menu.html`;
+            //     break;
         }
+
+
 
         if (headerPath)
             routeData.resources.push({ name: 'headerHTML', path: headerPath });
@@ -61,6 +69,12 @@ class MyApplication extends chitu.Application {
             if (headerHTML) {
                 let element = page.createHeader(50);
                 element.innerHTML = headerHTML;
+                let headerTitle = this.pageTitles[routeData.pageName];
+                if (headerTitle) {
+                    let titleElement = element.querySelector('h4');
+                    console.assert(titleElement != null);
+                    titleElement.innerHTML = headerTitle;
+                }
             }
             if (footerHTML) {
                 let element = page.createFooter(50);

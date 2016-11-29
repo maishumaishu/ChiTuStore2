@@ -51,7 +51,7 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
         method: 'post'
     } as FetchOptions;
 
-url = url + '?appId=582529cc404c42150fe6aec4&appToken=582529cc404c42150fe6aec4'
+    url = url + '?appId=582529cc404c42150fe6aec4&appToken=582529cc404c42150fe6aec4'
 
     return fetch(url, options).then((response) => {
         let text = response.text();
@@ -69,20 +69,10 @@ url = url + '?appId=582529cc404c42150fe6aec4&appToken=582529cc404c42150fe6aec4'
             return new Promise((resolve, reject) => {
                 let data = JSON.parse(text);
                 let err = isError(data);
-<<<<<<< HEAD:src/admin/modules/Services.ts
-                if (!err) {
-                    resolve(data);
-                    return;
-                }
-
-                reject(err);
-                return;
-=======
                 if (err)
                     reject(err);
                 else
                     resolve(data);
->>>>>>> 6e15e0b0c3d9d7294a607eb2c9627bc0eeddbbcc:src/modules/Services.ts
             });
         })
     });
