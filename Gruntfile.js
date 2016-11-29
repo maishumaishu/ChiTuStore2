@@ -1,6 +1,9 @@
 module.exports = function (grunt) {
-    var src_root = 'src';
-    var dest_root = 'www';
+    var src_user_root = 'src/user';
+    var dest_user_root = 'build/user';
+
+    var src_admin_root = 'src/admin';
+    var dest_admin_root = 'build/admin';
 
     var ts_options = {
         module: 'amd',
@@ -10,11 +13,24 @@ module.exports = function (grunt) {
     };
 
     grunt.initConfig({
-        ts: {
-            app: {
-                src: [src_root + '/**/*.ts'],
-                dest: dest_root,
-                options: ts_options
+        shell: {
+            ts_user: {
+                command: 'tsc -p ./src/user',
+                options: {
+                    failOnError: false
+                }
+            },
+            ts_admin: {
+                command: 'tsc -p ./src/admin',
+                options: {
+                    failOnError: false
+                }
+            },
+            ts_services:{
+                command: 'tsc -p ./src/services',
+                options: {
+                    failOnError: false
+                }
             }
         },
         babel: {
@@ -24,18 +40,31 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: [
-                    { expand: true, cwd: dest_root + '/modules', src: ['**/*.js'], dest: dest_root + '/modules.es5' }
+                    { expand: true, cwd: dest_user_root + '/modules', src: ['**/*.js'], dest: dest_user_root + '/modules.es5' }
                 ]
             }
         },
         copy: {
-            src: {
+            src_user: {
                 files: [
                     {
-                        expand: true, cwd: src_root, dest: dest_root,
+                        expand: true, cwd: src_user_root, dest: dest_user_root,
                         src: ['*.html', 'ui/**/*.html', 'js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/*.*'],
                     },
-                    { expand: true, cwd: src_root + '/modules', dest: dest_root + '/pages', src: ['**/*.html'] }
+                    { expand: true, cwd: src_user_root + '/modules', dest: dest_user_root + '/pages', src: ['**/*.html'] },
+                ],
+            },
+            src_services: {
+                files: [
+                    { expand: true, cwd: 'src/services', dest: 'build/services', src: ['package.json'] }
+                ]
+            },
+            src_admin: {
+                files: [
+                    {
+                        expand: true, cwd: src_admin_root, dest: dest_admin_root,
+                        src: ['*.html', '**/*.html', 'js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/*.*'],
+                    },
                 ],
             }
         },
@@ -45,33 +74,39 @@ module.exports = function (grunt) {
                     compress: false,
                 },
                 files: [
-                    { expand: true, cwd: src_root, src: ['content/**/*.styl'], dest: dest_root, ext: '.css' },
-                    { expand: true, cwd: src_root, src: ['core/chitu.mobile.styl'], dest: dest_root, ext: '.mobile.css' }]
+                    { expand: true, cwd: src_user_root, src: ['content/**/*.styl'], dest: dest_user_root, ext: '.css' },
+                    { expand: true, cwd: src_user_root, src: ['core/chitu.mobile.styl'], dest: dest_user_root, ext: '.mobile.css' }]
             },
         },
         less: {
             app: {
                 files: [{
                     expand: true,
-                    cwd: `${src_root}/content/app`,
+                    cwd: `${src_user_root}/content/app`,
                     src: ['**/*.less'],
-                    dest: `${dest_root}/content/app`,
+                    dest: `${dest_user_root}/content/app`,
                     ext: '.css'
                 }]
             },
-            bootstrap: {
+            bootstrap_user: {
                 files: [{
-                    src: [`${src_root}/content/bootstrap-3.3.5/bootstrap.less`],
-                    dest: `${dest_root}/content/css/bootstrap.css`
+                    src: [`${src_user_root}/content/bootstrap-3.3.5/bootstrap.less`],
+                    dest: `${dest_user_root}/content/css/bootstrap.css`
+                }]
+            },
+            bootstrap_admin: {
+                files: [{
+                    src: [`${src_admin_root}/content/bootstrap-3.3.5/bootstrap.less`],
+                    dest: `${dest_admin_root}/content/css/bootstrap.css`
                 }]
             }
         }
     });
 
     grunt.loadNpmTasks('grunt-babel');
-    grunt.loadNpmTasks('grunt-ts');
+    grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-stylus');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.registerTask('default', ['ts', 'stylus', 'less', 'copy', 'babel']);
+    grunt.registerTask('default', ['shell', 'stylus', 'less', 'copy', 'babel']);
 }

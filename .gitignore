@@ -1,4 +1,5 @@
 /node_modules
 /.tscache
 www
+build
 .baseDir.ts
