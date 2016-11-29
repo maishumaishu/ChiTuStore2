@@ -12,6 +12,24 @@ let config = {
     appToken: '7F0B6740588DCFA7E1C29C627B8C87379F1C98D5962FAB01D0D604307C04BFF0182BAE0B98307143'
 }
 
+function isError(data: any): Error {
+    if (data.Type == 'ErrorObject') {
+        if (data.Code == 'Success') {
+            return null;
+        }
+        let err = new Error(data.Message);
+        err.name = data.Code;
+        return err;
+    }
+
+    let err: Error = data;
+    if (err.name !== undefined && err.message !== undefined && err['stack'] !== undefined) {
+        return err;
+    }
+
+    return null;
+}
+
 let token = '';
 export function ajax<T>(url: string, data?: any): Promise<T> {
     data = data || {};
@@ -24,12 +42,15 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
 
     let options = {
         //headers: { appToken: config.appToken, token },
-        headers: {
-            'Application-Id': '7BBFA36C-8115-47AD-8D47-9E5'
-        },
+        // headers: {
+        //     'Application-Id': '582529cc404c42150fe6aec4',
+        //     'Application-Token': '582529cc404c42150fe6aec4'
+        // },
         body: form,
         method: 'post'
     } as FetchOptions;
+
+url = url + '?appId=582529cc404c42150fe6aec4&appToken=582529cc404c42150fe6aec4'
 
     return fetch(url, options).then((response) => {
         let text = response.text();
@@ -46,19 +67,11 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
         return p.then((text) => {
             return new Promise((resolve, reject) => {
                 let data = JSON.parse(text);
-                if (data.Type != 'ErrorObject')
+                let err = isError(data);
+                if (err)
+                    reject(err);
+                else
                     resolve(data);
-
-
-                if (data.Code == 'Success') {
-                    resolve(data);
-                    return;
-                }
-
-                let err = new Error(data.Message);
-                err.name = data.Code;
-                reject(err);
-                return;
             });
         })
     });
