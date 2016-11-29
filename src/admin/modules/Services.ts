@@ -12,10 +12,21 @@ let config = {
     appToken: '7F0B6740588DCFA7E1C29C627B8C87379F1C98D5962FAB01D0D604307C04BFF0182BAE0B98307143'
 }
 
-function isError(obj): Error {
-    let err = obj as Error;
-    if (err.name !== undefined && err.message !== undefined && err['stack'] !== undefined)
-        return obj;
+
+function isError(data: any): Error {
+    if (data.Type == 'ErrorObject') {
+        if (data.Code == 'Success') {
+            return null;
+        }
+        let err = new Error(data.Message);
+        err.name = data.Code;
+        return err;
+    }
+
+    let err: Error = data;
+    if (err.name !== undefined && err.message !== undefined && err['stack'] !== undefined) {
+        return err;
+    }
 
     return null;
 }
@@ -32,12 +43,15 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
 
     let options = {
         //headers: { appToken: config.appToken, token },
-        headers: {
-            'Application-Id': '7BBFA36C-8115-47AD-8D47-9E5'
-        },
+        // headers: {
+        //     'Application-Id': '582529cc404c42150fe6aec4',
+        //     'Application-Token': '582529cc404c42150fe6aec4'
+        // },
         body: form,
         method: 'post'
     } as FetchOptions;
+
+url = url + '?appId=582529cc404c42150fe6aec4&appToken=582529cc404c42150fe6aec4'
 
     return fetch(url, options).then((response) => {
         let text = response.text();
@@ -55,6 +69,7 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
             return new Promise((resolve, reject) => {
                 let data = JSON.parse(text);
                 let err = isError(data);
+<<<<<<< HEAD:src/admin/modules/Services.ts
                 if (!err) {
                     resolve(data);
                     return;
@@ -62,6 +77,12 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
 
                 reject(err);
                 return;
+=======
+                if (err)
+                    reject(err);
+                else
+                    resolve(data);
+>>>>>>> 6e15e0b0c3d9d7294a607eb2c9627bc0eeddbbcc:src/modules/Services.ts
             });
         })
     });
