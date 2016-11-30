@@ -20,8 +20,10 @@ function isError(obj): Error {
     return null;
 }
 
+
+let error = chitu.Callbacks();
 let token = '';
-export function ajax<T>(url: string, data?: any): Promise<T> {
+export async function ajax<T>(url: string, data?: any): Promise<T> {
     data = data || {};
     Object.assign(data, { AppToken: config.appToken });
 
@@ -39,32 +41,27 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
         method: 'post'
     } as FetchOptions;
 
-    return fetch(url, options).then((response) => {
-        let text = response.text();
-        let p: Promise<string>;
-        if (typeof text == 'string') {
-            p = new Promise<string>((reslove, reject) => {
-                reslove(text);
-            })
-        }
-        else {
-            p = text as Promise<string>;
-        }
-
-        return p.then((text) => {
-            return new Promise((resolve, reject) => {
-                let data = JSON.parse(text);
-                let err = isError(data);
-                if (!err) {
-                    resolve(data);
-                    return;
-                }
-
-                reject(err);
-                return;
-            });
+    let response = await fetch(url, options);
+    let responseText = response.text();
+    let p: Promise<string>;
+    if (typeof responseText == 'string') {
+        p = new Promise<string>((reslove, reject) => {
+            reslove(responseText);
         })
-    });
+    }
+    else {
+        p = responseText as Promise<string>;
+    }
+
+    let text = await responseText;
+    let textObject = JSON.parse(text);
+
+    if (isError(textObject)) {
+        error.fire(this, textObject);
+        throw textObject
+    }
+
+    return textObject;
 }
 
 const imageBasePath = 'http://service.alinq.cn:2015/Shop';

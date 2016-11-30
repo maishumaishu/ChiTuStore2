@@ -1,5 +1,3 @@
-// import fetch = require('fetch');
-
 const SERVICE_HOST = 'localhost:2014/UserServices';//'service.alinq.cn:2014';///UserServices
 let config = {
     service: {
@@ -9,7 +7,8 @@ let config = {
         weixin: `http://${SERVICE_HOST}/WeiXin/`,
         account: `http://${SERVICE_HOST}/Account/`,
     },
-    appToken: '7F0B6740588DCFA7E1C29C627B8C87379F1C98D5962FAB01D0D604307C04BFF0182BAE0B98307143'
+    appId: '582529cc404c42150fe6aec4',
+    appToken: '582529cc404c42150fe6aec4'
 }
 
 
@@ -31,10 +30,13 @@ function isError(data: any): Error {
     return null;
 }
 
+let error = chitu.Callbacks();
 let token = '';
-export function ajax<T>(url: string, data?: any): Promise<T> {
-    data = data || {};
-    Object.assign(data, { AppToken: config.appToken });
+async function ajax<T>(url: string, type: 'post' | 'get', data?: any): Promise<T> {
+    data = Object.assign(data, {
+        appId: config.appId,
+        appToken: config.appToken
+    }, data || {});
 
     var form = new FormData();
     for (let key in data) {
@@ -42,82 +44,50 @@ export function ajax<T>(url: string, data?: any): Promise<T> {
     }
 
     let options = {
-        //headers: { appToken: config.appToken, token },
-        // headers: {
-        //     'Application-Id': '582529cc404c42150fe6aec4',
-        //     'Application-Token': '582529cc404c42150fe6aec4'
-        // },
         body: form,
         method: 'post'
     } as FetchOptions;
 
-    url = url + '?appId=582529cc404c42150fe6aec4&appToken=582529cc404c42150fe6aec4'
-
-    return fetch(url, options).then((response) => {
-        let text = response.text();
-        let p: Promise<string>;
-        if (typeof text == 'string') {
-            p = new Promise<string>((reslove, reject) => {
-                reslove(text);
-            })
-        }
-        else {
-            p = text as Promise<string>;
-        }
-
-        return p.then((text) => {
-            return new Promise((resolve, reject) => {
-                let data = JSON.parse(text);
-                let err = isError(data);
-                if (err)
-                    reject(err);
-                else
-                    resolve(data);
-            });
+    let response = await fetch(url, options);
+    let responseText = response.text();
+    let p: Promise<string>;
+    if (typeof responseText == 'string') {
+        p = new Promise<string>((reslove, reject) => {
+            reslove(responseText);
         })
-    });
+    }
+    else {
+        p = responseText as Promise<string>;
+    }
+
+    let text = await responseText;
+    let textObject = JSON.parse(text);
+
+    if (isError(textObject)) {
+        error.fire(this, textObject);
+        throw textObject
+    }
+
+    return textObject;
+}
+
+function get<T>(url: string, data?: any) {
+    return ajax<T>(url, 'get', data);
+}
+
+function post<T>(url: string, data?: any) {
+    return ajax<T>(url, 'post', data);
 }
 
 const imageBasePath = 'http://service.alinq.cn:2015/Shop';
-export module home {
-    type HomeProduct = { Id: string, Name: string, ImagePath: string };
-    export function proudcts(pageIndex?: number): Promise<HomeProduct[]> {
-        pageIndex = pageIndex === undefined ? 0 : pageIndex;
-        let url = config.service.site + 'Home/GetHomeProducts';
-        return ajax<HomeProduct[]>(url, { pageIndex }).then((products) => {
-            for (let product of products) {
-                product.ImagePath = imageBasePath + product.ImagePath;
-            }
-            return products;
-        });
+export module user {
+    let appId = '583ea7d7426fb47071984deb';
+    let appToken = '583ea7d7426fb47071984deb';
+    type RegisterArguments = { username: string, password: string, smsId: string };
+    export function register(args: RegisterArguments) {
+        return post('user/register', { appId, appToken, user: args, });
     }
-    export function brands(): Promise<any> {
-        let url = config.service.shop + 'Product/GetBrands';
-        return ajax(url);
-    }
-
-    type Product = {
-        Id: string, Arguments: Array<{ key: string, value: string }>,
-        BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
-        GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
-        ProductCategoryId: string, Count: number,
-        CustomProperties: Array<{
-            Name: string,
-            Options: Array<{ Name: string, Selected: boolean, Value: string }>
-        }>
-    };
-    export function getProduct(productId): Promise<Product> {
-        let url = config.service.shop + 'Product/GetProduct';
-        return ajax<Product>(url, { productId }).then(product => {
-            product.Count = 1;
-            if (!product.ImageUrls && product.ImageUrl != null)
-                product.ImageUrls = (<string>product.ImageUrl).split(',');
-
-            return product;
-        });
-    }
-    export function advertItems(): Promise<any[]> {
-        let url = config.service.site + 'Home/GetAdvertItems'
-        return ajax(url);
+    export function sendVerifyCode(mobile: string) {
+        return post('sms/sendVerifyCode', { appId, appToken, mobile, type: 'register' });
     }
 }
