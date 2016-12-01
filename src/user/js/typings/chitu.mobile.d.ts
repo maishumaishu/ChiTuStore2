@@ -1,4 +1,4 @@
 declare module 'chitu.mobile' {
-    import * as cm from 'modules/Core/chitu.mobile';
+    import * as cm from 'modules/core/chitu.mobile';
     export = cm;
 }
