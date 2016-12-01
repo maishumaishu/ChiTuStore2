@@ -167,7 +167,7 @@ export function action(callback: ActionCallback) {
         p.then(() => {
             window.setTimeout(function () {
                 page.showView('main');
-            }, 10);
+            }, 100);
         }).catch((err: Error) => {
             page.showError(err);
         });
