@@ -1,6 +1,5 @@
-// import fetch = require('fetch');
 
-const SERVICE_HOST = 'localhost:2014/UserServices';//'service.alinq.cn:2014';///UserServices
+const SERVICE_HOST = 'localhost:2014/UserServices';
 let config = {
     service: {
         shop: `http://${SERVICE_HOST}/Shop/`,
@@ -9,7 +8,8 @@ let config = {
         weixin: `http://${SERVICE_HOST}/WeiXin/`,
         account: `http://${SERVICE_HOST}/Account/`,
     },
-    appToken: '7F0B6740588DCFA7E1C29C627B8C87379F1C98D5962FAB01D0D604307C04BFF0182BAE0B98307143'
+    appId: '582529cc404c42150fe6aec4',
+    appToken: '582529cc404c42150fe6aec4'
 }
 
 function isError(obj): Error {
@@ -20,23 +20,27 @@ function isError(obj): Error {
     return null;
 }
 
-
 let error = chitu.Callbacks();
 let token = '';
-export async function ajax<T>(url: string, data?: any): Promise<T> {
+async function ajax<T>(url: string, type: 'get' | 'post', data?: any): Promise<T> {
+
+    url = url + `?appId=${config.appId}&appToken=${config.appToken}`;
+
     data = data || {};
-    Object.assign(data, { AppToken: config.appToken });
 
     var form = new FormData();
-    for (let key in data) {
-        form.append(key, data[key])
+    if (type == 'post') {
+        for (let key in data) {
+            form.append(key, data[key])
+        }
+    }
+    else {
+        for (let key in data) {
+            url = url + `&${key}=${data[key]}`;
+        }
     }
 
     let options = {
-        //headers: { appToken: config.appToken, token },
-        headers: {
-            'Application-Id': '7BBFA36C-8115-47AD-8D47-9E5'
-        },
         body: form,
         method: 'post'
     } as FetchOptions;
@@ -64,13 +68,21 @@ export async function ajax<T>(url: string, data?: any): Promise<T> {
     return textObject;
 }
 
+function get<T>(url: string, data?: any) {
+    return ajax<T>(url, 'get', data);
+}
+
+function post<T>(url: string, data?: any) {
+    return ajax<T>(url, 'post', data);
+}
+
 const imageBasePath = 'http://service.alinq.cn:2015/Shop';
 export module home {
     type HomeProduct = { Id: string, Name: string, ImagePath: string };
     export function proudcts(pageIndex?: number): Promise<HomeProduct[]> {
         pageIndex = pageIndex === undefined ? 0 : pageIndex;
         let url = config.service.site + 'Home/GetHomeProducts';
-        return ajax<HomeProduct[]>(url, { pageIndex }).then((products) => {
+        return get<HomeProduct[]>(url, { pageIndex }).then((products) => {
             for (let product of products) {
                 product.ImagePath = imageBasePath + product.ImagePath;
             }
@@ -79,7 +91,7 @@ export module home {
     }
     export function brands(): Promise<any> {
         let url = config.service.shop + 'Product/GetBrands';
-        return ajax(url);
+        return get(url);
     }
 
     type Product = {
@@ -94,7 +106,7 @@ export module home {
     };
     export function getProduct(productId): Promise<Product> {
         let url = config.service.shop + 'Product/GetProduct';
-        return ajax<Product>(url, { productId }).then(product => {
+        return get<Product>(url, { productId }).then(product => {
             product.Count = 1;
             if (!product.ImageUrls && product.ImageUrl != null)
                 product.ImageUrls = (<string>product.ImageUrl).split(',');
@@ -104,6 +116,6 @@ export module home {
     }
     export function advertItems(): Promise<any[]> {
         let url = config.service.site + 'Home/GetAdvertItems'
-        return ajax(url);
+        return get(url);
     }
 }
