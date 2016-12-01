@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "启动程序",
             "program": "${workspaceRoot}/build/services/app.js",
-            "cwd": "${workspaceRoot}",
+            "cwd": "${workspaceRoot}/build/services/",
             "outFiles": [],
             "sourceMaps": true
         },
