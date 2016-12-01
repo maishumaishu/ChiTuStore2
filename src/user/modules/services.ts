@@ -1,5 +1,5 @@
 
-const SERVICE_HOST = 'localhost:2014/UserServices';
+const SERVICE_HOST = 'localhost:2800/UserServices';
 let config = {
     service: {
         shop: `http://${SERVICE_HOST}/Shop/`,
@@ -8,14 +8,24 @@ let config = {
         weixin: `http://${SERVICE_HOST}/WeiXin/`,
         account: `http://${SERVICE_HOST}/Account/`,
     },
-    appId: '582529cc404c42150fe6aec4',
-    appToken: '582529cc404c42150fe6aec4'
+    appId: '583ea7d7426fb47071984deb',
+    appToken: '583ea7d7426fb47071984deb'
 }
 
-function isError(obj): Error {
-    let err = obj as Error;
-    if (err.name !== undefined && err.message !== undefined && err['stack'] !== undefined)
-        return obj;
+function isError(data: any): Error {
+    if (data.Type == 'ErrorObject') {
+        if (data.Code == 'Success') {
+            return null;
+        }
+        let err = new Error(data.Message);
+        err.name = data.Code;
+        return err;
+    }
+
+    let err: Error = data;
+    if (err.name !== undefined && err.message !== undefined && err['stack'] !== undefined) {
+        return err;
+    }
 
     return null;
 }
@@ -45,7 +55,14 @@ async function ajax<T>(url: string, type: 'get' | 'post', data?: any): Promise<T
         method: 'post'
     } as FetchOptions;
 
-    let response = await fetch(url, options);
+    let response:Response;
+    try{
+        response = await fetch(url, options);
+    }
+    catch(err){
+        error.fire(this,err);
+        throw err;
+    }
     let responseText = response.text();
     let p: Promise<string>;
     if (typeof responseText == 'string') {

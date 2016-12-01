@@ -23,18 +23,18 @@ class MyApplication extends chitu.Application {
 
         let headerPath, footerPath;
         switch (routeData.pageName) {
-            case 'Home.Index':
-            case 'Home.Product':
+            case 'home.index':
+            case 'home.product':
                 headerPath = `text!ui/headers/${routeData.pageName}.html`;
                 break;
             default:
-                headerPath = `text!ui/headers/DefaultWithBack.html`;
+                headerPath = `text!ui/headers/defaultWithBack.html`;
                 break
         }
 
         switch (routeData.pageName) {
-            case 'Home.Index':
-                footerPath = `text!ui/Menu.html`;
+            case 'home.index':
+                footerPath = `text!ui/menu.html`;
                 break;
         }
 
@@ -72,13 +72,6 @@ class MyApplication extends chitu.Application {
         page.element.className = className;
         return page;
     }
-
-    // private createHeader(pageElement: HTMLElement, headerHTML: string) {
-    //     let headerElement = document.createElement('header');
-    //     headerElement.innerHTML = headerHTML;
-    //     pageElement.appendChild(headerElement);
-    // }
-
 }
 
 export let app = window['app'] = new MyApplication();

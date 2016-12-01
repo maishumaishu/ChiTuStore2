@@ -1,5 +1,5 @@
 
-var es5 = true;
+var es5 = false;
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
 var app_deps = [];
@@ -31,12 +31,12 @@ requirejs.config({
         text: 'js/text',
         move: 'js/move',
         vue: 'js/vue',
-        services: modulesPath + '/Services',
-        app: modulesPath + '/Application',
-        Controls: modulesPath + '/Controls',
-        'chitu.mobile': modulesPath + '/Core/chitu.mobile',
-        'vue.ext': modulesPath + '/Core/vue.ext',
-        'carousel': modulesPath + '/Core/carousel',
+        services: modulesPath + '/services',
+        app: modulesPath + '/application',
+        Controls: modulesPath + '/controls',
+        'chitu.mobile': modulesPath + '/core/chitu.mobile',
+        'vue.ext': modulesPath + '/core/vue.ext',
+        'carousel': modulesPath + '/core/carousel',
         'modules': modulesPath
     }
 });

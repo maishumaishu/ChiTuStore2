@@ -6,7 +6,7 @@ import Carousel = require('carousel');
 export default action(function (page: Page, pageLoadPromise) {
 
     let advertItems = [];
-    var productLoad = Promise.all([services.home.proudcts(), pageLoadPromise, chitu.loadjs('Controls/PromotionLabel')])
+    var productLoad = Promise.all([services.home.proudcts(), pageLoadPromise])// chitu.loadjs('Controls/PromotionLabel')
         .then(result => {
             let products = result[0];
             let data = { products, advertItems };
