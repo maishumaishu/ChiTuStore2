@@ -1,4 +1,6 @@
-const SERVICE_HOST = 'localhost:3010/UserServices';//'service.alinq.cn:2014';///UserServices
+
+const SERVICE_HOST = 'localhost:2800/UserServices';//'service.alinq.cn:2014';///UserServices
+
 let config = {
     service: {
         shop: `http://${SERVICE_HOST}/Shop/`,

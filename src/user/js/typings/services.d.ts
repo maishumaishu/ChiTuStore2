@@ -1,4 +1,4 @@
 declare module 'services' {
-    import * as cm from 'modules/Services';
+    import * as cm from 'modules/services';
     export = cm;
 }

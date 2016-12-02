@@ -1,4 +1,4 @@
 declare module 'carousel' {
-    import c = require('modules/Core/carousel');
+    import c = require('modules/core/carousel');
     export = c;
 }

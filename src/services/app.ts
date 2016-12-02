@@ -36,17 +36,21 @@ async function request(req: express.Request, res: express.Response, data?: strin
     try {
         let host = config.realServiceHost; //'localhost';
         let port = config.realServicePort; //80;
-        //let path = '/';
 
-        let headers: any = req.headers;
-        headers.host = host;
 
-        //let baseUrl = path;
-        //let requestUrl = combinePaths(baseUrl, req.url);
+        console.assert(req.query.appId != null);
+        let headers: any = Object.assign({
+            'application-id': req.query.appId,
+        }, req.headers, { host });
+
+        if (req.query.userId) {
+            headers['user-id'] = req.query.userId;
+        }
+
         let request = http.request(
             {
                 host: host,
-                path: req.baseUrl,
+                path: req.originalUrl,
                 method: req.method,
                 headers: headers,
                 port: port
