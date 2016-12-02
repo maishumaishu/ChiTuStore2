@@ -3,19 +3,9 @@ import * as express from 'express';
 import * as mongodb from 'mongodb';
 import * as http from 'http';
 import * as config from './config';
+import * as errors from './errors';
 
 let app = express();
-
-
-app.post('/register', function (req, res) {
-    let contentLength = new Number(req.headers['content-length']).valueOf();
-    if (contentLength > 0) {
-        getPostObject(req).then(data => {
-            console.log(data);
-        });
-    }
-    res.send();
-});
 
 app.use('/*', function (req: express.Request, res: express.Response) {
     let contentLength = 0;
@@ -38,14 +28,17 @@ async function request(req: express.Request, res: express.Response, data?: strin
         let port = config.realServicePort; //80;
 
 
-        console.assert(req.query.appId != null);
-        let headers: any = Object.assign({
-            'application-id': req.query.appId,
-        }, req.headers, { host });
-
-        if (req.query.userId) {
-            headers['user-id'] = req.query.userId;
+        if (!req.query.userId) {
+            throw errors.queryStringRequired('userId');
         }
+
+        if (!req.query.appId) {
+            throw errors.queryStringRequired('appId')
+        }
+
+        let headers: any = Object.assign({
+            'application-id': req.query.userId,
+        }, req.headers, { host });
 
         let request = http.request(
             {
@@ -60,16 +53,15 @@ async function request(req: express.Request, res: express.Response, data?: strin
                 for (var key in response.headers) {
                     res.setHeader(key, response.headers[key]);
                 }
-                //res.setHeader('Access-Control-Allow-Origin', '*');
                 response.pipe(res);
             }
-        );
+        ).on('error', (err) => {
+            outputError(res, err);
+        });
 
         if (data) {
-            //let text = String.fromCharCode.apply(null, data);
             request.write(data);
         }
-
         request.end();
     }
     catch (err) {
