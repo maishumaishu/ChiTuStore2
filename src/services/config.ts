@@ -1,2 +1,2 @@
-export let realServiceHost = 'shop.alinq.cn';
+export let realServiceHost = 'localhost';
 export let realServicePort = 80;

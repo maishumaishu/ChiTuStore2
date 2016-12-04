@@ -24,20 +24,15 @@ app.use('/*', function (req: express.Request, res: express.Response) {
 
 async function request(req: express.Request, res: express.Response, data?: string | Uint8Array) {
     try {
-        let host = config.realServiceHost; //'localhost';
-        let port = config.realServicePort; //80;
+        let host = config.realServiceHost;
+        let port = config.realServicePort;
 
-
-        if (!req.query.userId) {
-            throw errors.queryStringRequired('userId');
-        }
-
-        if (!req.query.appId) {
-            throw errors.queryStringRequired('appId')
+        if (!req.query.storeId) {
+            throw errors.queryStringRequired('store-id');
         }
 
         let headers: any = Object.assign({
-            'application-id': req.query.userId,
+            'application-id': req.query.storeId,
         }, req.headers, { host });
 
         let request = http.request(
