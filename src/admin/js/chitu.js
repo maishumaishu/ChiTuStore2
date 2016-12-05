@@ -49,6 +49,9 @@
                 });
             });
         }
+        map(callbackfn) {
+            return this.items.map(callbackfn);
+        }
     }
     chitu.Resources = Resources;
     class RouteData {
@@ -172,7 +175,7 @@
             return page;
         }
         createPageElement(routeData) {
-            let element = document.createElement('page');
+            let element = document.createElement(chitu.Page.tagName);
             document.body.appendChild(element);
             return element;
         }
@@ -248,7 +251,8 @@
                 return;
             var c = this.page_stack.pop();
             c.close();
-            this.setLocationHash(this.currentPage.routeData.routeString);
+            if (this.currentPage != null)
+                this.setLocationHash(this.currentPage.routeData.routeString);
         }
         redirect(routeString, args) {
             let location = window.location;
@@ -464,49 +468,46 @@ var chitu;
         createActionDeferred(routeData) {
             return new Promise((resolve, reject) => {
                 var url = routeData.actionPath;
-                requirejs([url], (obj) => {
-                    if (!obj) {
-                        let msg = `Load action '${routeData.pageName}' fail.`;
-                        let err = new Error(msg);
-                        reject(err);
-                        return;
-                    }
-                    resolve(obj);
-                }, (err) => reject(err));
+                requirejs([url], (obj) => resolve(obj), (err) => reject(err));
             });
         }
         loadPageAction(routeData) {
             var action_deferred = new Promise((reslove, reject) => {
-                this.createActionDeferred(routeData).then((actionResult) => {
-                    if (!actionResult)
-                        throw chitu.Errors.exportsCanntNull(routeData.pageName);
+                this.createActionDeferred(routeData)
+                    .then((actionResult) => {
                     let actionName = 'default';
-                    let action = actionResult[actionName];
-                    if (action == null) {
-                        throw chitu.Errors.canntFindAction(routeData.pageName);
-                    }
-                    if (typeof action == 'function') {
+                    if (actionResult != null && actionResult[actionName] != null) {
+                        let action = actionResult[actionName];
+                        if (typeof action != 'function') {
+                            reject();
+                            throw chitu.Errors.actionTypeError(routeData.pageName);
+                        }
                         if (action['prototype'] != null)
                             new action(this);
                         else
                             action(this);
-                        reslove();
                     }
-                    else {
-                        reject();
-                        throw chitu.Errors.actionTypeError(routeData.pageName);
-                    }
-                }).catch((err) => {
+                    reslove();
+                })
+                    .catch((err) => {
                     reject(err);
                 });
             });
-            let result = Promise.all([action_deferred, routeData.resources.load()]).then((data) => {
-                let args = data[1];
+            let resourcePaths = routeData.resources.map(o => o.path);
+            let resourceNames = routeData.resources.map(o => o.name);
+            let result = Promise.all([action_deferred, chitu.loadjs(...resourcePaths || [])]).then((data) => {
+                let resourceResults = data[1];
+                let args = {};
+                for (let i = 0; i < resourceResults.length; i++) {
+                    let name = resourceNames[i];
+                    args[name] = resourceResults[i];
+                }
                 this.on_load(args);
             });
             return result;
         }
     }
+    Page.tagName = 'div';
     chitu.Page = Page;
     class PageDisplayerImplement {
         show(page) {

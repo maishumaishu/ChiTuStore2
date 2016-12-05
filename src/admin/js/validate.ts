@@ -144,7 +144,7 @@ var ruleRegex = /^(.+?)\[(.+)\]$/,
 
 type ErrorCallback = (errors: ValidatorError[], evt: Environment) => void
 type Environment = { formElement: HTMLElement, validator: FormValidator };
-export class FormValidator {
+class FormValidator {
     private callback: ErrorCallback;
     private errors: Array<ValidatorError>;
     private fields: { [propName: string]: ValidateField };
@@ -785,7 +785,8 @@ let attributeValue = function (element, attributeName) {
 
 
 
-window['FormValidator'] = FormValidator;
+//window['FormValidator'] = FormValidator;
+export = FormValidator;
 // })(window, document);
 
 /*

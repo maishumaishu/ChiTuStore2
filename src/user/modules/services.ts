@@ -8,8 +8,8 @@ let config = {
         weixin: `http://${SERVICE_HOST}/WeiXin/`,
         account: `http://${SERVICE_HOST}/Account/`,
     },
-    appId: '583ea7d7426fb47071984deb',
-    appToken: '583ea7d7426fb47071984deb'
+    appToken: '58424776034ff82470d06d3d',
+    storeId: '58401d1906c02a2b8877bd13'
 }
 
 function isError(data: any): Error {
@@ -34,7 +34,7 @@ let error = chitu.Callbacks();
 let token = '';
 async function ajax<T>(url: string, type: 'get' | 'post', data?: any): Promise<T> {
 
-    url = url + `?appId=${config.appId}&appToken=${config.appToken}`;
+    url = url + `?storeId=${config.storeId}`;
 
     data = data || {};
 
@@ -51,16 +51,19 @@ async function ajax<T>(url: string, type: 'get' | 'post', data?: any): Promise<T
     }
 
     let options = {
+        headers: {
+            'application-token': config.appToken
+        },
         body: form,
         method: 'post'
     } as FetchOptions;
 
-    let response:Response;
-    try{
+    let response: Response;
+    try {
         response = await fetch(url, options);
     }
-    catch(err){
-        error.fire(this,err);
+    catch (err) {
+        error.fire(this, err);
         throw err;
     }
     let responseText = response.text();

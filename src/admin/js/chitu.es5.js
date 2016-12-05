@@ -78,6 +78,11 @@ var chitu;
                     });
                 });
             }
+        }, {
+            key: 'map',
+            value: function map(callbackfn) {
+                return this.items.map(callbackfn);
+            }
         }]);
 
         return Resources;
@@ -240,7 +245,7 @@ var chitu;
         }, {
             key: 'createPageElement',
             value: function createPageElement(routeData) {
-                var element = document.createElement('page');
+                var element = document.createElement(chitu.Page.tagName);
                 document.body.appendChild(element);
                 return element;
             }
@@ -326,7 +331,7 @@ var chitu;
                 if (this.page_stack.length <= 0) return;
                 var c = this.page_stack.pop();
                 c.close();
-                this.setLocationHash(this.currentPage.routeData.routeString);
+                if (this.currentPage != null) this.setLocationHash(this.currentPage.routeData.routeString);
             }
         }, {
             key: 'redirect',
@@ -579,6 +584,8 @@ var chitu;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var chitu;
@@ -666,13 +673,7 @@ var chitu;
                 return new Promise(function (resolve, reject) {
                     var url = routeData.actionPath;
                     requirejs([url], function (obj) {
-                        if (!obj) {
-                            var msg = 'Load action \'' + routeData.pageName + '\' fail.';
-                            var err = new Error(msg);
-                            reject(err);
-                            return;
-                        }
-                        resolve(obj);
+                        return resolve(obj);
                     }, function (err) {
                         return reject(err);
                     });
@@ -685,25 +686,33 @@ var chitu;
 
                 var action_deferred = new Promise(function (reslove, reject) {
                     _this.createActionDeferred(routeData).then(function (actionResult) {
-                        if (!actionResult) throw chitu.Errors.exportsCanntNull(routeData.pageName);
                         var actionName = 'default';
-                        var action = actionResult[actionName];
-                        if (action == null) {
-                            throw chitu.Errors.canntFindAction(routeData.pageName);
-                        }
-                        if (typeof action == 'function') {
+                        if (actionResult != null && actionResult[actionName] != null) {
+                            var action = actionResult[actionName];
+                            if (typeof action != 'function') {
+                                reject();
+                                throw chitu.Errors.actionTypeError(routeData.pageName);
+                            }
                             if (action['prototype'] != null) new action(_this);else action(_this);
-                            reslove();
-                        } else {
-                            reject();
-                            throw chitu.Errors.actionTypeError(routeData.pageName);
                         }
+                        reslove();
                     }).catch(function (err) {
                         reject(err);
                     });
                 });
-                var result = Promise.all([action_deferred, routeData.resources.load()]).then(function (data) {
-                    var args = data[1];
+                var resourcePaths = routeData.resources.map(function (o) {
+                    return o.path;
+                });
+                var resourceNames = routeData.resources.map(function (o) {
+                    return o.name;
+                });
+                var result = Promise.all([action_deferred, chitu.loadjs.apply(chitu, _toConsumableArray(resourcePaths || []))]).then(function (data) {
+                    var resourceResults = data[1];
+                    var args = {};
+                    for (var i = 0; i < resourceResults.length; i++) {
+                        var name = resourceNames[i];
+                        args[name] = resourceResults[i];
+                    }
                     _this.on_load(args);
                 });
                 return result;
@@ -733,6 +742,7 @@ var chitu;
         return Page;
     }();
 
+    Page.tagName = 'div';
     chitu.Page = Page;
 
     var PageDisplayerImplement = function () {

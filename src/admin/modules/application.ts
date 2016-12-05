@@ -7,44 +7,64 @@ class MyPage extends Page {
 
         this.view('loading').innerHTML =
             `<div class="spin">
-    <i class="icon-spinner icon-spin"></i>
-</div>`;
+                <i class="icon-spinner icon-spin"></i>
+            </div>`;
+    }
+}
+
+let DEFAULT_HEADER = 'text!ui/headers/default.html';
+let DEFAULT_WITH_BACK = 'text!ui/headers/defaultWithBack.html'
+let LOAD_BY_NAME = 'LoadByName'
+let MENU = 'text!ui/menu.html';
+let config = {
+    headerHeight: 50,
+    footerHeight: 50,
+    pageTitles: {
+        'user.register': '商家注册',
+        'user.login': '登录',
+        'user.resetPassword': '重置密码',
+        'home.orders': '订单',
+        'home.products': '商品'
+    },
+    headerPaths: {
+        'home.index': DEFAULT_HEADER,
+        'home.product': 'LoadByName',
+        'user.register': DEFAULT_HEADER,
+        'user.login': DEFAULT_HEADER,
+        'user.resetPassword': DEFAULT_WITH_BACK
+    },
+    footerPaths: {
+        'home.index': MENU,
+        'home.orders': MENU,
+        'home.products': MENU,
+        'user.index': MENU,
+    },
+    css: {
+        'user.login': LOAD_BY_NAME,
+        'user.register': LOAD_BY_NAME
     }
 }
 
 class MyApplication extends chitu.Application {
     private headerText: string;
-    private pageTitles = {
-        'User.Register': '注册'
-    }
+
+
     constructor() {
         super();
         this.pageType = MyPage;
     }
 
     protected parseRouteString(routeString: string) {
+        routeString = routeString.replace(new RegExp('_'), '/');
         let routeData = super.parseRouteString(routeString);
 
-        let headerPath, footerPath;
-        switch (routeData.pageName) {
-            case 'Home.Index':
-                headerPath = `text!ui/headers/Default.html`;
-                break;
-            case 'Home.Product':
-                headerPath = `text!ui/headers/${routeData.pageName}.html`;
-                break;
-            default:
-                headerPath = `text!ui/headers/DefaultWithBack.html`;
-                break
-        }
+        let headerPath = config.headerPaths[routeData.pageName];
+        if (headerPath == LOAD_BY_NAME)
+            headerPath = `text!ui/headers/Default.html`;
+        else if (headerPath === undefined)
+            headerPath = DEFAULT_WITH_BACK;
 
-        switch (routeData.pageName) {
-            // case 'Home.Index':
-            //     footerPath = `text!ui/Menu.html`;
-            //     break;
-        }
-
-
+        let footerPath = config.footerPaths[routeData.pageName];
 
         if (headerPath)
             routeData.resources.push({ name: 'headerHTML', path: headerPath });
@@ -53,8 +73,13 @@ class MyApplication extends chitu.Application {
             routeData.resources.push({ name: 'footerHTML', path: footerPath });
 
         let path = routeData.actionPath.substr(routeData.basePath.length);
-        let cssPath = `css!content/app` + path;
-        routeData.resources.push({ name: 'pageCSS', path: cssPath });
+        let cssPath = config.css[routeData.pageName];
+        if (cssPath == LOAD_BY_NAME)
+            cssPath = `css!content/app` + path;
+
+        if (cssPath)
+            routeData.resources.push({ name: 'pageCSS', path: cssPath });
+
         routeData.resources.push({ name: 'viewHTML', path: `text!pages${path}.html` });
 
         return routeData;
@@ -67,9 +92,9 @@ class MyApplication extends chitu.Application {
             let { headerHTML, footerHTML } = args;
             console.assert(headerHTML != null);
             if (headerHTML) {
-                let element = page.createHeader(50);
+                let element = page.createHeader(config.headerHeight);
                 element.innerHTML = headerHTML;
-                let headerTitle = this.pageTitles[routeData.pageName];
+                let headerTitle = config.pageTitles[routeData.pageName];
                 if (headerTitle) {
                     let titleElement = element.querySelector('h4');
                     console.assert(titleElement != null);
@@ -77,28 +102,22 @@ class MyApplication extends chitu.Application {
                 }
             }
             if (footerHTML) {
-                let element = page.createFooter(50);
+                let element = page.createFooter(config.footerHeight);
                 element.innerHTML = footerHTML;
             }
         });
         let className = routeData.pageName.split('.').join('-');
-        //className = className + ' immersion';
-        page.element.className = className;
+        page.element.className = 'page ' + className;
+
         return page;
     }
-
-    // private createHeader(pageElement: HTMLElement, headerHTML: string) {
-    //     let headerElement = document.createElement('header');
-    //     headerElement.innerHTML = headerHTML;
-    //     pageElement.appendChild(headerElement);
-    // }
-
 }
 
-export let app = window['app'] = new MyApplication();
+let app = window['app'] = new MyApplication();
 app.run();
 
 if (!location.hash) {
     app.redirect('home/index');
 }
 
+export = app;

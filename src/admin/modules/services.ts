@@ -1,18 +1,11 @@
 
-const SERVICE_HOST = 'localhost:2800/UserServices';//'service.alinq.cn:2014';///UserServices
+const SERVICE_HOST = 'http://localhost:2800/';//'service.alinq.cn:2014';///UserServices
 
 let config = {
-    service: {
-        shop: `http://${SERVICE_HOST}/Shop/`,
-        site: `http://${SERVICE_HOST}/Site/`,
-        member: `http://${SERVICE_HOST}/Member/`,
-        weixin: `http://${SERVICE_HOST}/WeiXin/`,
-        account: `http://${SERVICE_HOST}/Account/`,
-    },
-    appId: '582529cc404c42150fe6aec4',
-    appToken: '582529cc404c42150fe6aec4'
+    appToken: '58424776034ff82470d06d3d',
+    userToken: '',
+    storeId: '',
 }
-
 
 function isError(data: any): Error {
     if (data.Type == 'ErrorObject') {
@@ -35,19 +28,40 @@ function isError(data: any): Error {
 let error = chitu.Callbacks();
 let token = '';
 async function ajax<T>(url: string, type: 'post' | 'get', data?: any): Promise<T> {
-    data = Object.assign(data, {
-        appId: config.appId,
-        appToken: config.appToken
-    }, data || {});
 
-    var form = new FormData();
-    for (let key in data) {
-        form.append(key, data[key])
+    url = SERVICE_HOST + url;
+
+    data = data || {};
+
+
+    var form: FormData;
+    if (type == 'post') {
+        new FormData();
+        for (let key in data) {
+            form.append(key, data[key])
+        }
+    }
+    else {
+        let urlParams = '';
+        for (let key in data) {
+            if (urlParams == '')
+                urlParams = urlParams + '?';
+            else
+                urlParams = urlParams + '&';
+
+            urlParams = urlParams + `${key}=${data[key]}`;
+        }
+        if (urlParams)
+            url = url + urlParams;
     }
 
     let options = {
+        headers: {
+            'application-token': config.appToken,
+            'user-token': config.userToken,
+        },
         body: form,
-        method: 'post'
+        method: type
     } as FetchOptions;
 
     let response = await fetch(url, options);
@@ -83,13 +97,22 @@ function post<T>(url: string, data?: any) {
 
 const imageBasePath = 'http://service.alinq.cn:2015/Shop';
 export module user {
-    let appId = '583ea7d7426fb47071984deb';
-    let appToken = '583ea7d7426fb47071984deb';
+    // let appId = '583ea7d7426fb47071984deb';
+    // let appToken = '583ea7d7426fb47071984deb';
+    //let userToken = '';
     type RegisterArguments = { username: string, password: string, smsId: string };
     export function register(args: RegisterArguments) {
-        return post('user/register', { appId, appToken, user: args, });
+        return post('user/register', { user: args, });
     }
     export function sendVerifyCode(mobile: string) {
-        return post('sms/sendVerifyCode', { appId, appToken, mobile, type: 'register' });
+        return post('sms/sendVerifyCode', { mobile, type: 'register' });
+    }
+
+    type LoginResult = { token: string, userId: string }
+    export function login(username: string, password: string) {
+        return get<LoginResult>('user/login', { username, password }).then((result) => {
+            config.userToken = result.token;
+            config.storeId = result.userId;
+        });
     }
 }
