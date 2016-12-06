@@ -20,8 +20,9 @@ let config = {
     headerHeight: 50,
     footerHeight: 50,
     pageTitles: {
-        'user.register': '商家注册',
+        'user.index': '用户中心',
         'user.login': '登录',
+        'user.register': '商家注册',
         'user.resetPassword': '重置密码',
         'home.orders': '订单',
         'home.products': '商品'
@@ -44,7 +45,8 @@ let config = {
         'user.register': LOAD_BY_NAME,
         'home.products': LOAD_BY_NAME,
         'home.orders': LOAD_BY_NAME,
-    }
+    },
+    cachePages: ['home.products', 'home.orders', 'user.index']
 }
 
 class MyApplication extends chitu.Application {
@@ -89,6 +91,10 @@ class MyApplication extends chitu.Application {
 
     protected createPage(routeData: chitu.RouteData) {
         let page = super.createPage(routeData) as Page;
+        if (config.cachePages.indexOf(page.name) >= 0) {
+            page.allowCache = true;
+        }
+
         console.assert(page instanceof Page);
         page.load.add((sender, args) => {
             let { headerHTML, footerHTML } = args;

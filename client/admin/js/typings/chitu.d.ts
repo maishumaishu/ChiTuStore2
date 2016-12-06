@@ -29,13 +29,13 @@ declare namespace chitu {
         constructor(basePath: any, routeString: string);
         parseRouteString(): void;
         private pareeUrlQuery(query);
-        readonly basePath: string;
-        readonly values: any;
-        readonly pageName: string;
-        readonly resources: Resources;
-        readonly routeString: string;
-        readonly actionPath: string;
-        readonly loadCompleted: boolean;
+        basePath: string;
+        values: any;
+        pageName: string;
+        resources: Resources;
+        routeString: string;
+        actionPath: string;
+        loadCompleted: boolean;
     }
     class Application {
         pageCreated: Callback<Application, Page>;
@@ -49,8 +49,8 @@ declare namespace chitu {
         constructor();
         protected parseRouteString(routeString: string): RouteData;
         private on_pageCreated(page);
-        readonly currentPage: Page;
-        readonly pages: Array<Page>;
+        currentPage: Page;
+        pages: Array<Page>;
         protected createPage(routeData: RouteData): Page;
         protected createPageElement(routeData: chitu.RouteData): HTMLElement;
         protected hashchange(): void;
@@ -150,10 +150,10 @@ declare namespace chitu {
         show(): void;
         hide(): void;
         close(): void;
-        readonly element: HTMLElement;
-        readonly previous: Page;
-        readonly routeData: RouteData;
-        readonly name: string;
+        element: HTMLElement;
+        previous: Page;
+        routeData: RouteData;
+        name: string;
         private createActionDeferred(routeData);
         private loadPageAction(routeData);
     }
@@ -167,6 +167,6 @@ declare namespace chitu {
     function combinePath(path1: string, path2: string): string;
     function loadjs(...modules: string[]): Promise<Array<any>>;
 }
-declare module "chitu" { 
-            export = chitu; 
-        }
+declare module "chitu" {
+    export = chitu;
+}

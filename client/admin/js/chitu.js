@@ -169,11 +169,6 @@
                 element
             });
             this.on_pageCreated(page);
-            this.page_stack.push(page);
-            if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
-                let c = this.page_stack.shift();
-                c.close();
-            }
             return page;
         }
         createPageElement(routeData) {
@@ -235,8 +230,17 @@
             let result = new Promise((resolve, reject) => {
                 let page = this.cachePages[routeData.pageName];
                 if (page == null) {
-                    this.createPage(routeData);
+                    page = this.createPage(routeData);
+                    if (page.allowCache) {
+                        this.cachePages[routeData.pageName] = page;
+                    }
                 }
+                this.page_stack.push(page);
+                if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
+                    let c = this.page_stack.shift();
+                    c.close();
+                }
+                page.previous = previous;
                 page.show();
                 resolve(page);
             });
@@ -255,7 +259,6 @@
                 return;
             var page = this.page_stack.pop();
             if (page.allowCache) {
-                this.cachePages[page.name] = page;
                 page.hide();
             }
             else {
@@ -471,6 +474,9 @@ var chitu;
         }
         get previous() {
             return this._previous;
+        }
+        set previous(value) {
+            this._previous = value;
         }
         get routeData() {
             return this._routeData;
