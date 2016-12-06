@@ -1,8 +1,8 @@
 module.exports = function (grunt) {
-    var src_user_root = 'src/user';
+    var src_user_root = 'client/user';
     var dest_user_root = 'build/user';
 
-    var src_admin_root = 'src/admin';
+    var src_admin_root = 'client/admin';
     var dest_admin_root = 'build/admin';
 
     var ts_options = {
@@ -15,19 +15,19 @@ module.exports = function (grunt) {
     grunt.initConfig({
         shell: {
             ts_user: {
-                command: 'tsc -p ./src/user',
+                command: 'tsc -p ./client/user',
                 options: {
                     failOnError: false
                 }
             },
             ts_admin: {
-                command: 'tsc -p ./src/admin',
+                command: 'tsc -p ./client/admin',
                 options: {
                     failOnError: false
                 }
             },
             ts_services:{
-                command: 'tsc -p ./src/services',
+                command: 'tsc -p ./server',
                 options: {
                     failOnError: false
                 }
@@ -57,7 +57,7 @@ module.exports = function (grunt) {
             },
             src_services: {
                 files: [
-                    { expand: true, cwd: 'src/services', dest: 'build/services', src: ['package.json'] },
+                    { expand: true, cwd: 'server', dest: 'build/services', src: ['package.json'] },
                 ]
             },
             src_admin: {
