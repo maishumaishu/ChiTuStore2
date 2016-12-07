@@ -55,10 +55,11 @@
     }
     chitu.Resources = Resources;
     class RouteData {
-        constructor(basePath, routeString) {
+        constructor(basePath, routeString, pathSpliterChar) {
             this._parameters = {};
             this.path_string = '';
             this.path_spliter_char = '/';
+            this.path_contact_char = '/';
             this.param_spliter = '?';
             this.name_spliter_char = '.';
             this._pathBase = '';
@@ -66,6 +67,8 @@
                 throw chitu.Errors.argumentNull('basePath');
             if (!routeString)
                 throw chitu.Errors.argumentNull('routeString');
+            if (pathSpliterChar)
+                this.path_spliter_char = pathSpliterChar;
             this._loadCompleted = false;
             this._routeString = routeString;
             this._pathBase = basePath;
@@ -94,7 +97,7 @@
             if (path_parts.length < 1) {
                 throw chitu.Errors.canntParseRouteString(routeString);
             }
-            let file_path = path_parts.join(this.path_spliter_char);
+            let file_path = path_parts.join(this.path_contact_char);
             this._pageName = path_parts.join(this.name_spliter_char);
             this._actionPath = (this.basePath ? chitu.combinePath(this.basePath, file_path) : file_path);
         }
@@ -226,25 +229,25 @@
                 throw chitu.Errors.noneRouteMatched(routeString);
             }
             Object.assign(routeData.values, args || {});
+            let page = this.cachePages[routeData.pageName];
+            if (page == null) {
+                page = this.createPage(routeData);
+                if (page.allowCache) {
+                    this.cachePages[routeData.pageName] = page;
+                }
+            }
+            if (page == this.currentPage) {
+                return page;
+            }
             let previous = this.currentPage;
-            let result = new Promise((resolve, reject) => {
-                let page = this.cachePages[routeData.pageName];
-                if (page == null) {
-                    page = this.createPage(routeData);
-                    if (page.allowCache) {
-                        this.cachePages[routeData.pageName] = page;
-                    }
-                }
-                this.page_stack.push(page);
-                if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
-                    let c = this.page_stack.shift();
-                    c.close();
-                }
-                page.previous = previous;
-                page.show();
-                resolve(page);
-            });
-            return result;
+            this.page_stack.push(page);
+            if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
+                let c = this.page_stack.shift();
+                c.close();
+            }
+            page.previous = previous;
+            page.show();
+            return page;
         }
         setLocationHash(routeString) {
             if (window.location.hash == '#' + routeString) {

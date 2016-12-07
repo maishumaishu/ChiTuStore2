@@ -91,17 +91,19 @@ var chitu;
     chitu.Resources = Resources;
 
     var RouteData = function () {
-        function RouteData(basePath, routeString) {
+        function RouteData(basePath, routeString, pathSpliterChar) {
             _classCallCheck(this, RouteData);
 
             this._parameters = {};
             this.path_string = '';
             this.path_spliter_char = '/';
+            this.path_contact_char = '/';
             this.param_spliter = '?';
             this.name_spliter_char = '.';
             this._pathBase = '';
             if (!basePath) throw chitu.Errors.argumentNull('basePath');
             if (!routeString) throw chitu.Errors.argumentNull('routeString');
+            if (pathSpliterChar) this.path_spliter_char = pathSpliterChar;
             this._loadCompleted = false;
             this._routeString = routeString;
             this._pathBase = basePath;
@@ -135,7 +137,7 @@ var chitu;
                 if (path_parts.length < 1) {
                     throw chitu.Errors.canntParseRouteString(routeString);
                 }
-                var file_path = path_parts.join(this.path_spliter_char);
+                var file_path = path_parts.join(this.path_contact_char);
                 this._pageName = path_parts.join(this.name_spliter_char);
                 this._actionPath = this.basePath ? chitu.combinePath(this.basePath, file_path) : file_path;
             }
@@ -295,33 +297,31 @@ var chitu;
         }, {
             key: 'showPage',
             value: function showPage(routeString, args) {
-                var _this3 = this;
-
                 if (!routeString) throw chitu.Errors.argumentNull('routeString');
                 var routeData = this.parseRouteString(routeString);
                 if (routeData == null) {
                     throw chitu.Errors.noneRouteMatched(routeString);
                 }
                 Object.assign(routeData.values, args || {});
+                var page = this.cachePages[routeData.pageName];
+                if (page == null) {
+                    page = this.createPage(routeData);
+                    if (page.allowCache) {
+                        this.cachePages[routeData.pageName] = page;
+                    }
+                }
+                if (page == this.currentPage) {
+                    return page;
+                }
                 var previous = this.currentPage;
-                var result = new Promise(function (resolve, reject) {
-                    var page = _this3.cachePages[routeData.pageName];
-                    if (page == null) {
-                        page = _this3.createPage(routeData);
-                        if (page.allowCache) {
-                            _this3.cachePages[routeData.pageName] = page;
-                        }
-                    }
-                    _this3.page_stack.push(page);
-                    if (_this3.page_stack.length > PAGE_STACK_MAX_SIZE) {
-                        var c = _this3.page_stack.shift();
-                        c.close();
-                    }
-                    page.previous = previous;
-                    page.show();
-                    resolve(page);
-                });
-                return result;
+                this.page_stack.push(page);
+                if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
+                    var c = this.page_stack.shift();
+                    c.close();
+                }
+                page.previous = previous;
+                page.show();
+                return page;
             }
         }, {
             key: 'setLocationHash',
@@ -357,17 +357,17 @@ var chitu;
         }, {
             key: 'back',
             value: function back() {
-                var _this4 = this;
+                var _this3 = this;
 
                 var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
 
                 return new Promise(function (reslove, reject) {
-                    if (_this4.page_stack.length == 0) {
+                    if (_this3.page_stack.length == 0) {
                         reject();
-                        chitu.fireCallback(_this4.backFail, _this4, {});
+                        chitu.fireCallback(_this3.backFail, _this3, {});
                         return;
                     }
-                    _this4.closeCurrentPage();
+                    _this3.closeCurrentPage();
                     reslove();
                 });
             }

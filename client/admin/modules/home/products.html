@@ -1,3 +1,31 @@
-<div v-for="product in products">
-    <div>{{product.Name}}</div>
-</div>
+<ul class="tabs">
+    <li v-on:click="allProducts" class="active">
+        全部商品
+    </li>
+    <li v-on:click="onShelve">
+        已上架
+    </li>
+    <li v-on:click="offShelve">
+        已下架
+    </li>
+</ul>
+<template v-for="(product, index) in products">
+    <div class="clearfix">
+        <div class="col-xs-4">
+            <cv-img v-bind:src="product.ImageUrl" class="img-responsive" />
+        </div>
+        <div class="col-xs-8">
+            <div class="interception">
+                {{product.Name}}
+            </div>
+            <div class="price">
+                ￥{{product.Price.toFixed(2)}}
+            </div>
+            <div>
+
+            </div>
+            <i class="icon-chevron-right"></i>
+        </div>
+    </div>
+    <hr v-if="index < products.length - 1" />
+</template>

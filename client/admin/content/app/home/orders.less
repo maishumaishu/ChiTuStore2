@@ -1,7 +1,74 @@
 @import "../common.less";
 .home-orders {
     section {
-        padding-top: @header-height;
+        padding-top: @header-height + 40;
         padding-bottom: @menu-height; 
+    }
+
+    .tabs {
+        li {
+            width: 25%;
+        }
+    }
+
+    .order-item {
+        background-color: white;
+        li {
+            width: 25%;
+            float: left;
+            padding: 4px;
+        }
+
+
+        h4 {
+            padding: 0px;
+        }
+
+        .header {
+            padding: 10px 10px 10px 10px;
+
+            i {
+                font-size: 16px;
+                position: relative;
+                top: -28px;
+            }
+        }
+
+        .body {
+            border-top: 1px solid @gray-lighter;
+            border-bottom: 1px solid @gray-lighter;
+            padding: 10px 10px 10px 10px;
+
+            .image {
+                width: 25%;
+            }
+
+            .name {
+                padding-left: 10px;
+                font-size: 16px;
+            }
+        }
+
+        .footer {
+            padding: 10px 10px 10px 10px;
+
+            .btn {
+                /*position: relative;*/
+                top: 0px;
+                margin-bottom: 10px;
+            }
+
+            label {
+                position: relative;
+                top: 8px;
+                font-size: 16px;
+            }
+        }
+    }
+
+    hr {
+        width: 100%;
+        border-top-width: 12px;
+        margin: 0px;
     }
 }

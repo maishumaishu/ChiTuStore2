@@ -120,6 +120,54 @@ footer {
   }
 }
 
+.interception {
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-text-overflow: ellipsis;
+  -moz-binding: url("ellipsis.xml#ellipsis");
+  -ms-text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+}
+
+.price {
+  color: #f70;
+  font-weight: bold;
+}
+
+.tabs {
+    position: fixed;
+    top: @header-height;
+    padding: 0px;
+    width: 100%;
+    z-index: @zindex-navbar-fixed;
+    
+    li {
+        width: 33.33%;
+        float: left;
+        text-align: center;
+        background-color: #fff;
+        font-size: 16px;
+        display: block;
+        border: 1px solid @gray-lighter;
+        border-left: none;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        padding: 8px;
+        color: @gray-light;
+
+        &:first-child {
+            border-left: 1px solid #e5e5e5;
+        }
+
+        &.active {
+            color: @brand-primary;
+            font-weight: bold;
+        }
+      
+    }
+}
 
 
 /* 取消弹窗的背景 */

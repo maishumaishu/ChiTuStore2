@@ -1,3 +1,57 @@
-<div v-for="order in orders">
-    {{order.Id}}
-</div>
+<ul class="tabs">
+    <li v-on:click="" class="active">
+        全部订单
+    </li>
+    <li v-on:click="">
+        已付款
+    </li>
+    <li v-on:click="">
+        待发货
+    </li>
+    <li v-on:click="">
+        已发货
+    </li>
+</ul>
+<template v-for="(order, index) in orders">
+    <hr>        
+    <div class="order-item">
+        <div class="header">
+            <h4>订单编号：<span>{{order.Serial}}</span></h4>
+            <div class="pull-right">
+                <i class="icon-chevron-right"></i>
+            </div>
+        </div>
+        <div class="body">
+            <ul v-if="order.OrderDetails.length > 1">
+                <li v-for="orderDetail in order.OrderDetails">
+                    <cv-img v-bind:src="orderDetail.ImageUrl" class="img-responsive img-thumbnail"/>
+                </li>
+            </ul>
+            <div v-if="order.OrderDetails.length == 1" class="row clearfix">
+                <div class="col-xs-3">
+                    <cv-img v-bind:src="order.OrderDetails[0].ImageUrl" class="img-responsive img-thumbnail">
+                </div>
+                <div class="name col-xs-9">
+                    <span>{{order.OrderDetails[0].ProductName}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer clearfix">
+            <h4 class="pull-left">
+                实付款：<span class="price">￥{{order.Amount.toFixed(2)}}</span>
+            </h4>
+            <div class="pull-right">
+                <a data-bind="visible:ko.unwrap(Status)=='WaitingForPayment',tap:$parent.pay,click:$parent.pay" class="btn btn-small btn-primary pull-right"
+                    style="display: none;">立即付款</a>
+                <a data-bind="visible:ko.unwrap(Status)=='Send',tap:$parent.confirmReceived,click:$parent.confirmReceived" data-dialog="confirm:'你确定收到货了吗？'"
+                    class="btn btn-small btn-primary pull-right" style="display: none;">确认收货</a>
+                <a data-bind="visible:ko.unwrap(Status)=='ToEvaluate',tap:$parent.evaluate,click:$parent.evaluate" class="btn btn-small btn-primary pull-right"
+                    style="display: none;">评价晒单</a>
+                <label data-bind="visible:ko.unwrap(Status)=='Canceled'" class="pull-right" style="display: none;">已取消</label>
+                <label data-bind="visible:ko.unwrap(Status)=='Paid'" class="pull-right">已付款</label>
+                <label data-bind="visible:ko.unwrap(Status)=='Evaluated'" class="pull-right" style="display: none;">已评价</label>
+                <label data-bind="visible:ko.unwrap(Status)=='Received'" class="pull-right" style="display: none;">已收货</label>
+            </div>
+        </div>
+    </div>
+</template>

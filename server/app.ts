@@ -35,6 +35,10 @@ async function request(req: express.Request, res: express.Response, data?: strin
             'application-id': req.query.storeId,
         }, req.headers, { host });
 
+if(req.query.userId){
+    
+}
+
         let request = http.request(
             {
                 host: host,
@@ -44,6 +48,10 @@ async function request(req: express.Request, res: express.Response, data?: strin
                 port: port
             },
             (response) => {
+                
+                res.statusCode = response.statusCode;
+                res.statusMessage = response.statusMessage;
+
                 console.assert(response != null);
                 for (var key in response.headers) {
                     res.setHeader(key, response.headers[key]);

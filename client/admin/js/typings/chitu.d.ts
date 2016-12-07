@@ -18,6 +18,7 @@ declare namespace chitu {
         private _parameters;
         private path_string;
         private path_spliter_char;
+        private path_contact_char;
         private param_spliter;
         private name_spliter_char;
         private _pathBase;
@@ -26,16 +27,16 @@ declare namespace chitu {
         private _resources;
         private _routeString;
         private _loadCompleted;
-        constructor(basePath: any, routeString: string);
+        constructor(basePath: string, routeString: string, pathSpliterChar?: string);
         parseRouteString(): void;
         private pareeUrlQuery(query);
-        basePath: string;
-        values: any;
-        pageName: string;
-        resources: Resources;
-        routeString: string;
-        actionPath: string;
-        loadCompleted: boolean;
+        readonly basePath: string;
+        readonly values: any;
+        readonly pageName: string;
+        readonly resources: Resources;
+        readonly routeString: string;
+        readonly actionPath: string;
+        readonly loadCompleted: boolean;
     }
     class Application {
         pageCreated: Callback<Application, Page>;
@@ -49,17 +50,17 @@ declare namespace chitu {
         constructor();
         protected parseRouteString(routeString: string): RouteData;
         private on_pageCreated(page);
-        currentPage: Page;
-        pages: Array<Page>;
+        readonly currentPage: Page;
+        readonly pages: Array<Page>;
         protected createPage(routeData: RouteData): Page;
         protected createPageElement(routeData: chitu.RouteData): HTMLElement;
         protected hashchange(): void;
         run(): void;
         getPage(name: string): Page;
-        showPage<T extends Page>(routeString: string, args?: any): Promise<T>;
+        showPage(routeString: string, args?: any): Page;
         private setLocationHash(routeString);
         private closeCurrentPage();
-        redirect<T extends Page>(routeString: string, args?: any): Promise<T>;
+        redirect(routeString: string, args?: any): Page;
         back(args?: any): Promise<void>;
     }
 }
@@ -150,10 +151,10 @@ declare namespace chitu {
         show(): void;
         hide(): void;
         close(): void;
-        element: HTMLElement;
+        readonly element: HTMLElement;
         previous: Page;
-        routeData: RouteData;
-        name: string;
+        readonly routeData: RouteData;
+        readonly name: string;
         private createActionDeferred(routeData);
         private loadPageAction(routeData);
     }
@@ -167,6 +168,6 @@ declare namespace chitu {
     function combinePath(path1: string, path2: string): string;
     function loadjs(...modules: string[]): Promise<Array<any>>;
 }
-declare module "chitu" {
-    export = chitu;
-}
+declare module "chitu" { 
+            export = chitu; 
+        }

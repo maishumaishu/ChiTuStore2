@@ -112,10 +112,6 @@ Vue.component(`cv-img`, {
     mounted: function () {
         let self = this as VueInstance;
         processImageElement(self.$el as HTMLImageElement);
-    },
-    updated: function () {
-        let self = this as VueInstance;
-        processImageElement(self.$el as HTMLImageElement);
     }
 });
 

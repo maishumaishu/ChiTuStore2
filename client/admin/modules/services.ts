@@ -1,6 +1,6 @@
 import * as chitu from 'chitu';
 
-const SERVICE_HOST = 'http://localhost:2800/';//'service.alinq.cn:2014';///UserServices
+const SERVICE_HOST = 'http://service.alinq.cn:2800/';//'service.alinq.cn:2014';
 
 let config = {
     appToken: '58424776034ff82470d06d3d'
@@ -144,15 +144,30 @@ interface DataSourceSelectResult<T> {
 }
 
 export module shop {
-    type ProductsResult = DataSourceSelectResult<{ Id: string, Name: string, Price: string, Unit: string }>;
-    export function products() {
+    type ProductsResult = DataSourceSelectResult<{
+        Id: string, Name: string, Price: string,
+        Unit: string, ImagePath: string, ImageUrl: string
+    }>;
+    export function products(type?: 'onShelve' | 'offShelve') {
         let url = 'AdminServices/Shop/Product/GetProducts';
+        let filter = 'true';
+        if (type == 'onShelve')
+            filter = 'OffShelve = false'
+        else if (type == 'offShelve')
+            filter = 'OffShelve = true';
+
         let args = {
             startRowIndex: 0,
-            maximumRows: 20
+            maximumRows: 20,
+            filter
         }
         return get<ProductsResult>(url, args)
-            .then(o => o.DataItems);
+            .then(o => {
+                o.DataItems.forEach(c => {
+                    c.ImageUrl = (c.ImagePath || '').split(',')[0];
+                });
+                return o.DataItems;
+            });
     }
     export function orders() {
         let args = {

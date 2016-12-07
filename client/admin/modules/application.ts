@@ -59,8 +59,9 @@ class MyApplication extends chitu.Application {
     }
 
     protected parseRouteString(routeString: string) {
-        routeString = routeString.replace(new RegExp('_'), '/');
-        let routeData = super.parseRouteString(routeString);
+        //outeString = routeString.replace(new RegExp('_'), '/');
+
+        let routeData = new chitu.RouteData(this.fileBasePath, routeString, '_');
 
         let headerPath = config.headerPaths[routeData.pageName];
         if (headerPath == LOAD_BY_NAME)
