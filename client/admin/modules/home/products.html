@@ -1,14 +1,18 @@
 <ul class="tabs">
-    <li v-on:click="allProducts" class="active">
+    <li v-on:click="allProducts" v-bind:class="{active:type == 'all'}">
         全部商品
     </li>
-    <li v-on:click="onShelve">
+    <li v-on:click="onShelve" v-bind:class="{active:type == 'onShelve'}">
         已上架
     </li>
-    <li v-on:click="offShelve">
+    <li v-on:click="offShelve" v-bind:class="{active:type == 'offShelve'}">
         已下架
     </li>
 </ul>
+<div v-show="isLoading" class="data-loading">
+    <i class="icon-spinner icon-spin"></i>
+    <span>数据正在加载中...</span>
+</div>
 <template v-for="(product, index) in products">
     <div class="clearfix">
         <div class="col-xs-4">

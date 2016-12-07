@@ -148,7 +148,7 @@ export module shop {
         Id: string, Name: string, Price: string,
         Unit: string, ImagePath: string, ImageUrl: string
     }>;
-    export function products(type?: 'onShelve' | 'offShelve') {
+    export function products(type?: 'onShelve' | 'offShelve' | 'all') {
         let url = 'AdminServices/Shop/Product/GetProducts';
         let filter = 'true';
         if (type == 'onShelve')

@@ -4,12 +4,15 @@ import * as services from 'services';
 
 export default function (page: Page) {
 
+    type TabType = 'offShelve' | 'onShelve' | 'all';
     let data = {
         name: 'testsfs',
-        products: new Array()
+        products: new Array(),
+        type: null as TabType,
+        isLoading: false,
     };
 
-    allProducts().then(result => {
+    loadProducts('all').then(result => {
         page.loadingView.style.display = 'none';
     });
 
@@ -18,36 +21,27 @@ export default function (page: Page) {
             el: page.mainView,
             data,
             methods: {
-                offShelve,
-                onShelve,
-                allProducts
+                offShelve: function () {
+                    return loadProducts('offShelve');
+                },
+                onShelve: function () {
+                    return loadProducts('onShelve');
+                },
+                allProducts: function () {
+                    return loadProducts('all');
+                }
             }
         });
-        debugger;
     });
 
-    function offShelve() {
+    function loadProducts(type: 'onShelve' | 'offShelve' | 'all') {
         Vue.set(data, 'products', []);
-        return services.shop.products('offShelve').then(result => {
-            Vue.set(data, 'products', result);
-        });
-    }
-
-    function onShelve() {
-        Vue.set(data, 'products', []);
-        return services.shop.products('onShelve').then(result => {
-            Vue.set(data, 'products', result);
-        });
-    }
-
-    function allProducts() {
-        Vue.set(data, 'products', []);
-        return services.shop.products().then(result => {
+        data.type = type;
+        data.isLoading = true;
+        return services.shop.products(type).then(result => {
+            data.isLoading = false;
             Vue.set(data, 'products', result);
         });
     }
 };
 
-function page_load(page: Page) {
-
-}
