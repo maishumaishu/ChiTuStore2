@@ -1,8 +1,10 @@
 @import "../common.less";
+@tab-hieght: 40px;
+@bottom-padding: 20px;
 .home-products {
     section {
-        padding-top: @header-height + 60;
-        padding-bottom: @menu-height; 
+        padding-top: @header-height + @tab-hieght;
+        padding-bottom: @menu-height + @bottom-padding; 
     }
 
     .icon-chevron-right {
@@ -14,5 +16,9 @@
 
     .price {
         margin-top: 8px;
+    }
+
+    .products {
+        padding-top: 20px;
     }
 }

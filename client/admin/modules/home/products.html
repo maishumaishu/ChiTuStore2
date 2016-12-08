@@ -9,26 +9,28 @@
         已下架
     </li>
 </ul>
-<template v-for="(product, index) in products">
-    <div class="clearfix">
-        <div class="col-xs-4">
-            <cv-img v-bind:src="product.ImageUrl" class="img-responsive" />
-        </div>
-        <div class="col-xs-8">
-            <div class="interception">
-                {{product.Name}}
+<div class="products">
+    <template v-for="(product, index) in products">
+        <div class="clearfix">
+            <div class="col-xs-4">
+                <cv-img v-bind:src="product.ImageUrl" class="img-responsive" />
             </div>
-            <div class="price">
-                ￥{{product.Price.toFixed(2)}}
-            </div>
-            <div>
+            <div class="col-xs-8">
+                <div class="interception">
+                    {{product.Name}}
+                </div>
+                <div class="price">
+                    ￥{{product.Price.toFixed(2)}}
+                </div>
+                <div>
 
+                </div>
+                <i class="icon-chevron-right"></i>
             </div>
-            <i class="icon-chevron-right"></i>
         </div>
-    </div>
-    <hr v-if="index < products.length - 1" />
-</template>
+        <hr v-if="index < products.length - 1" />
+    </template>
+</div>
 <div v-show="isLoading" class="data-loading">
     <i class="icon-spinner icon-spin"></i>
     <span>数据正在加载中...</span>

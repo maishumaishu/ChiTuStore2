@@ -167,7 +167,7 @@ export module shop {
         };
 
         if (type == 'onShelve')
-            args.filter = 'OffShelve <> true'
+            args.filter = 'OffShelve != true'
         else if (type == 'offShelve')
             args.filter = 'OffShelve = true';
 
