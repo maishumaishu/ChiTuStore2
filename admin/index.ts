@@ -33,7 +33,7 @@ requirejs.config({
         application: modulesPath + '/application',
         errorHandle: modulesPath + '/errorHandle',
         services: modulesPath + '/services',
-        validate: modulesPath + '/validate',
+        validate: modulesPath + '/core/validate',
 
         'carousel': modulesPath + '/core/carousel',
         'chitu.mobile': modulesPath + '/core/chitu.mobile',
