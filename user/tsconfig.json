@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "module": "commonjs",
+        "module": "amd",
         "sourceMap": false,
-        "outDir": "../build/services"
+        "outDir": "../build/user"
     }
 }

@@ -1,0 +1,188 @@
+﻿@import "variables.less";
+
+body {
+  overflow-x: hidden;
+}
+
+/* 页面样式 开始*/
+.page {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+
+  section {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    overflow-y:scroll;
+    -webkit-user-drag:none;
+    -webkit-user-select: none;
+    -webkit-overflow-scrolling:touch;
+
+    &.loading {
+        width: 100%;
+
+        font-size: 120px;
+        text-align: center;  
+        padding-top: 80px;
+        color: #bbb;
+    }
+  }
+}
+
+header {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    width: 100%;
+    /*height: @header-height;*/
+    position: fixed;
+    background-color: @brand-primary; 
+    top: 0px;
+
+    h4 {
+      text-align: center;
+      font-size: 18px;
+    }
+
+    nav {
+      position: absolute;
+      top: 8px;
+    }
+
+    .rightButton {
+        position: absolute;
+        font-size: 18px;
+        top: 8px;
+        right: 12px;
+    }
+    .leftButton {
+        position: absolute;
+        font-size: 18px;
+        top: 8px;
+        left: 12px;
+    }
+}
+
+footer {
+  width: 100%;
+  position: fixed;
+  bottom: 0px;
+}
+/* 页面样式 结束*/
+
+.validationMessage {
+  color: red;
+  font-weight: bold;
+}
+
+
+/*导航菜单*/
+.menu {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  z-index: 940;
+  border-top: 1px solid #dddddd;
+  height: 50px;
+  width: 100%;
+  display: block;
+  background-color: #f8f8f8;
+  padding:0px; 
+
+   li {
+    float: left;
+    width: 33.33%;
+    position: relative;
+    text-align: center;
+    display: block !important;
+    padding-top: 5px;
+
+    a {
+      color: #777777;
+      height: 100%;
+      display: block;
+      width: 100%;
+      text-decoration: none;
+      position: relative;
+
+      &.active {
+        color: #bf0705;
+      }
+    }
+
+    span {
+      width: 100%;
+      display: block;
+      font-size: 10px;
+    }
+  }
+}
+
+.interception {
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-text-overflow: ellipsis;
+  -moz-binding: url("ellipsis.xml#ellipsis");
+  -ms-text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+}
+
+.price {
+  color: #f70;
+  font-weight: bold;
+}
+
+.tabs {
+    position: fixed;
+    top: @header-height;
+    padding: 0px;
+    width: 100%;
+    z-index: @zindex-navbar-fixed;
+    
+    li {
+        width: 33.33%;
+        float: left;
+        text-align: center;
+        background-color: #fff;
+        font-size: 16px;
+        display: block;
+        border: 1px solid @gray-lighter;
+        border-left: none;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        padding: 8px;
+        color: @gray-light;
+
+        &:first-child {
+            border-left: 1px solid #e5e5e5;
+        }
+
+        &.active {
+            color: @brand-primary;
+            font-weight: bold;
+        }
+      
+    }
+}
+
+.data-loading {
+    text-align: center;
+    // height: 50px;
+     padding-top: 20px; 
+}
+
+/* 取消弹窗的背景 */
+.modal-backdrop.in {
+  opacity: 0;
+}
+
+
+
+
+
+
+
