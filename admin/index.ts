@@ -2,12 +2,12 @@
 var es5 = false;
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
-var app_deps = [];
+var app_deps = ['vue'];
 
 if (es5) {
     chituPath = 'js/chitu.es5';
     modulesPath = 'modules.es5';
-    app_deps = ['js/polyfill']
+    app_deps.push('js/polyfill');
 }
 
 
@@ -19,7 +19,7 @@ requirejs.config({
         vue: {
             exports: 'Vue'
         },
-        app: {
+        application: {
             deps: app_deps
         }
     },
