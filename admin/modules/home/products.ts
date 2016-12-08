@@ -62,8 +62,7 @@ export default function (page: Page) {
             let maxScrollTop = element.scrollHeight - element.clientHeight;
             let deltaHeight = 10;
             if (element.scrollTop + deltaHeight >= maxScrollTop) {
-                let loadPrmoise = callback();
-                console.assert(loadPrmoise != null);
+                callback();
             }
         });
     }
