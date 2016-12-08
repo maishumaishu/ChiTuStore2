@@ -148,25 +148,35 @@ export module shop {
         Id: string, Name: string, Price: string,
         Unit: string, ImagePath: string, ImageUrl: string
     }>;
-    export function products(type?: 'onShelve' | 'offShelve' | 'all') {
-        let url = 'AdminServices/Shop/Product/GetProducts';
-        let filter = 'true';
-        if (type == 'onShelve')
-            filter = 'OffShelve = false'
-        else if (type == 'offShelve')
-            filter = 'OffShelve = true';
+    interface DataSourceSelectArguments {
+        startRowIndex?: number,
+        maximumRows?: number,
+        filter?: string
+    }
+    export function products(type: 'onShelve' | 'offShelve' | 'all', pageIndex: number) {
+        console.assert(pageIndex >= 0);
 
-        let args = {
-            startRowIndex: 0,
-            maximumRows: 20,
-            filter
-        }
+        let url = 'AdminServices/Shop/Product/GetProducts';
+        //let filter = 'true';
+
+
+        const PAGE_SIZE = 20;
+        let args: DataSourceSelectArguments = {
+            startRowIndex: PAGE_SIZE * pageIndex,
+            maximumRows: PAGE_SIZE,
+        };
+
+        if (type == 'onShelve')
+            args.filter = 'OffShelve <> true'
+        else if (type == 'offShelve')
+            args.filter = 'OffShelve = true';
+
         return get<ProductsResult>(url, args)
             .then(o => {
                 o.DataItems.forEach(c => {
                     c.ImageUrl = (c.ImagePath || '').split(',')[0];
                 });
-                return o.DataItems;
+                return { dataItems: o.DataItems, loadComplete: o.DataItems.length < PAGE_SIZE };
             });
     }
     export function orders() {

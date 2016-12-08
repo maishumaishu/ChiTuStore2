@@ -73,7 +73,7 @@ export class Page extends chitu.Page {
         return element;
     }
 
-    get mainView() {
+    get dataView() {
         return this.view('main');
     }
 

@@ -14,7 +14,7 @@ export default action(function (page: Page) {
 
     let intervalId: number;
     let vm = new Vue({
-        el: page.mainView,
+        el: page.dataView,
         data,
         methods: {
             sendVerifyCode: function () {

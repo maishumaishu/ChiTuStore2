@@ -19,7 +19,7 @@ export default action(function (page) {
 
     page.load.add(() => {
         let vm = new Vue({
-            el: page.mainView,
+            el: page.dataView,
             data,
             mounted: function () {
                 let vm = this as VueInstance;
@@ -28,6 +28,7 @@ export default action(function (page) {
                     { name: '用户名', rules: 'required' },
                     { name: '密码', rules: 'required' }
                 ]);
+                
             },
             methods: {
                 login: function () {

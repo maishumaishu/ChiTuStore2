@@ -6,6 +6,5 @@
         //"README.md": true,
         "/**/.baseDir.*": true,
         ".tscache": true
-    },
-    "typescript.tsdk": "./node_modules/typescript/lib"
+    }
 }

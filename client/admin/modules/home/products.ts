@@ -10,37 +10,71 @@ export default function (page: Page) {
         products: new Array(),
         type: null as TabType,
         isLoading: false,
+        pageIndex: 0,
+        loadComplete: false,
     };
 
-    loadProducts('all').then(result => {
+    loadProducts('all', 0).then(result => {
         page.loadingView.style.display = 'none';
     });
 
     page.load.add(() => {
-        let vm = new Vue({
-            el: page.mainView,
+        new Vue({
+            el: page.dataView,
             data,
             methods: {
                 offShelve: function () {
-                    return loadProducts('offShelve');
+                    return reloadProduct('offShelve');
                 },
                 onShelve: function () {
-                    return loadProducts('onShelve');
+                    return reloadProduct('onShelve');
                 },
                 allProducts: function () {
-                    return loadProducts('all');
+                    return reloadProduct('all');
                 }
+            },
+            mounted: function () {
+                let vm = this as VueInstance;
+                scrollOnBottom(vm.$el, function () {
+                    if (data.loadComplete)
+                        return;
+
+                    return loadProducts(data.type, data.pageIndex + 1).then((isLoadComplete) => {
+                        data.pageIndex = data.pageIndex + 1;
+                        data.loadComplete = isLoadComplete;
+                    });
+                })
             }
         });
     });
 
-    function loadProducts(type: 'onShelve' | 'offShelve' | 'all') {
+    function reloadProduct(type: TabType) {
         Vue.set(data, 'products', []);
+        data.loadComplete = false;
+        return loadProducts(type, 0);
+    }
+
+    function scrollOnBottom(element: HTMLElement, callback: Function) {
+        console.assert(element != null);
+        console.assert(callback != null);
+
+        element.addEventListener('scroll', function () {
+            let maxScrollTop = element.scrollHeight - element.clientHeight;
+            let deltaHeight = 10;
+            if (element.scrollTop + deltaHeight >= maxScrollTop) {
+                let loadPrmoise = callback();
+                console.assert(loadPrmoise != null);
+            }
+        });
+    }
+
+    function loadProducts(type: 'onShelve' | 'offShelve' | 'all', pageIndex: number) {
         data.type = type;
         data.isLoading = true;
-        return services.shop.products(type).then(result => {
+        return services.shop.products(type, pageIndex).then(result => {
             data.isLoading = false;
-            Vue.set(data, 'products', result);
+            result.dataItems.forEach(o => data.products.push(o));
+            return result.loadComplete;
         });
     }
 };

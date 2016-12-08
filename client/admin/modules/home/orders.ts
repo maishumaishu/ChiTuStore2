@@ -16,7 +16,7 @@ export default function (page: Page) {
 
     page.load.add(() => {
         new Vue({
-            el: page.mainView,
+            el: page.dataView,
             data
         })
     });
