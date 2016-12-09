@@ -1,6 +1,7 @@
 import { Page, action } from 'chitu.mobile';
 import * as services from 'services';
 import FormValidator = require('validate');
+import { app, config } from 'site';
 
 export default action(function (page: Page) {
     page.load.add(page_load);
@@ -8,12 +9,19 @@ export default action(function (page: Page) {
 
 function page_load(page: Page) {
 
-    let data = {
-        letfSeconds: 0,
+    let model: services.RegisterModel = {
+        smsId: '584abde78014e41c58ee2a50',
+        verifyCode: '',
         user: {
             mobile: '',
             password: ''
         }
+    }
+
+    let data = {
+        letfSeconds: 0,
+        confirmPassword: '',
+        model,
     };
 
     let validator: FormValidator;
@@ -28,7 +36,8 @@ function page_load(page: Page) {
                     return Promise.resolve();
                 }
 
-                return services.user.sendVerifyCode(data.user.mobile).then(() => {
+                let mobile = data.model.user.mobile;
+                return services.user.sendVerifyCode(mobile).then((result) => {
                     data.letfSeconds = 60;
                     intervalId = setInterval(() => {
                         data.letfSeconds = data.letfSeconds - 1;
@@ -40,15 +49,19 @@ function page_load(page: Page) {
                         intervalId = null;
 
                     }, 1000);
+
+                    data.model.smsId = result.smsId;
                 });
 
             },
             register: function () {
-                //validator.clearErrors();
                 if (!validator.validateForm()) {
                     return;
                 }
 
+                services.user.register(data.model).then(() => {
+                    app.redirect(config.defaultUrl);
+                });
             }
         },
         computed: {

@@ -16,7 +16,8 @@ let DEFAULT_HEADER = 'text!ui/headers/default.html';
 let DEFAULT_WITH_BACK = 'text!ui/headers/defaultWithBack.html'
 let LOAD_BY_NAME = 'LoadByName'
 let MENU = 'text!ui/menu.html';
-let config = {
+export let config = {
+    defaultUrl: 'home_products',
     headerHeight: 50,
     footerHeight: 50,
     pageTitles: {
@@ -137,11 +138,11 @@ class MyApplication extends chitu.Application {
     }
 }
 
-let app = window['app'] = new MyApplication();
+export let app = window['app'] = new MyApplication();
 app.run();
 
 if (!location.hash) {
-    app.redirect('home/index');
+    app.redirect(config.defaultUrl);
 }
 
-export = app;
+//export = app;

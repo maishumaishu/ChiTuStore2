@@ -1,6 +1,6 @@
 import { Application, Page, action } from 'chitu.mobile';
 import * as services from 'services';
-import app = require('application');
+import { app } from 'site';
 
 export default function (page: Page) {
     let data = {

@@ -1,7 +1,7 @@
 import { Page, action } from 'chitu.mobile';
 import * as services from 'services';
 import FormValidator = require('validate');
-import app = require('application');
+import { app } from 'site';
 
 console.assert(app.currentPage != null);
 
@@ -28,7 +28,7 @@ export default action(function (page) {
                     { name: '用户名', rules: 'required' },
                     { name: '密码', rules: 'required' }
                 ]);
-                
+
             },
             methods: {
                 login: function () {

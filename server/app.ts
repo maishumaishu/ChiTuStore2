@@ -31,13 +31,11 @@ async function request(req: express.Request, res: express.Response, data?: strin
             throw errors.queryStringRequired('store-id');
         }
 
-        let headers: any = Object.assign({
+        let headers: any = Object.assign(req.headers, {
             'application-id': req.query.storeId,
-        }, req.headers, { host });
+            host,
+        });
 
-if(req.query.userId){
-    
-}
 
         let request = http.request(
             {
@@ -48,7 +46,7 @@ if(req.query.userId){
                 port: port
             },
             (response) => {
-                
+
                 res.statusCode = response.statusCode;
                 res.statusMessage = response.statusMessage;
 

@@ -19,7 +19,7 @@ requirejs.config({
         vue: {
             exports: 'Vue'
         },
-        application: {
+        site: {
             deps: app_deps
         }
     },
@@ -30,7 +30,7 @@ requirejs.config({
         text: 'js/text',
         move: 'js/move',
         vue: 'js/vue',
-        application: modulesPath + '/application',
+        site: modulesPath + '/site',
         errorHandle: modulesPath + '/errorHandle',
         services: modulesPath + '/services',
         validate: modulesPath + '/core/validate',
@@ -42,7 +42,7 @@ requirejs.config({
     }
 });
 
-requirejs(['application', 'vue', 'vue.ext', 'errorHandle'], function (args, vue, vue_ext) {
+requirejs(['site', 'vue', 'vue.ext', 'errorHandle'], function (args, vue, vue_ext) {
     window['Vue'] = vue;
     vue_ext.config.imageDisaplyText = '零食有约';
     vue_ext.config.imageBaseUrl = 'http://service.alinq.cn:2015/Shop';

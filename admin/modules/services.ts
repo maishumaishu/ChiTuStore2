@@ -1,6 +1,6 @@
 import * as chitu from 'chitu';
 
-const SERVICE_HOST = 'http://service.alinq.cn:2800/';//'service.alinq.cn:2014';
+const SERVICE_HOST = 'http://localhost:2800/';//'http://service.alinq.cn:2800/';//
 
 let config = {
     appToken: '58424776034ff82470d06d3d'
@@ -42,89 +42,122 @@ function isError(data: any): Error {
 
 export let error = chitu.Callbacks();
 let token = '';
-async function ajax<T>(url: string, type: 'post' | 'get', data?: any): Promise<T> {
 
+async function ajax<T>(url: string, options: FetchOptions): Promise<T> {
+    //type: 'post' | 'get', contentType: ContentType, data?: any
     url = SERVICE_HOST + url;
-
-    data = data || {};
-    let urlParams = '';
-    let store_id = storeId();
-    if (store_id) {
-        urlParams = `?storeId=${store_id}`;
-    }
-
-    var form: FormData;
-    if (type == 'post') {
-        form = new FormData();
-        for (let key in data) {
-            form.append(key, data[key])
-        }
-    }
-    else {
-        for (let key in data) {
-            if (urlParams == '')
-                urlParams = urlParams + '?';
-            else
-                urlParams = urlParams + '&';
-
-            urlParams = urlParams + `${key}=${data[key]}`;
-        }
-        if (urlParams)
-            url = url + urlParams;
-    }
-
-    let options = {
-        headers: {
-            'application-token': config.appToken,
-        },
-        body: form,
-        method: type
-    } as FetchOptions;
 
     let user_token = userToken();
     if (user_token) {
         options.headers['user-token'] = user_token;
     }
 
-    let response = await fetch(url, options);
-    let responseText = response.text();
-    let p: Promise<string>;
-    if (typeof responseText == 'string') {
-        p = new Promise<string>((reslove, reject) => {
-            reslove(responseText);
-        })
-    }
-    else {
-        p = responseText as Promise<string>;
-    }
+    try {
 
-    let text = await responseText;
-    let textObject = JSON.parse(text);
+        let response = await fetch(url, options);
+        let responseText = response.text();
+        let p: Promise<string>;
+        if (typeof responseText == 'string') {
+            p = new Promise<string>((reslove, reject) => {
+                reslove(responseText);
+            })
+        }
+        else {
+            p = responseText as Promise<string>;
+        }
 
-    if (isError(textObject)) {
-        error.fire(this, textObject);
-        throw textObject
+        let text = await responseText;
+        let textObject = JSON.parse(text);
+
+        if (isError(textObject))
+            throw textObject
+
+        return textObject;
     }
-
-    return textObject;
+    catch (err) {
+        error.fire(this, err);
+        throw err;
+    }
 }
 
 function get<T>(url: string, data?: any) {
-    return ajax<T>(url, 'get', data);
+
+    console.assert(userToken() != null);
+    console.assert(storeId() != null);
+
+    data = data || {};
+    let headers = {
+        'application-token': config.appToken,
+        'user-token': userToken(),
+    };
+
+    let urlParams = `storeId=${storeId()}`;
+    for (let key in data) {
+        urlParams = urlParams + `&${key}=${data[key]}`;
+    }
+
+    url = url + '?' + urlParams;
+    let options = {
+        headers,
+        method: 'get',
+    }
+    return ajax<T>(url, options);
 }
 
-function post<T>(url: string, data?: any) {
-    return ajax<T>(url, 'post', data);
+type ContentType = 'json' | 'urlencoded';
+function post<T>(url: string, contentType: ContentType, data?: any) {
+
+    console.assert(userToken() != null);
+    console.assert(storeId() != null);
+
+    data = data || {};
+    let headers = {
+        'application-token': config.appToken,
+        'user-token': userToken(),
+        'content-type': 'application/json'
+    };
+
+    let options = {
+        headers,
+        body: JSON.stringify(data),
+        method: 'post'
+    }
+    return ajax<T>(url, options);
 }
 
 const imageBasePath = 'http://service.alinq.cn:2015/Shop';
+export interface RegisterModel {
+    user: { mobile: string, password: string },
+    smsId: string,
+    verifyCode: string
+}
 export module user {
-    type RegisterArguments = { username: string, password: string, smsId: string };
-    export function register(args: RegisterArguments) {
-        return post('user/register', { user: args, });
+    export function register(model: RegisterModel) {
+        let options = {
+            headers: {
+                'application-token': config.appToken,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(model),
+            method: 'post'
+        }
+        return ajax<{ token: string, userId: string }>('user/register', options).then(result => {
+            userToken(result.token);
+            storeId(result.userId);
+
+            return result;
+        });
     }
-    export function sendVerifyCode(mobile: string) {
-        return post('sms/sendVerifyCode', { mobile, type: 'register' });
+    export function sendVerifyCode(mobile: string): Promise<{ smsId: string }> {
+        let options = {
+            headers: {
+                'application-token': config.appToken,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({ mobile, type: 'register' }),
+            method: 'put'
+        }
+        return ajax('sms/sendVerifyCode', options);
     }
 
     type LoginResult = { token: string, userId: string }
@@ -190,3 +223,5 @@ export module shop {
     }
 }
 
+// userToken('584ae360ec3a7324d0e4c249');
+// storeId('584ae35fec3a7324d0e4c248');

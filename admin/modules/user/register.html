@@ -2,12 +2,12 @@
     <form class="form-horizontal">
         <div class="form-group">
             <div class="col-xs-12">
-                <input v-model="user.mobile" class="form-control" type="text" name="mobile" placeholder="请输入手机号码" />
+                <input v-model="model.user.mobile" class="form-control" type="text" name="mobile" placeholder="请输入手机号码" />
             </div>
         </div>
         <div class="form-group">
             <div class="col-xs-6">
-                <input v-model="user.verifyCode" type="text" name="verifyCode" class="form-control" placeholder="验证码" />
+                <input v-model="model.verifyCode" type="text" name="verifyCode" class="form-control" placeholder="验证码" />
             </div>
             <div class="col-xs-6">
                 <button v-on:click='sendVerifyCode' v-bind:disabled="letfSeconds>0" type="button" class="btn btn-block btn-warning">{{sendButtonText}}</button>
@@ -18,12 +18,12 @@
         </div>
         <div class="form-group">
             <div class="col-xs-12">
-                <input data-bind="value:user.password" name="password" type="password" class="form-control" placeholder="请输入密码" />
+                <input v-model="model.user.password" name="password" type="password" class="form-control" placeholder="请输入密码" />
             </div>
         </div>
         <div class="form-group">
             <div class="col-xs-12">
-                <input data-bind="value:user.confirmPassword" name="confirmPassword" type="password" class="form-control" placeholder="请再一次输入密码" />
+                <input v-model="confirmPassword" name="confirmPassword" type="password" class="form-control" placeholder="请再一次输入密码" />
             </div>
         </div>
         <div class="form-group">
