@@ -74,8 +74,10 @@ class MyApplication extends chitu.Application {
         if (headerPath)
             routeData.resources.push({ name: 'headerHTML', path: headerPath });
 
-        if (footerPath)
+        if (footerPath) {
             routeData.resources.push({ name: 'footerHTML', path: footerPath });
+        }
+
 
         let path = routeData.actionPath.substr(routeData.basePath.length);
         let cssPath = config.css[routeData.pageName];
@@ -89,6 +91,8 @@ class MyApplication extends chitu.Application {
 
         return routeData;
     }
+
+
 
     protected createPage(routeData: chitu.RouteData) {
         let page = super.createPage(routeData) as Page;
@@ -113,10 +117,21 @@ class MyApplication extends chitu.Application {
             if (footerHTML) {
                 let element = page.createFooter(config.footerHeight);
                 element.innerHTML = footerHTML;
+                //=====================================
+                // HARDCODE，TODO：取消硬编码
+                let menuItem = element.querySelector(`[name="${page.name}"]`) as HTMLElement;
+                if (menuItem) {
+                    menuItem.className = 'active';
+                }
+                //=====================================
             }
         });
+
         let className = routeData.pageName.split('.').join('-');
         page.element.className = 'page ' + className;
+
+
+
 
         return page;
     }
