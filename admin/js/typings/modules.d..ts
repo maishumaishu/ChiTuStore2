@@ -8,7 +8,7 @@ declare module 'chitu.mobile' {
     export = cm;
 }
 
-declare module 'vue.ext'{
+declare module 'vue.ext' {
     import m = require('modules/core/vue.ext');
     export = m;
 }
@@ -16,4 +16,9 @@ declare module 'vue.ext'{
 declare module 'services' {
     import * as cm from 'modules/services';
     export = cm;
+}
+
+declare module 'validate' {
+    import m = require('modules/core/validate');
+    export = m;
 }

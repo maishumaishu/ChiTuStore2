@@ -35,13 +35,13 @@ interface ValidatorError {
 
 interface ValidateField {
     id?: string,
-    name?: string,
-    names?: string,
+    name: string,
+    //names?: string,
     depends?: () => boolean | string,
     display?: string,
     element?: HTMLElement,
     type?: string,
-    rules?: string,
+    rules: string,
     value?: string,
     checked?: boolean
 }
@@ -77,12 +77,11 @@ var defaults = {
         less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.'
     },
     errorClassName: 'validationMessage',
-    callback: function (errors: ValidatorError[], evt: Environment) {
+    callback: function (errors: ValidatorError[], fields: ValidateField[], evt: Environment) {
         console.assert(evt != null && evt.validator instanceof FormValidator);
-
         for (let i = 0; i < errors.length; i++) {
             console.assert(errors[i].id != null && errors[i].id != '');
-            let errorTextElementId = `${errors[i].id}-error`;
+            let errorTextElementId = getErrorElementId(errors[i].element);
             let errorTextElement: HTMLElement = document.getElementById(errorTextElementId) as HTMLElement;
             if (errorTextElement == null) {
                 errorTextElement = evt.formElement.querySelector(`.${errors[i].name}.${defaults.errorClassName}`) as HTMLElement;
@@ -103,9 +102,27 @@ var defaults = {
             errorTextElement.style.display = 'block';
             errorTextElement.innerHTML = errors[i].message;
         }
+
+        let errorNames = errors.map(o => o.name);
+        let successFields = fields.filter(o => errorNames.indexOf(o.name) < 0);
+        let errorElements = successFields
+            .map(o => o.element).filter(o => o != null)
+            .map(o => document.getElementById(getErrorElementId(o))).filter(o => o != null);
+
+        errorElements.forEach(o => {
+            o.innerHTML = '';
+            o.style.display = 'none';
+        })
     }
 };
 
+
+//let errorElementIdPattern = '%s-error';
+function getErrorElementId(inputElement: HTMLElement) {
+    console.assert(inputElement != null);
+    console.assert((inputElement.id || '') != '');
+    return inputElement.id + '-error';
+}
 
 
 /*
@@ -142,87 +159,49 @@ var ruleRegex = /^(.+?)\[(.+)\]$/,
  *     @argument event - The javascript event
  */
 
-type ErrorCallback = (errors: ValidatorError[], evt: Environment) => void
+type ErrorCallback = (errors: ValidatorError[], fields: ValidateField[], evt: Environment) => void
 type Environment = { formElement: HTMLElement, validator: FormValidator };
 class FormValidator {
     private callback: ErrorCallback;
-    private errors: Array<ValidatorError>;
+    //private errors: Array<ValidatorError>;
     private fields: { [propName: string]: ValidateField };
     private form: HTMLElement;
     private messages: any;
-    private handlers: any;
+    private handlers: { [name: string]: (value) => any };
     private conditionals: { [propName: string]: Function };
 
-    constructor(formNameOrNode, fields: ValidateField[], callback: ErrorCallback) {
+    constructor(form: HTMLElement, fields: ValidateField[], callback?: ErrorCallback) {
         this.callback = callback || defaults.callback;
-        this.errors = [];
+        //this.errors = [];
         this.fields = {};
-        this.form = this._formByNameOrNode(formNameOrNode) || {};
+        this.form = form;
         this.messages = {};
         this.handlers = {};
         this.conditionals = {};
 
-        for (var i = 0, fieldLength = fields.length; i < fieldLength; i++) {
-            var field = fields[i];
-
-            // If passed in incorrectly, we need to skip the field.
-            if ((!field.name && !field.names) || !field.rules) {
-                console.warn('validate.js: The following field is being skipped due to a misconfiguration:');
-                console.warn(field);
-                console.warn('Check to ensure you have properly configured a name and rules for this field');
-                continue;
-            }
-
-            /*
-             * Build the master fields array that has all the information needed to validate
-             */
-
-            if (field.names) {
-                for (var j = 0, fieldNamesLength = field.names.length; j < fieldNamesLength; j++) {
-                    this._addField(field, field.names[j]);
-                }
-            } else {
-                this._addField(field, field.name);
-            }
-        }
+        this.setRules(fields);
     }
 
-    // private findErrorElements() {
-    //     let errorElements = new Array<HTMLElement>();
-    //     for (let i = 0; i < this.errors.length; i++) {
-    //         let errorElementId = this.errors[i].element.id + '-error';
-    //         let errorElement = document.getElementById(errorElementId);
-    //         if (errorElement != null)
-    //             errorElements.push(errorElement);
-    //     }
-    //     return errorElements;
-    // }
-
     clearErrors(...fieldNames: string[]) {
-        let fields = new Array<ValidateField>();
-        for (let i = 0; i < fieldNames.length; i++) {
-            let field = this.fields[fieldNames[i]];
-            if (field == null) {
-                console.warn(`'${fieldNames[i]}' field is not exists.`);
-                continue;
-            }
-
-            fields.push(field);
+        console.assert(fieldNames != null);
+        //==========================================
+        // 不传参数，清除所有错误。
+        if (fieldNames.length == 0) {
+            fieldNames = Object.getOwnPropertyNames(this.fields);
         }
+        //==========================================
 
-        let errorElements = new Array<HTMLElement>();
-        for (let i = 0; i < fields.length; i++) {
-            let field = fields[i];
-            if (field.element == null)
-                continue;
+        let fields = fieldNames.map(fieldName => {
+            let result = this.fields[fieldName];
+            if (result == null)
+                console.warn(`'${fieldName}' field is not exists.`);
 
-            console.assert((field.element.id || '') != '');
+            return result;
+        }).filter(o => o != null);
 
-            let errorElementId = field.element.id + '-error';
-            let errorElement = document.getElementById(errorElementId);
-            if (errorElement)
-                errorElements.push(errorElement);
-        }
+        let errorElements = fields.filter(o => o.element != null)
+            .map(o => document.getElementById(getErrorElementId(o.element)))
+            .filter(o => o != null);
 
         for (let i = 0; i < errorElements.length; i++) {
             (errorElements[i] as HTMLElement).innerHTML = '';
@@ -235,7 +214,7 @@ class FormValidator {
      * @public
      * Sets a custom message for one of the rules
      */
-    setMessage(rule, message) {
+    setMessage(rule: string, message: string) {
         this.messages[rule] = message;
 
         // return this for chaining
@@ -253,14 +232,14 @@ class FormValidator {
     * Sets new custom validation rules set
     */
 
-    setRules(fields) {
+    setRules(fields: ValidateField[]) {
         this.fields = {};
 
         for (var i = 0, fieldLength = fields.length; i < fieldLength; i++) {
             var field = fields[i];
 
             // If passed in incorrectly, we need to skip the field.
-            if ((!field.name && !field.names) || !field.rules) {
+            if (!field.name || !field.rules) {
                 console.warn('validate.js: The following field is being skipped due to a misconfiguration:');
                 console.warn(field);
                 console.warn('Check to ensure you have properly configured a name and rules for this field');
@@ -270,17 +249,23 @@ class FormValidator {
             /*
              * Build the master fields array that has all the information needed to validate
              */
+            //this._addField(field, field.name);
 
-            if (field.names) {
-                for (var j = 0, fieldNamesLength = field.names.length; j < fieldNamesLength; j++) {
-                    this._addField(field, field.names[j]);
-                }
-            } else {
-                this._addField(field, field.name);
-            }
+            this.fields[field.name] = {
+                name: field.name,
+                display: field.display || field.name,
+                rules: field.rules,
+                depends: field.depends,
+                id: null,
+                element: null,
+                type: null,
+                value: null,
+                checked: null
+            };
         }
 
-        // return this for chaining
+
+
         return this;
     };
 
@@ -289,7 +274,7 @@ class FormValidator {
     * Registers a callback for a custom rule (i.e. callback_username_check)
     */
 
-    registerCallback = function (name, handler) {
+    registerCallback(name: string, handler: (value: string) => void) {
         if (name && typeof name === 'string' && handler && typeof handler === 'function') {
             this.handlers[name] = handler;
         }
@@ -313,46 +298,16 @@ class FormValidator {
         return this;
     };
 
-
-
-
     /*
-     * @private
-     * Determines if a form dom node was passed in or just a string representing the form name
-     */
-
-    _formByNameOrNode(formNameOrNode) {
-        return (typeof formNameOrNode === 'object') ? formNameOrNode : document.forms[formNameOrNode];
-    };
-
-    /*
-     * @private
-     * Adds a file to the master fields array
-     */
-
-    _addField(field, nameValue) {
-        this.fields[nameValue] = {
-            name: nameValue,
-            display: field.display || nameValue,
-            rules: field.rules,
-            depends: field.depends,
-            id: null,
-            element: null,
-            type: null,
-            value: null,
-            checked: null
-        };
-    };
-
-    /*
-     * @private
+     * @public
      * Runs the validation when the form is submitted.
      */
     validateForm() {
+        //this.clearErrors();
         return this._validateFields(this.fields);
     };
 
-    validateFields(...fieldNames: string[]) {
+    validateFields(...fieldNames: string[]): boolean {
         fieldNames = fieldNames || new Array<string>();
         let fields: { [propName: string]: ValidateField } = {};
         for (let i = 0; i < fieldNames.length; i++) {
@@ -368,53 +323,65 @@ class FormValidator {
     }
 
     private _validateFields(fields: { [propName: string]: ValidateField }) {
-        this.errors = [];
-
+        //this.errors = [];
+        let errors = [];
         for (var key in fields) {
-            if (this.fields.hasOwnProperty(key)) {
-                var field = this.fields[key] || <ValidateField>{},
-                    element = this.form.querySelector('[name="' + field.name + '"]') as HTMLInputElement; //this.form.que [field.name];
+            if (!this.fields.hasOwnProperty(key))
+                continue;
 
-                if (element && element !== undefined) {
-                    let elementId = attributeValue(element, 'id');
-                    if (!elementId) {
-                        elementId = guid();
-                        element.id = elementId;
-                    }
+            let field = this.fields[key];
+            console.assert(field != null);
 
-                    field.id = elementId;
-                    field.element = element;
-                    field.type = element.type; //(element.length > 0) ? (element[0]).type : element.type;
-                    field.value = attributeValue(element, 'value');
-                    field.checked = attributeValue(element, 'checked');
+            let element = this.form.querySelector(`[name="${field.name}"]`) as HTMLInputElement;
+            let elements = this.form.querySelectorAll(`[name="${field.name}"]`) as NodeListOf<HTMLInputElement>;
+            if (!element)
+                continue;
 
-                    /*
-                     * Run through the rules for each field.
-                     * If the field has a depends conditional, only validate the field
-                     * if it passes the custom function
-                     */
-
-                    if (field.depends && typeof field.depends === "function") {
-                        if (field.depends.call(this, field)) {
-                            this._validateField(field);
-                        }
-                    } else if (field.depends && typeof field.depends === "string" && this.conditionals[<any>field.depends]) {
-                        if (this.conditionals[field.depends as any].call(this, field)) {
-                            this._validateField(field);
-                        }
-                    } else {
-                        this._validateField(field);
-                    }
-                }
+            let elementId = element.id;
+            if (!elementId) {
+                elementId = guid();
+                element.id = elementId;
             }
+
+            field.id = elementId;
+            field.element = element;
+            field.type = element.type;
+
+            let value = attributeValue(elements, 'value');
+            if (typeof value == 'string')
+                field.value = attributeValue(elements, 'value') as string;
+            else
+                field.checked = attributeValue(elements, 'checked') as boolean;
+
+            /*
+             * Run through the rules for each field.
+             * If the field has a depends conditional, only validate the field
+             * if it passes the custom function
+             */
+            let error: ValidatorError;
+            if (field.depends && typeof field.depends === "function") {
+                if (field.depends.call(this, field)) {
+                    error = this._validateField(field);
+                }
+            } else if (field.depends && typeof field.depends === "string" && this.conditionals[<any>field.depends]) {
+                if (this.conditionals[field.depends as any].call(this, field)) {
+                    error = this._validateField(field);
+                }
+            } else {
+                error = this._validateField(field);
+            }
+
+            if (error)
+                errors.push(error);
         }
 
 
         if (typeof this.callback === 'function') {
-            this.callback(this.errors, { formElement: this.form, validator: this });
+            let _fields = Object.getOwnPropertyNames(fields).map(o => fields[o]);
+            this.callback(errors, _fields, { formElement: this.form, validator: this });
         }
 
-        if (this.errors.length > 0) {
+        if (errors.length > 0) {
             return false;
         }
 
@@ -427,7 +394,7 @@ class FormValidator {
      * Looks at the fields value and evaluates it against the given rules
      */
 
-    private _validateField(field) {
+    private _validateField(field): ValidatorError {
         var i, j,
             rules = field.rules.split('|'),
             indexOfRequired = field.rules.indexOf('required'),
@@ -478,9 +445,7 @@ class FormValidator {
                 method = method.substring(9, method.length);
 
                 if (typeof this.handlers[method] === 'function') {
-                    if (this.handlers[method].apply(this, [field.value, param, field]) === false) {
-                        failed = true;
-                    }
+                    failed = !this.handlers[method].apply(this, [field.value, param, field])
                 }
             }
 
@@ -488,39 +453,36 @@ class FormValidator {
              * If the hook failed, add a message to the errors array
              */
 
-            if (failed) {
-                // Make sure we have a message for this rule
-                var source = this.messages[field.name + '.' + method] || this.messages[method] || defaults.messages[method],
-                    message = 'An error has occurred with the ' + field.display + ' field.';
+            if (!failed)
+                continue;
 
-                if (source) {
-                    message = source.replace('%s', field.display);
+            // Make sure we have a message for this rule
+            var source = this.messages[field.name + '.' + method] || this.messages[method] || defaults.messages[method],
+                message = 'An error has occurred with the ' + field.display + ' field.';
 
-                    if (param) {
-                        message = message.replace('%s', (this.fields[param]) ? this.fields[param].display : param);
-                    }
+            if (source) {
+                message = source.replace('%s', field.display);
+
+                if (param) {
+                    message = message.replace('%s', (this.fields[param]) ? this.fields[param].display : param);
                 }
-
-                var existingError;
-                for (j = 0; j < this.errors.length; j += 1) {
-                    if (field.id === this.errors[j].id) {
-                        existingError = this.errors[j];
-                    }
-                }
-
-                var errorObject: ValidatorError = existingError || {
-                    id: field.id,
-                    display: field.display,
-                    element: field.element,
-                    name: field.name,
-                    message: message,
-                    messages: [],
-                    rule: method
-                };
-                errorObject.messages.push(message);
-                if (!existingError) this.errors.push(errorObject);
             }
+
+            var errorObject: ValidatorError = {
+                id: field.id,
+                display: field.display,
+                element: field.element,
+                name: field.name,
+                message: message,
+                messages: [],
+                rule: method
+            };
+            errorObject.messages.push(message);
+
+            return errorObject;
         }
+
+        return null;
     };
 
     /**
@@ -558,7 +520,7 @@ class FormValidator {
                 return (field.checked === true);
             }
 
-            return (value !== null && value !== '');
+            return (value || '') != '';
         },
 
         "default": function (field, defaultName) {
@@ -764,34 +726,33 @@ class FormValidator {
 }
 
 
-let attributeValue = function (element, attributeName) {
-    var i;
+function attributeValue(elements: NodeListOf<HTMLInputElement>, attributeName): string | boolean {
 
-    if ((element.length > 0) && (element[0].type === 'radio' || element[0].type === 'checkbox')) {
-        let elementLength = element.length;
+    console.assert(elements != null);
+
+    if (elements.length == 0)
+        return null;
+
+    if (elements.length == 1)
+        return elements[0][attributeName];
+
+    if (elements[0].type === 'radio' || elements[0].type === 'checkbox') {
+        var i;
+        let elementLength = elements.length;
         for (i = 0; i < elementLength; i++) {
-            if (element[i].checked) {
-                return element[i][attributeName];
+            if (elements[i].checked) {
+                return elements[i][attributeName];
             }
         }
-
-        return;
     }
 
-    return element[attributeName];
+    return null;
 };
 
-
-
-
-
-//window['FormValidator'] = FormValidator;
 export = FormValidator;
-// })(window, document);
 
-/*
- * Export as a CommonJS module
- */
-// if (typeof module !== 'undefined' && module.exports) {
-//     module.exports = FormValidator;
-// }
+
+//===============================================================================
+// TODO: 汉化
+
+//===============================================================================

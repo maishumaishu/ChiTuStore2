@@ -55,7 +55,7 @@ async function ajax<T>(url: string, type: 'post' | 'get', data?: any): Promise<T
 
     var form: FormData;
     if (type == 'post') {
-        new FormData();
+        form = new FormData();
         for (let key in data) {
             form.append(key, data[key])
         }

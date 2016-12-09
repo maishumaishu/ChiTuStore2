@@ -1,5 +1,5 @@
 import * as services from 'services';
-import { Application, Page } from 'chitu.mobile';
+import { Page } from 'chitu.mobile';
 
 class MyPage extends Page {
     constructor(params) {
