@@ -166,7 +166,6 @@ export module user {
             headers: {
                 'application-token': config.appToken,
             },
-            //body: JSON.stringify({ username, password }),
             method: 'get'
         }
         let url = `user/login?username=${username}&password=${password}`;
