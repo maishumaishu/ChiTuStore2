@@ -1,6 +1,7 @@
 import * as chitu from 'chitu';
 
 const SERVICE_HOST = 'http://service.alinq.cn:2800/';//'http://localhost:2800/';//
+const imgUrl = 'http://shop.alinq.cn/AdminServices/Shop/';
 
 let config = {
     appToken: '58424776034ff82470d06d3d'
@@ -200,7 +201,6 @@ export module shop {
         let url = 'AdminServices/Shop/Product/GetProducts';
         //let filter = 'true';
 
-
         const PAGE_SIZE = 20;
         let args: DataSourceSelectArguments = {
             startRowIndex: PAGE_SIZE * pageIndex,
@@ -215,7 +215,7 @@ export module shop {
         return get<ProductsResult>(url, args)
             .then(o => {
                 o.DataItems.forEach(c => {
-                    c.ImageUrl = (c.ImagePath || '').split(',')[0];
+                    c.ImageUrl = (c.ImagePath == null ? '' : (c.ImagePath.indexOf('http://') == -1 ? imgUrl + c.ImagePath : c.ImagePath) || '').split(',')[0];
                 });
                 return { dataItems: o.DataItems, loadComplete: o.DataItems.length < PAGE_SIZE };
             });
@@ -227,7 +227,15 @@ export module shop {
         }
 
         let url = 'AdminServices/Shop/Order/GetOrders';
-        return get<DataSourceSelectResult<any>>(url, args).then(o => o.DataItems);
+        return get<DataSourceSelectResult<any>>(url, args).
+            then(o => {
+                o.DataItems.forEach(o => {
+                    o.OrderDetails.forEach(d => {
+                        d.ImageUrl = (d.ImagePath == null ? '' : (d.ImagePath.indexOf('http://') == -1 ? imgUrl + d.ImagePath : d.ImagePath) || '').split(',')[0];
+                    })
+                })
+                return { dataItems: o.DataItems };
+            });
     }
 }
 

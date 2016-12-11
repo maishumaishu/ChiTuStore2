@@ -8,8 +8,8 @@ export default function (page: Page) {
     }
 
     services.shop.orders().then(result => {
-        for (let i = 0; i < result.length; i++)
-            data.orders.push(result[i]);
+        for (let i = 0; i < result.dataItems.length; i++)
+            data.orders.push(result.dataItems[i]);
 
         page.loadingView.style.display = 'none';
     });
