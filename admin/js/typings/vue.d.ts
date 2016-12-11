@@ -10,6 +10,7 @@ interface VueOptions<T> {
     beforeUpdate?: () => void,
     computed?: any,
     data?: T | (() => T),
+    created?: () => void,
     methods?: any,
     mounted?: () => void,
     updated?: () => void,

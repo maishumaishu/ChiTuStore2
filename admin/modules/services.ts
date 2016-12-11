@@ -219,12 +219,12 @@ export module shop {
                 return { dataItems: o.DataItems, loadComplete: o.DataItems.length < PAGE_SIZE };
             });
     }
-    export function orders() {
-        let args = {
+    export function orders(type: 'all' | 'Send' | 'Paid' | 'WaitingForPayment') {
+        let args: DataSourceSelectArguments = {
             startRowIndex: 0,
-            maximumRows: 20
+            maximumRows: 20,
         }
-
+        args.filter = type == 'all' ? '' : "Status='" + type + "'";
         let url = 'AdminServices/Shop/Order/GetOrders';
         return get<DataSourceSelectResult<any>>(url, args).
             then(o => {
