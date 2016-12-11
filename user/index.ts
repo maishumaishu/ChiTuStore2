@@ -1,5 +1,5 @@
 
-var es5 = false;
+var es5 = true;
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
 var app_deps = [];
@@ -10,6 +10,9 @@ if (es5) {
     app_deps = ['js/polyfill']
 }
 
+if (!window['fetch']) {
+    app_deps.push('fetch');
+}
 
 requirejs.config({
     shim: {
@@ -26,7 +29,7 @@ requirejs.config({
     paths: {
         chitu: chituPath,
         css: 'js/css',
-        //fetch: 'js/fetch',
+        fetch: 'js/fetch',
         hammer: 'js/hammer',
         text: 'js/text',
         move: 'js/move',

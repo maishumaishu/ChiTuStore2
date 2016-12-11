@@ -5,10 +5,11 @@
   </ol>
   <!-- Wrapper for slides -->
   <div class="carousel-inner">
-    <div v-for="item in advertItems" class="item">
+    <div v-for="(item, index) in advertItems" v-bind:class="{active: index == 0}"  class="item">
       <cv-img v-bind:src="item.ImgUrl" class="img-responsive">
-        <div class="carousel-caption">
-        </div>
+      </cv-img>
+      <div class="carousel-caption">
+      </div>
     </div>
   </div>
 </div>
@@ -64,14 +65,13 @@
 </div>
 <div class="row products" style="margin: 0px;">
   <div v-for="item in products" class="col-xs-6 text-center item">
-    <a v-bind:href="`#Home/Product?id=${item.ProductId}`">
+    <a v-bind:href="`#home_product?id=${item.ProductId}`">
       <cv-img v-bind:src="item.ImagePath" class="img-responsive-70 img-full"></cv-img>
       <div class="bottom">
         <div class="interception">{{item.Name}}</div>
         <div>
           <div class="price pull-left">￥{{item.Price}}</div>
-          <promotion-label v-bind:value="item.PromotionLabel" class="pull-right" style="padding-top:2px;">
-          </promotion-label>
+
         </div>
       </div>
     </a>

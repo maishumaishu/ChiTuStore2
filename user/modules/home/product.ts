@@ -4,17 +4,22 @@ import * as services from 'services';
 
 
 
-export default action((page: Page) => {
+export default function (page: Page) {
     let { id } = page.routeData.values
 
 
-    return Promise.all([services.home.getProduct(id), chitu.loadjs('Controls/ImageView')]).then(results => {
-        let product = results[0];
+    let q = Promise.all([services.home.getProduct(id)]);//, chitu.loadjs('Controls/ImageView')
+
+    page.load.add(async () => {
+        let result = await q;
+        let product = result[0];
+        let data = {
+            product
+        };
+
         let vm = new Vue({
-            el: page.mainView,
-            data: {
-                product
-            },
+            el: page.dataView,
+            data,
             computed: {
                 productSelectedText: function () {
                     var str = '';
@@ -32,34 +37,81 @@ export default action((page: Page) => {
                     return str;
                 }
             },
-            mounted: () => {
-                window.setTimeout(() => {
-                    let viewTop = page.mainView.querySelector('.view-top') as HTMLElement;
-                    new HorizontalViewSwitchBar(viewTop, page.mainView.querySelector('.pull-up-bar') as HTMLElement)
-                }, 20);
+            mounted() {
+
+                page.loadingView.style.display = 'none';
+
+                //on_mounted();
+                test(page.dataView);
+                on_mounted();
             }
-        })
-    });
+        });
+    })
+
+    function test(view: HTMLElement) {
+
+        let topString = getComputedStyle(view).top;
+        let viewStartTop = new Number(topString.substr(0, topString.length - 2)).valueOf();
+        let startY;
+        view.addEventListener('touchstart', function (event) {
+            startY = event.touches[0].pageY
+        });
+
+        view.addEventListener('touchmove', function (event) {
+            let { scrollTop, scrollHeight } = page.dataView;
+            let scrollOnBottom = (scrollTop + view.clientHeight) >= scrollHeight;
+
+            //===================================
+            // deltaY 负数表示向上移动，现在只考虑这种情况
+            let deltaY = event.touches[0].pageY - startY;
+
+            if (scrollOnBottom && deltaY < 0) {
+                console.log('scrollOnBottom');
+
+                let viewCurrentTop = viewStartTop + deltaY / 2;
+                view.style.top = viewCurrentTop + 'px';
+
+                let rect = view.getBoundingClientRect();
+                console.log(`top:${rect.top}`);
+
+                //===================================
+                // 禁用原来的滚动
+                view.style.overflowY = 'hidden';
+                //===================================
+            }
+
+            event.cancelBubble = true;
+
+        });
+
+        view.addEventListener('touchend', function (event) {
+            view.style.top = viewStartTop + 'px';
+            view.style.overflowY = 'scroll';
+        });
+    }
+
+
 
 
 
     function on_mounted() {
-        let pullUpBar = page.mainView.querySelector('.pull-up-bar') as HTMLElement;
+        let pullUpBar = page.dataView.querySelector('.pull-up-bar') as HTMLElement;
         let beginTop: number;
         let currentTop: number;
 
-        let viewHeight = page.mainView.getBoundingClientRect().height;
-        page.mainView.addEventListener('touchstart', function (event) {
+        let viewHeight = page.dataView.getBoundingClientRect().height;
+        page.dataView.addEventListener('touchstart', function (event) {
             let rect = pullUpBar.getBoundingClientRect();
             beginTop = rect.top;
         });
-        page.mainView.addEventListener('touchmove', function (event) {
+        page.dataView.addEventListener('touchmove', function (event: TouchEvent) {
+
             let rect = pullUpBar.getBoundingClientRect();
             currentTop = rect.top;
             let deltaTop = beginTop - currentTop;
-            console.log(`scrollTop:${page.mainView.scrollTop}`);
+            console.log(`scrollTop:${page.dataView.scrollTop}`);
 
-            let { scrollTop, scrollHeight } = page.mainView;
+            let { scrollTop, scrollHeight } = page.dataView;
             let scrollOnBottom = (scrollTop + viewHeight) >= scrollHeight;
             if (deltaTop > 20 && scrollOnBottom) {
                 status('ready');
@@ -68,14 +120,14 @@ export default action((page: Page) => {
                 status('init');
             }
         });
-        page.mainView.addEventListener('touchend', function (event) {
-            let deltaTop = currentTop - beginTop;
+        page.dataView.addEventListener('touchend', function (event) {
+            // let deltaTop = currentTop - beginTop;
 
-            if (status() == 'ready') {
-                page.mainView.style.transform = 'translate3d(0%,-100%,0)';
-                page.mainView.style.transition = '0.4s';
-            }
-            console.log(`status:${status()}`);
+            // if (status() == 'ready') {
+            //     page.dataView.style.transform = 'translate3d(0%,-100%,0)';
+            //     page.dataView.style.transition = '0.4s';
+            // }
+            // console.log(`status:${status()}`);
             status('init');
         });
 
@@ -98,7 +150,7 @@ export default action((page: Page) => {
             return _status;
         }
     }
-});
+}
 
 class HorizontalViewSwitchBar {
     private barElement: HTMLElement;
@@ -163,17 +215,17 @@ class HorizontalViewSwitchBar {
             // (<HTMLElement>this.view.nextElementSibling).style.display = 'block';
 
             // window.setTimeout(() => {
-                this.view.style.transform = 'translate3d(0%,-100%,0)';
-                this.view.style.transition = '0.4s';
+            this.view.style.transform = 'translate3d(0%,-100%,0)';
+            this.view.style.transition = '0.4s';
 
-                (<HTMLElement>this.view.nextElementSibling).style.transform = 'translate3d(0%,-50px,0)';
-                (<HTMLElement>this.view.nextElementSibling).style.transition = '0.4s';
-                
-                window.setTimeout(()=>{ // (<HTMLElement>this.view.nextElementSibling).style.display = 'block';
+            (<HTMLElement>this.view.nextElementSibling).style.transform = 'translate3d(0%,-50px,0)';
+            (<HTMLElement>this.view.nextElementSibling).style.transition = '0.4s';
 
-            // window.setTimeout(() => {
-                    (<HTMLElement>this.view.nextElementSibling).scrollTop = 0;
-                },600);
+            window.setTimeout(() => { // (<HTMLElement>this.view.nextElementSibling).style.display = 'block';
+
+                // window.setTimeout(() => {
+                (<HTMLElement>this.view.nextElementSibling).scrollTop = 0;
+            }, 600);
 
             // }, 50);
         }
