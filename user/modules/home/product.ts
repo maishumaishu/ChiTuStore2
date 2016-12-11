@@ -1,14 +1,13 @@
 import { Page, action } from 'chitu.mobile';
 import * as services from 'services';
-
-
+import { isAndroid } from 'site'
 
 
 export default function (page: Page) {
     let { id } = page.routeData.values
 
 
-    let q = Promise.all([services.home.getProduct(id)]);//, chitu.loadjs('Controls/ImageView')
+    let q = Promise.all([services.home.getProduct(id)]);
 
     page.load.add(async () => {
         let result = await q;
@@ -41,214 +40,112 @@ export default function (page: Page) {
 
                 page.loadingView.style.display = 'none';
 
-                //on_mounted();
-                test(page.dataView);
-                on_mounted();
+                if (isAndroid)
+                    enablePullUpRequiredforAndroid(page.dataView);
+
+                enablePullUp(page.dataView);
             }
         });
     })
+}
 
-    function test(view: HTMLElement) {
 
-        let topString = getComputedStyle(view).top;
-        let viewStartTop = new Number(topString.substr(0, topString.length - 2)).valueOf();
-        let startY;
-        view.addEventListener('touchstart', function (event) {
-            startY = event.touches[0].pageY
-        });
+function enablePullUpRequiredforAndroid(view: HTMLElement) {
 
-        view.addEventListener('touchmove', function (event) {
-            let { scrollTop, scrollHeight } = page.dataView;
-            let scrollOnBottom = (scrollTop + view.clientHeight) >= scrollHeight;
+    let topString = getComputedStyle(view).top;
+    let viewStartTop = new Number(topString.substr(0, topString.length - 2)).valueOf();
+    let startY;
+    view.addEventListener('touchstart', function (event) {
+        startY = event.touches[0].pageY;
+
+    });
+
+    view.addEventListener('touchmove', function (event) {
+
+        let { scrollTop, scrollHeight } = view;
+        let scrollOnBottom = (scrollTop + view.clientHeight) >= scrollHeight;
+
+        //===================================
+        // deltaY 负数表示向上移动，现在只考虑这种情况
+        let deltaY = event.touches[0].pageY - startY;
+
+        if (scrollOnBottom && deltaY < 0) {
+            console.log('scrollOnBottom');
+
+            let viewCurrentTop = viewStartTop + deltaY / 2;
+            view.style.top = viewCurrentTop + 'px';
+
+            let rect = view.getBoundingClientRect();
+            console.log(`top:${rect.top}`);
 
             //===================================
-            // deltaY 负数表示向上移动，现在只考虑这种情况
-            let deltaY = event.touches[0].pageY - startY;
-
-            if (scrollOnBottom && deltaY < 0) {
-                console.log('scrollOnBottom');
-
-                let viewCurrentTop = viewStartTop + deltaY / 2;
-                view.style.top = viewCurrentTop + 'px';
-
-                let rect = view.getBoundingClientRect();
-                console.log(`top:${rect.top}`);
-
-                //===================================
-                // 禁用原来的滚动
-                view.style.overflowY = 'hidden';
-                //===================================
-            }
-
-            event.cancelBubble = true;
-
-        });
-
-        view.addEventListener('touchend', function (event) {
-            view.style.top = viewStartTop + 'px';
-            view.style.overflowY = 'scroll';
-        });
-    }
-
-
-
-
-
-    function on_mounted() {
-        let pullUpBar = page.dataView.querySelector('.pull-up-bar') as HTMLElement;
-        let beginTop: number;
-        let currentTop: number;
-
-        let viewHeight = page.dataView.getBoundingClientRect().height;
-        page.dataView.addEventListener('touchstart', function (event) {
-            let rect = pullUpBar.getBoundingClientRect();
-            beginTop = rect.top;
-        });
-        page.dataView.addEventListener('touchmove', function (event: TouchEvent) {
-
-            let rect = pullUpBar.getBoundingClientRect();
-            currentTop = rect.top;
-            let deltaTop = beginTop - currentTop;
-            console.log(`scrollTop:${page.dataView.scrollTop}`);
-
-            let { scrollTop, scrollHeight } = page.dataView;
-            let scrollOnBottom = (scrollTop + viewHeight) >= scrollHeight;
-            if (deltaTop > 20 && scrollOnBottom) {
-                status('ready');
-            }
-            else {
-                status('init');
-            }
-        });
-        page.dataView.addEventListener('touchend', function (event) {
-            // let deltaTop = currentTop - beginTop;
-
-            // if (status() == 'ready') {
-            //     page.dataView.style.transform = 'translate3d(0%,-100%,0)';
-            //     page.dataView.style.transition = '0.4s';
-            // }
-            // console.log(`status:${status()}`);
-            status('init');
-        });
-
-        type Status = 'init' | 'ready';
-        let _status: Status;
-        function status(value?: Status): Status {
-            if (value == undefined) {
-                return _status;
-            }
-
-            _status = value;
-            if (_status == 'init') {
-                (<HTMLElement>pullUpBar.querySelector('.ready')).style.display = 'none';
-                (<HTMLElement>pullUpBar.querySelector('.init')).style.display = 'block';
-            }
-            else if (_status == 'ready') {
-                (<HTMLElement>pullUpBar.querySelector('.ready')).style.display = 'block';
-                (<HTMLElement>pullUpBar.querySelector('.init')).style.display = 'none';
-            }
-            return _status;
+            // 禁用原来的滚动
+            event.preventDefault();
+            //===================================
         }
-    }
+    });
+
+    view.addEventListener('touchend', function (event) {
+        view.style.top = viewStartTop + 'px';
+        view.style.overflowY = 'scroll';
+    });
 }
 
-class HorizontalViewSwitchBar {
-    private barElement: HTMLElement;
-    private view: HTMLElement;
-    //private bottomViewElement: HTMLElement;
-    private viewHeight: number;
-    private barBeginTop: number;
-    private barCurrentTop: number;
+function enablePullUp(view: HTMLElement) {
+    let pullUpBar = view.querySelector('.pull-up-bar') as HTMLElement;
+    let beginTop: number;
+    let currentTop: number;
 
-    private barStatus: 'init' | 'ready' = 'init';
+    let viewHeight = view.getBoundingClientRect().height;
+    view.addEventListener('touchstart', function (event) {
+        let rect = pullUpBar.getBoundingClientRect();
+        beginTop = rect.top;
+    });
+    view.addEventListener('touchmove', function (event: TouchEvent) {
 
-    constructor(view: HTMLElement, barElement) {
-        this.view = view;
-        this.barElement = barElement;
-        this.viewHeight = view.getBoundingClientRect().height;
+        let rect = pullUpBar.getBoundingClientRect();
+        currentTop = rect.top;
 
-        view.addEventListener('touchstart', (event) => this.topView_touchstart(event));
-        view.addEventListener('touchmove', (event) => this.topview_touchmove(event));
-        view.addEventListener('touchend', (event) => this.topView_touchend(event));
-    }
+        // deltaTop 正值为向上，
+        let deltaTop = beginTop - currentTop;
+        console.log(`scrollTop:${view.scrollTop}`);
 
-    private topView_touchstart(event: TouchEvent) {
-        let rect = this.barElement.getBoundingClientRect();
-        this.barBeginTop = rect.top;
-    }
-
-    private topview_touchmove(event: TouchEvent) {
-        let rect = this.barElement.getBoundingClientRect();
-        this.barCurrentTop = rect.top;
-        let deltaTop = this.barBeginTop - this.barCurrentTop;
-
-        let { scrollTop, scrollHeight } = this.view;
-        let scrollOnBottom = (scrollTop + this.viewHeight) >= scrollHeight;
+        let { scrollTop, scrollHeight } = view;
+        let scrollOnBottom = (scrollTop + viewHeight) >= scrollHeight;
         if (deltaTop > 20 && scrollOnBottom) {
-            this.status = 'ready';
+            status('ready');
         }
         else {
-            this.status = 'init';
+            status('init');
         }
-    }
+    });
+    view.addEventListener('touchend', function (event) {
+        // let deltaTop = currentTop - beginTop;
 
-    private set status(value: 'init' | 'ready') {
-        this.barStatus = value;
-        if (value == 'init') {
-            (<HTMLElement>this.barElement.querySelector('.ready')).style.display = 'none';
-            (<HTMLElement>this.barElement.querySelector('.init')).style.display = 'block';
+        // if (status() == 'ready') {
+        //     page.dataView.style.transform = 'translate3d(0%,-100%,0)';
+        //     page.dataView.style.transition = '0.4s';
+        // }
+        // console.log(`status:${status()}`);
+        status('init');
+    });
+
+    type Status = 'init' | 'ready';
+    let _status: Status;
+    function status(value?: Status): Status {
+        if (value == undefined) {
+            return _status;
         }
-        else if (value == 'ready') {
-            (<HTMLElement>this.barElement.querySelector('.ready')).style.display = 'block';
-            (<HTMLElement>this.barElement.querySelector('.init')).style.display = 'none';
+
+        _status = value;
+        if (_status == 'init') {
+            (<HTMLElement>pullUpBar.querySelector('.ready')).style.display = 'none';
+            (<HTMLElement>pullUpBar.querySelector('.init')).style.display = 'block';
         }
-    }
-
-    private get status() {
-        return this.barStatus;
-    }
-
-    private topView_touchend(event: TouchEvent) {
-
-        if (this.status == 'ready') {
-
-            // (<HTMLElement>this.view.nextElementSibling).style.display = 'block';
-
-            // window.setTimeout(() => {
-            this.view.style.transform = 'translate3d(0%,-100%,0)';
-            this.view.style.transition = '0.4s';
-
-            (<HTMLElement>this.view.nextElementSibling).style.transform = 'translate3d(0%,-50px,0)';
-            (<HTMLElement>this.view.nextElementSibling).style.transition = '0.4s';
-
-            window.setTimeout(() => { // (<HTMLElement>this.view.nextElementSibling).style.display = 'block';
-
-                // window.setTimeout(() => {
-                (<HTMLElement>this.view.nextElementSibling).scrollTop = 0;
-            }, 600);
-
-            // }, 50);
+        else if (_status == 'ready') {
+            (<HTMLElement>pullUpBar.querySelector('.ready')).style.display = 'block';
+            (<HTMLElement>pullUpBar.querySelector('.init')).style.display = 'none';
         }
-        this.status = 'init';
-        // this.direction = this.direction == 'up' ? 'down' : 'up';
+        return _status;
     }
 }
-
-
-            // window.setTimeout(() => {
-            //     let bar = page.mainView.querySelector('[name="buttonBar"]') as HTMLElement;
-            //     page.mainView.ontouchstart = function (event: TouchEvent) {
-            //         console.log('Touch Start');
-            //     };
-
-            //     page.mainView.ontouchmove = function (event: TouchEvent) {
-            //         console.log('Touch Move');
-            //         let rect = bar.getBoundingClientRect();
-            //         let y = rect.top;
-            //         console.log(`scrollTop:${y}`);
-            //     }
-
-            //     page.mainView.ontouchend = function (event: TouchEvent) {
-            //         console.log('Touch End');
-            //     }
-            // }, 10);

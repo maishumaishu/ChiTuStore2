@@ -77,6 +77,9 @@ class MyApplication extends chitu.Application {
 export let app = window['app'] = new MyApplication();
 app.run();
 
+var u = navigator.userAgent;
+export let isAndroid= u.indexOf('Android') > -1;
+
 if (!location.hash) {
     app.redirect('home/index');
 }
