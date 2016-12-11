@@ -1,6 +1,6 @@
 import * as chitu from 'chitu';
 
-const SERVICE_HOST = 'http://localhost:2800/';//'http://service.alinq.cn:2800/';//
+const SERVICE_HOST = 'http://service.alinq.cn:2800/';//'http://localhost:2800/';//
 
 let config = {
     appToken: '58424776034ff82470d06d3d'
@@ -162,7 +162,15 @@ export module user {
 
     type LoginResult = { token: string, userId: string }
     export function login(username: string, password: string) {
-        return get<LoginResult>('user/login', { username, password }).then((result) => {
+        let options = {
+            headers: {
+                'application-token': config.appToken,
+            },
+            //body: JSON.stringify({ username, password }),
+            method: 'get'
+        }
+        let url = `user/login?username=${username}&password=${password}`;
+        return ajax<LoginResult>(url, options).then((result) => {
             userToken(result.token);
             storeId(result.userId);
         });
