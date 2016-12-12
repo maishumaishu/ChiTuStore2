@@ -61,6 +61,12 @@ Linux + nginx
 
 http://web.alinq.cn/store2
 
+# 项目进展
+
+关注公众号，即可以获取项目最新的进展
+
+<img src="http://images2015.cnblogs.com/blog/24769/201512/24769-20151214114035646-1782417684.jpg"/>
+
 
 
 
