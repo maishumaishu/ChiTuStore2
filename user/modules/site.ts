@@ -90,6 +90,6 @@ var u = navigator.userAgent;
 export let isAndroid = u.indexOf('Android') > -1;
 
 if (!location.hash) {
-    app.redirect('home/index');
+    app.redirect('home_index');
 }
 

@@ -134,18 +134,3 @@ export class Application extends chitu.Application {
         return routeData;
     }
 }
-
-type ActionCallback = ((page: Page) => Promise<any> | void);
-export function action(callback: ActionCallback) {
-    return (page: Page) => {
-
-        let result = callback(page) as Promise<any>;
-            if (result == null)
-                result = Promise.resolve();
-
-        page.load.add(() => {
-            result.then(() => page.loadingView.style.display = 'none');
-        });
-
-    };
-};

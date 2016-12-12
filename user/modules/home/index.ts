@@ -1,7 +1,8 @@
-import { Page, action } from 'chitu.mobile';
+import { Page } from 'chitu.mobile';
 import * as services from 'services';
 import { createVueInstance } from 'vue.ext'
 import Carousel = require('carousel');
+import Vue = require('vue');
 
 export default function (page: Page) {
 
