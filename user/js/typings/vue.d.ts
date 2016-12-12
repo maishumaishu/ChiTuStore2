@@ -7,10 +7,12 @@ declare interface VueInstance {
 
 interface VueOptions<T> {
     el?: string | HTMLElement,
+    beforeUpdate?: () => void,
     computed?: any,
     data?: T | (() => T),
     methods?: any,
     mounted?: () => void,
+    updated?: () => void,
     watch?: any,
 }
 

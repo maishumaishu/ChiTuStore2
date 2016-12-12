@@ -1,6 +1,7 @@
 import * as chitu from 'chitu';
 
-const SERVICE_HOST = 'http://localhost:2800/';//'http://service.alinq.cn:2800/';//
+const SERVICE_HOST = 'http://service.alinq.cn:2800/';//'http://localhost:2800/';//
+const imgUrl = 'http://shop.alinq.cn/AdminServices/Shop/';
 
 let config = {
     appToken: '58424776034ff82470d06d3d'
@@ -162,7 +163,14 @@ export module user {
 
     type LoginResult = { token: string, userId: string }
     export function login(username: string, password: string) {
-        return get<LoginResult>('user/login', { username, password }).then((result) => {
+        let options = {
+            headers: {
+                'application-token': config.appToken,
+            },
+            method: 'get'
+        }
+        let url = `user/login?username=${username}&password=${password}`;
+        return ajax<LoginResult>(url, options).then((result) => {
             userToken(result.token);
             storeId(result.userId);
         });
@@ -192,7 +200,6 @@ export module shop {
         let url = 'AdminServices/Shop/Product/GetProducts';
         //let filter = 'true';
 
-
         const PAGE_SIZE = 20;
         let args: DataSourceSelectArguments = {
             startRowIndex: PAGE_SIZE * pageIndex,
@@ -207,19 +214,27 @@ export module shop {
         return get<ProductsResult>(url, args)
             .then(o => {
                 o.DataItems.forEach(c => {
-                    c.ImageUrl = (c.ImagePath || '').split(',')[0];
+                    c.ImageUrl = (c.ImagePath == null ? '' : (c.ImagePath.indexOf('http://') == -1 ? imgUrl + c.ImagePath : c.ImagePath) || '').split(',')[0];
                 });
                 return { dataItems: o.DataItems, loadComplete: o.DataItems.length < PAGE_SIZE };
             });
     }
-    export function orders() {
-        let args = {
+    export function orders(type: 'all' | 'Send' | 'Paid' | 'WaitingForPayment') {
+        let args: DataSourceSelectArguments = {
             startRowIndex: 0,
-            maximumRows: 20
+            maximumRows: 20,
         }
-
+        args.filter = type == 'all' ? '' : "Status='" + type + "'";
         let url = 'AdminServices/Shop/Order/GetOrders';
-        return get<DataSourceSelectResult<any>>(url, args).then(o => o.DataItems);
+        return get<DataSourceSelectResult<any>>(url, args).
+            then(o => {
+                o.DataItems.forEach(o => {
+                    o.OrderDetails.forEach(d => {
+                        d.ImageUrl = (d.ImagePath == null ? '' : (d.ImagePath.indexOf('http://') == -1 ? imgUrl + d.ImagePath : d.ImagePath) || '').split(',')[0];
+                    })
+                })
+                return { dataItems: o.DataItems };
+            });
     }
 }
 

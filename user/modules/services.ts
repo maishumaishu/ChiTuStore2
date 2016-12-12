@@ -1,5 +1,5 @@
 
-const SERVICE_HOST = 'localhost:2800/UserServices';
+const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
 let config = {
     service: {
         shop: `http://${SERVICE_HOST}/Shop/`,
@@ -32,68 +32,112 @@ function isError(data: any): Error {
 
 let error = chitu.Callbacks();
 let token = '';
-async function ajax<T>(url: string, type: 'get' | 'post', data?: any): Promise<T> {
 
-    url = url + `?storeId=${config.storeId}`;
-
-    data = data || {};
-
-    var form = new FormData();
-    if (type == 'post') {
-        for (let key in data) {
-            form.append(key, data[key])
-        }
+function userToken(value?: string) {
+    if (value !== undefined) {
+        localStorage.setItem('userToken', value);
+        return;
     }
-    else {
-        for (let key in data) {
-            url = url + `&${key}=${data[key]}`;
-        }
+    return localStorage.getItem('userToken');
+}
+
+function storeId() {
+    return '58401d1906c02a2b8877bd13';
+}
+
+async function ajax<T>(url: string, options: FetchOptions): Promise<T> {
+    let user_token = userToken();
+    if (user_token) {
+        options.headers['user-token'] = user_token;
     }
 
-    let options = {
-        headers: {
-            'application-token': config.appToken
-        },
-        body: form,
-        method: 'post'
-    } as FetchOptions;
-
-    let response: Response;
     try {
-        response = await fetch(url, options);
+
+        let response = await fetch(url, options);
+        let responseText = response.text();
+        let p: Promise<string>;
+        if (typeof responseText == 'string') {
+            p = new Promise<string>((reslove, reject) => {
+                reslove(responseText);
+            })
+        }
+        else {
+            p = responseText as Promise<string>;
+        }
+
+        let text = await responseText;
+        let textObject = JSON.parse(text);
+
+        if (isError(textObject))
+            throw textObject
+
+        return textObject;
     }
     catch (err) {
         error.fire(this, err);
         throw err;
     }
-    let responseText = response.text();
-    let p: Promise<string>;
-    if (typeof responseText == 'string') {
-        p = new Promise<string>((reslove, reject) => {
-            reslove(responseText);
-        })
-    }
-    else {
-        p = responseText as Promise<string>;
-    }
-
-    let text = await responseText;
-    let textObject = JSON.parse(text);
-
-    if (isError(textObject)) {
-        error.fire(this, textObject);
-        throw textObject
-    }
-
-    return textObject;
 }
 
 function get<T>(url: string, data?: any) {
-    return ajax<T>(url, 'get', data);
+
+    // console.assert(userToken() != null);
+    console.assert(storeId() != null);
+
+    data = data || {};
+    let headers = {
+        'application-token': config.appToken,
+    };
+
+    if (userToken()) {
+        headers['user-token'] = userToken();
+    }
+
+    let urlParams = `storeId=${storeId()}`;
+    for (let key in data) {
+        urlParams = urlParams + `&${key}=${data[key]}`;
+    }
+
+    url = url + '?' + urlParams;
+    let options = {
+        headers,
+        method: 'get',
+    }
+    return ajax<T>(url, options);
 }
 
-function post<T>(url: string, data?: any) {
-    return ajax<T>(url, 'post', data);
+type ContentType = 'json' | 'urlencoded';
+function post<T>(url: string, contentType: ContentType, data?: any) {
+
+    console.assert(userToken() != null);
+    console.assert(storeId() != null);
+
+    data = data || {};
+    let headers = {
+        'application-token': config.appToken,
+        'user-token': userToken(),
+        'content-type': 'application/json'
+    };
+
+    let body: string = '';
+    if (contentType == 'json') {
+        body = JSON.stringify(data);
+    }
+    else {
+        for (let key in data) {
+            if (body != '')
+                body = body + '&';
+
+            body = body + `${key}=${data[key]}`;
+        }
+    }
+
+    let options = {
+        headers,
+        body,
+        method: 'post'
+    }
+    return ajax<T>(url, options);
 }
 
 const imageBasePath = 'http://service.alinq.cn:2015/Shop';

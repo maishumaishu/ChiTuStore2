@@ -19,7 +19,7 @@ class MyApplication extends chitu.Application {
     }
 
     protected parseRouteString(routeString: string) {
-        let routeData = super.parseRouteString(routeString);
+        let routeData = new chitu.RouteData(this.fileBasePath, routeString, '_');
 
         let headerPath, footerPath;
         switch (routeData.pageName) {
@@ -69,7 +69,7 @@ class MyApplication extends chitu.Application {
         });
         let className = routeData.pageName.split('.').join('-');
         //className = className + ' immersion';
-        page.element.className = className;
+        page.element.className = 'page ' + className;
         return page;
     }
 }

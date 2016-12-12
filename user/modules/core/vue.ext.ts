@@ -49,9 +49,10 @@ function processImageElement(element: HTMLImageElement) {
     element.setAttribute('src', src_replace);
 
     var image: HTMLImageElement = new Image();
-    image['element'] = element;
-    image['updateScrollView'] = match == null || match.length == 0;
+    //image['element'] = element;
+    //image['updateScrollView'] = match == null || match.length == 0;
     image.onload = function () {
+        //(<HTMLImageElement>this['element']).src = this.src;
         element.src = (this as HTMLImageElement).src;
     };
     image.src = getImageUrl(src);
@@ -110,6 +111,10 @@ Vue.component(`cv-img`, {
         };
     },
     mounted: function () {
+        let self = this as VueInstance;
+        processImageElement(self.$el as HTMLImageElement);
+    },
+    updated: function () {
         let self = this as VueInstance;
         processImageElement(self.$el as HTMLImageElement);
     }
