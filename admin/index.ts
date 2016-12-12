@@ -10,19 +10,26 @@ if (es5) {
     app_deps.push('js/polyfill');
 }
 
+var shim: { [key: string]: RequireShim } = {
+    vue: {
+        exports: 'Vue'
+    },
+    site: {
+        deps: app_deps
+    }
+};
+
+if (!window['fetch']) {
+    shim['fetch'] = {
+        exports: 'fetch'
+    }
+    shim['services'] = {
+        deps: ['fetch']
+    }
+}
 
 requirejs.config({
-    shim: {
-        fetch: {
-            exports: 'fetch'
-        },
-        vue: {
-            exports: 'Vue'
-        },
-        site: {
-            deps: app_deps
-        }
-    },
+    shim,
     paths: {
         chitu: chituPath,
         css: 'js/css',
