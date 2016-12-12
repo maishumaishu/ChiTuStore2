@@ -9,6 +9,12 @@ export default function (page: Page) {
 
     let q = Promise.all([services.home.getProduct(id)]);
 
+    let introduceElement = document.createElement('section');
+    page.element.appendChild(introduceElement);
+    introduceElement.innerHTML = '<h1 style="margin-top:200px;">产品介绍</h1></br>';
+    introduceElement.style.transform = 'translate3d(0%,100%,0)';
+    introduceElement.style.display = 'none';
+
     page.load.add(async () => {
         let result = await q;
         let product = result[0];
@@ -37,27 +43,43 @@ export default function (page: Page) {
                 }
             },
             mounted() {
-
                 page.loadingView.style.display = 'none';
 
-                if (isAndroid)
-                    enablePullUpRequiredforAndroid(page.dataView);
+                if (isAndroid) {
+                    enableBounceBootomForAndroid(page.dataView);
+                    enableBounceTopForAndroid(page.dataView);
+                }
 
-                enablePullUp(page.dataView);
+                enablePullUp({
+                    view: page.dataView,
+                    callback() {
+                        introduceElement.style.display = 'block';
+                        //==========================================
+                        // 要有延时，才有动画效果
+                        window.setTimeout(() => {
+                            introduceElement.style.transform = 'translate3d(0%, 0%, 0)';
+                            introduceElement.style.transition = '0.4s';
+                        }, 50);
+                        //==========================================
+
+                        page.dataView.style.transform = 'translate3d(0%,-100%,0)';
+                        page.dataView.style.transition = '0.4s';
+                    }
+                });
             }
         });
     })
 }
 
-
-function enablePullUpRequiredforAndroid(view: HTMLElement) {
+//================================================================================
+// 使得元素具有回弹效果，仅适用于安卓系统
+function enableBounceBootomForAndroid(view: HTMLElement) {
 
     let topString = getComputedStyle(view).top;
     let viewStartTop = new Number(topString.substr(0, topString.length - 2)).valueOf();
     let startY;
     view.addEventListener('touchstart', function (event) {
         startY = event.touches[0].pageY;
-
     });
 
     view.addEventListener('touchmove', function (event) {
@@ -90,29 +112,41 @@ function enablePullUpRequiredforAndroid(view: HTMLElement) {
         view.style.overflowY = 'scroll';
     });
 }
+//================================================================================
 
-function enablePullUp(view: HTMLElement) {
-    let pullUpBar = view.querySelector('.pull-up-bar') as HTMLElement;
+function enablePullUp(options: { view: HTMLElement, statusSwitchDistance?: number, callback?: () => void }) {
+
+    options = options || <any>{};
+    let view = options.view;
+    let callback = options.callback;
+    let statusSwitchDistance = options.statusSwitchDistance || 20;
+
+    if (view == null) throw new Error('Argument view can not be null.');
+
+    let indicator = view.querySelector('.pull-up-indicator') as HTMLElement;
+    if (indicator == null) {
+        throw new Error('Indicator element is not exists.');
+    }
+
     let beginTop: number;
     let currentTop: number;
 
     let viewHeight = view.getBoundingClientRect().height;
     view.addEventListener('touchstart', function (event) {
-        let rect = pullUpBar.getBoundingClientRect();
+        let rect = indicator.getBoundingClientRect();
         beginTop = rect.top;
     });
     view.addEventListener('touchmove', function (event: TouchEvent) {
 
-        let rect = pullUpBar.getBoundingClientRect();
+        let rect = indicator.getBoundingClientRect();
         currentTop = rect.top;
 
-        // deltaTop 正值为向上，
         let deltaTop = beginTop - currentTop;
-        console.log(`scrollTop:${view.scrollTop}`);
 
         let { scrollTop, scrollHeight } = view;
         let scrollOnBottom = (scrollTop + viewHeight) >= scrollHeight;
-        if (deltaTop > 20 && scrollOnBottom) {
+
+        if (deltaTop > statusSwitchDistance && scrollOnBottom) {
             status('ready');
         }
         else {
@@ -120,13 +154,10 @@ function enablePullUp(view: HTMLElement) {
         }
     });
     view.addEventListener('touchend', function (event) {
-        // let deltaTop = currentTop - beginTop;
 
-        // if (status() == 'ready') {
-        //     page.dataView.style.transform = 'translate3d(0%,-100%,0)';
-        //     page.dataView.style.transition = '0.4s';
-        // }
-        // console.log(`status:${status()}`);
+        if (status() == 'ready' && callback != null) {
+            callback();
+        }
         status('init');
     });
 
@@ -138,14 +169,64 @@ function enablePullUp(view: HTMLElement) {
         }
 
         _status = value;
+
+        let readyElement = <HTMLElement>indicator.querySelector('.ready');
+        let initElement = <HTMLElement>indicator.querySelector('.init');
         if (_status == 'init') {
-            (<HTMLElement>pullUpBar.querySelector('.ready')).style.display = 'none';
-            (<HTMLElement>pullUpBar.querySelector('.init')).style.display = 'block';
+            if (readyElement)
+                readyElement.style.display = 'none';
+
+            if (initElement)
+                initElement.style.display = 'block';
         }
         else if (_status == 'ready') {
-            (<HTMLElement>pullUpBar.querySelector('.ready')).style.display = 'block';
-            (<HTMLElement>pullUpBar.querySelector('.init')).style.display = 'none';
+            if (readyElement)
+                readyElement.style.display = 'block';
+
+            if (initElement)
+                initElement.style.display = 'none';
         }
         return _status;
     }
+}
+
+function enableBounceTopForAndroid(view: HTMLElement) {
+    if (!isAndroid) {
+        return;
+    }
+
+    let topString = getComputedStyle(view).top;
+    let viewStartTop = new Number(topString.substr(0, topString.length - 2)).valueOf();
+    let startY;
+    view.addEventListener('touchstart', function (event) {
+        startY = event.touches[0].pageY;
+    });
+
+    view.addEventListener('touchmove', function (event) {
+
+        let { scrollTop, scrollHeight } = view;
+        //let scrollOnBottom = (scrollTop + view.clientHeight) >= scrollHeight;
+
+        //===================================
+        // deltaY 正数表示向上移动，现在只考虑这种情况
+        let deltaY = event.touches[0].pageY - startY;
+
+        if (scrollTop <= 0 && deltaY > 0) {
+            let viewCurrentTop = viewStartTop + deltaY / 2;
+            view.style.top = viewCurrentTop + 'px';
+            //===================================
+            // 禁用原来的滚动
+            event.preventDefault();
+            //===================================
+        }
+    });
+
+    view.addEventListener('touchend', function (event) {
+        view.style.top = viewStartTop + 'px';
+        view.style.overflowY = 'scroll';
+    });
+}
+
+function enablePullDown() {
+
 }
