@@ -183,3 +183,10 @@ export module home {
         return get(url);
     }
 }
+
+export module shop{
+    export function productIntroduce(productId:string):Promise<string>{
+        let url = config.service.shop + 'Product/GetProductIntroduce';
+        return get<{Introduce:string}>(url,{productId}).then(o=>o.Introduce);
+    }
+}

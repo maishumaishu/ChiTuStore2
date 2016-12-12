@@ -1,4 +1,4 @@
-import { Page, action } from 'chitu.mobile';
+import { Page } from 'chitu.mobile';
 import * as services from 'services';
 import { isAndroid } from 'site'
 
@@ -9,11 +9,8 @@ export default function (page: Page) {
 
     let q = Promise.all([services.home.getProduct(id)]);
 
-    let introduceElement = document.createElement('section');
-    page.element.appendChild(introduceElement);
-    introduceElement.innerHTML = '<h1 style="margin-top:200px;">产品介绍</h1></br>';
-    introduceElement.style.transform = 'translate3d(0%,100%,0)';
-    introduceElement.style.display = 'none';
+    let introduceView = createIntroduceElement(page);
+    page.element.appendChild(introduceView);
 
     page.load.add(async () => {
         let result = await q;
@@ -53,14 +50,8 @@ export default function (page: Page) {
                 enablePullUp({
                     view: page.dataView,
                     callback() {
-                        introduceElement.style.display = 'block';
-                        //==========================================
-                        // 要有延时，才有动画效果
-                        window.setTimeout(() => {
-                            introduceElement.style.transform = 'translate3d(0%, 0%, 0)';
-                            introduceElement.style.transition = '0.4s';
-                        }, 50);
-                        //==========================================
+
+                        showIntroduceView();
 
                         page.dataView.style.transform = 'translate3d(0%,-100%,0)';
                         page.dataView.style.transition = '0.4s';
@@ -69,6 +60,70 @@ export default function (page: Page) {
             }
         });
     })
+
+    function showIntroduceView() {
+
+        let introduceElement = introduceView.querySelector('.introduce') as HTMLElement;
+
+        let nextELement: HTMLElement = !introduceElement.innerHTML ? page.loadingView : introduceView;
+        nextELement.style.display = 'block';
+        nextELement.style.transform = 'translate3d(0%, 100%, 0)';
+        //==========================================
+        // 要有延时，才有动画效果, 比动画时间 0.4s 略大
+        let p = new Promise<any>(function (reslove, reject) {
+            window.setTimeout(reslove, 1000);
+        });
+
+        window.setTimeout(() => {
+            nextELement.style.transform = 'translate3d(0%, 0%, 0)';
+            nextELement.style.transition = '0.4s';
+        }, 50);
+        //==========================================
+
+        if (!introduceElement.innerHTML) {
+            Promise.all([services.shop.productIntroduce(id), p]).then(result => {
+                let introduce = result[0];
+                introduceElement.innerHTML = introduce;
+                introduceView.style.display = 'block';
+
+                page.loadingView.style.display = 'none';
+            });
+        }
+    }
+
+}
+
+
+function createIntroduceElement(page: Page) {
+    let introduceView = document.createElement('section');
+    introduceView.style.display = 'none';
+    introduceView.style.paddingTop = '0px';
+
+    let introduceElement = document.createElement('div');
+    introduceElement.className = 'introduce';
+    introduceElement.innerHTML = '';
+
+
+    let indicator = document.createElement("div");
+    indicator.innerHTML = `<div class="pull-down-indicator">
+        <h4 class="text-center">
+            <div class="init">
+                <i class="icon-chevron-down"></i>
+                <span>上拉查看图文详情</span>
+            </div>
+            <div class="ready" style="display:none;">
+                <i class="icon-chevron-down"></i>
+                <span>释放查看图文详情</span>
+            </div>
+        </h4>
+    </div>`;
+
+    introduceView.appendChild(indicator);
+    introduceView.appendChild(introduceElement);
+
+    enableBounceTopForAndroid(introduceView);
+
+    return introduceView;
 }
 
 //================================================================================
@@ -205,7 +260,6 @@ function enableBounceTopForAndroid(view: HTMLElement) {
     view.addEventListener('touchmove', function (event) {
 
         let { scrollTop, scrollHeight } = view;
-        //let scrollOnBottom = (scrollTop + view.clientHeight) >= scrollHeight;
 
         //===================================
         // deltaY 正数表示向上移动，现在只考虑这种情况
