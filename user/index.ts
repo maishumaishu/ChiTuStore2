@@ -1,5 +1,5 @@
 
-var es5 = false;
+var es5 = true;
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
 var app_deps = [];

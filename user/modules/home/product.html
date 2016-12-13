@@ -1,92 +1,75 @@
-<!--<div class="view-top">-->
-    <div class="container">
-        <div name="productImages" class="swiper-container">
-            <div v-for="imageUrl in product.ImageUrls" class="swiper-wrapper">
-                <div class="swiper-slide" style="text-align:center;">
-                    <cv-img v-bind:src="imageUrl" class="img-responsive-100 img-full">
-                    </cv-img>
-                </div>
+<div class="container">
+    <div name="productImages" class="swiper-container">
+        <div v-for="imageUrl in product.ImageUrls" class="swiper-wrapper">
+            <div class="swiper-slide" style="text-align:center;">
+                <cv-img v-bind:src="imageUrl" class="img-responsive-100 img-full">
+                </cv-img>
             </div>
-            <div v-if="product.ImageUrls.length > 1" name="productImages-pagination" class="swiper-pagination"></div>
         </div>
+        <div v-if="product.ImageUrls.length > 1" name="productImages-pagination" class="swiper-pagination"></div>
+    </div>
 
-        <div>
-            <a data-bind="click:showDetailView,tap:showDetailView">
-                <div name="productName" class="pull-left" style="width:100%;margin-left:-20px;">
-                    <h4 class="text-left" style="font-weight:bold;padding-left:20px;">{{product.Name}}</h4>
-                </div>
-                <div class="pull-right">
-                    <h4 name="productNameChevron" style="">
-                        <i class="icon-chevron-right"></i>
-                    </h4>
-                </div>
-            </a>
-        </div>
-        <div class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
-            <span>类别：</span>
-            <a data-bind="href: ['#Home_ProductList_category_{0}', product.ProductCategoryId]" style="color: blue" href="#Home_ProductList_category_1abe2836-9c26-4472-8c3a-c840bb29ea6a">{{product.ProductCategoryName}}</a>
-        </div>
-
-        <div class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
-            <span class="pull-left">价格：<strong data-bind="money: product.Price" class="price">￥{{product.Price}}</strong></span>
-            <span v-if="product.Score" class="pull-left" style="display: none;">积分：<strong class="price">{{product.Score}}</strong></span>
-            <span class="pull-right">{{product.Unit}}</span>
-            <div class="clearfix"></div>
-            <p class="oldprice" v-if="product.MemberPrice != null && product.MemberPrice != product.Price" style="display: none;">
-                促销价：<span class="price">￥{{product.MemberPrice}}</span>
-            </p>
-        </div>
-
-        <div data-bind="click:showPanel,tap:showPanel" class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
-            <div class="pull-left">
-                <span>已选：</span>
-                <span>{{productSelectedText}}</span>
+    <div>
+        <a data-bind="click:showDetailView,tap:showDetailView">
+            <div name="productName" class="pull-left" style="width:100%;margin-left:-20px;">
+                <h4 class="text-left" style="font-weight:bold;padding-left:20px;">{{product.Name}}</h4>
             </div>
             <div class="pull-right">
-                <i class="icon-chevron-right"></i>
+                <h4 name="productNameChevron" style="">
+                    <i class="icon-chevron-right"></i>
+                </h4>
             </div>
-        </div>
+        </a>
+    </div>
+    <div class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
+        <span>类别：</span>
+        <a data-bind="href: ['#Home_ProductList_category_{0}', product.ProductCategoryId]" style="color: blue" href="#Home_ProductList_category_1abe2836-9c26-4472-8c3a-c840bb29ea6a">{{product.ProductCategoryName}}</a>
+    </div>
 
-        <div data-bind="visible:ko.unwrap(product.Promotions).length>0" class="col-xs-12 box" style="padding: 10px 0px; display: none;">
-            <div data-bind="foreach:product.Promotions"></div>
-        </div>
+    <div class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
+        <span class="pull-left">价格：<strong data-bind="money: product.Price" class="price">￥{{product.Price}}</strong></span>
+        <span v-if="product.Score" class="pull-left" style="display: none;">积分：<strong class="price">{{product.Score}}</strong></span>
+        <span class="pull-right">{{product.Unit}}</span>
+        <div class="clearfix"></div>
+        <p class="oldprice" v-if="product.MemberPrice != null && product.MemberPrice != product.Price" style="display: none;">
+            促销价：<span class="price">￥{{product.MemberPrice}}</span>
+        </p>
     </div>
-    <hr/>
-    <div class="container">
-        <h4 style="font-weight: bold;width:100%;">商品信息</h4>
-        <div v-for="argument in product.Arguments" style="margin-bottom:10px;">
-            <div class="pull-left" style="width:100px;">{{argument.key}}</div>
-            <div style="margin-left:100px;">{{argument.value}}</div>
-            <div class="clearfix"></div>
-        </div>
-    </div>
-    <hr/>
 
-    <div class="pull-up-indicator">
-        <h4 class="text-center">
-            <div class="init">
-                <i class="icon-chevron-up"></i>
-                <span>上拉查看图文详情</span>
-            </div>
-            <div class="ready" style="display:none;">
-                <i class="icon-chevron-up"></i>
-                <span>释放查看图文详情</span>
-            </div>
-        </h4>
+    <div data-bind="click:showPanel,tap:showPanel" class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
+        <div class="pull-left">
+            <span>已选：</span>
+            <span>{{productSelectedText}}</span>
+        </div>
+        <div class="pull-right">
+            <i class="icon-chevron-right"></i>
+        </div>
     </div>
-<!--</div>-->
-<!--<div class="view-bottom" style="transform:translate3d(0%,100%,0);width:100%;height:100%;position:absolute;overflow-y:scroll;-webkit-overflow-scrolling:touch;"> 
-     <div class="pull-down-bar">
-        <h4 class="text-center">
-            <div class="init">
-                <i class="icon-chevron-up"></i>
-                <span>下拉查看图文详情</span>
-            </div>
-            <div class="ready" style="display:none;">
-                <i class="icon-chevron-up"></i>
-                <span>释放查看图文详情</span>
-            </div>
-        </h4>
+
+    <div data-bind="visible:ko.unwrap(product.Promotions).length>0" class="col-xs-12 box" style="padding: 10px 0px; display: none;">
+        <div data-bind="foreach:product.Promotions"></div>
     </div>
-    <p style="text-align: justify;"><span style="font-size: 18px;">“合禾果”——“集合优质粮果”之意。合禾果人秉承“吃的安全、活的健康”的理念，以“都市回归田园，生命源自绿色”为理想与责任，于2009年创建品牌。在农业部及中国绿色食品协会的指导下，志将安全的食品上您的餐桌，将健康的方式引入您的生活。</span><br></p>
-</div>-->
+</div>
+<hr/>
+<div class="container">
+    <h4 style="font-weight: bold;width:100%;">商品信息</h4>
+    <div v-for="argument in product.Arguments" style="margin-bottom:10px;">
+        <div class="pull-left" style="width:100px;">{{argument.key}}</div>
+        <div style="margin-left:100px;">{{argument.value}}</div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<hr/>
+
+<div class="pull-up-indicator">
+    <h4 class="text-center">
+        <div class="init">
+            <i class="icon-chevron-up"></i>
+            <span>上拉查看商品详情</span>
+        </div>
+        <div class="ready" style="display:none;">
+            <i class="icon-chevron-up"></i>
+            <span>释放查看商品详情</span>
+        </div>
+    </h4>
+</div>

@@ -9,7 +9,7 @@ export default function (page: Page) {
 
     let q = Promise.all([services.home.getProduct(id)]);
 
-    let introduceView = createIntroduceElement(page);
+    let introduceView = createIntroduceView(page);
     page.element.appendChild(introduceView);
 
     page.load.add(async () => {
@@ -50,63 +50,80 @@ export default function (page: Page) {
                 enablePullUp({
                     view: page.dataView,
                     callback() {
-
-                        showIntroduceView();
-
-                        page.dataView.style.transform = 'translate3d(0%,-100%,0)';
-                        page.dataView.style.transition = '0.4s';
+                        viewUp(page.dataView, introduceView);
                     }
                 });
             }
         });
     })
+}
 
-    function showIntroduceView() {
+function viewUp(currentView: HTMLElement, nextView: HTMLElement) {
 
-        let introduceElement = introduceView.querySelector('.introduce') as HTMLElement;
+    nextView.style.display = 'block';
+    nextView.style.transform = 'translate(0%, 100%)';
 
-        let nextELement: HTMLElement = !introduceElement.innerHTML ? page.loadingView : introduceView;
-        nextELement.style.display = 'block';
-        nextELement.style.transform = 'translate3d(0%, 100%, 0)';
-        //==========================================
-        // 要有延时，才有动画效果, 比动画时间 0.4s 略大
-        let p = new Promise<any>(function (reslove, reject) {
-            window.setTimeout(reslove, 1000);
-        });
+    //==========================================
+    // 要有延时，才有动画效果, 
+    window.setTimeout(() => {
+        nextView.style.transform = 'translate(0%, 0%)';
+        nextView.style.transition = '0.4s';
+    }, 50);
+    //==========================================
 
-        window.setTimeout(() => {
-            nextELement.style.transform = 'translate3d(0%, 0%, 0)';
-            nextELement.style.transition = '0.4s';
-        }, 50);
-        //==========================================
+    currentView.style.transform = 'translate(0%, -100%)';
+    currentView.style.transition = '0.4s';
 
-        if (!introduceElement.innerHTML) {
-            Promise.all([services.shop.productIntroduce(id), p]).then(result => {
-                let introduce = result[0];
-                introduceElement.innerHTML = introduce;
-                introduceView.style.display = 'block';
+    //==========================================
+    // 比动画时间 0.4s 略大
+    let playEnd = new Promise<any>(function (reslove, reject) {
+        window.setTimeout(reslove, 500);
+    });
 
-                page.loadingView.style.display = 'none';
-            });
-        }
-    }
+    playEnd.then(() => {
+        currentView.style.display = 'none';
+    })
+}
 
+function viewDown(currentView: HTMLElement, previousView: HTMLElement) {
+    previousView.style.display = 'block';
+    previousView.style.transform = 'translate(0%, -100%)';
+
+    //==========================================
+    // 要有延时，才有动画效果, 
+    window.setTimeout(() => {
+        previousView.style.transform = 'translate(0%, 0%)';
+        previousView.style.transition = '0.4s';
+    }, 50);
+    //==========================================
+
+    currentView.style.transform = 'translate(0%, 100%)';
+    currentView.style.transition = '0.4s';
+
+    //==========================================
+    // 比动画时间 0.4s 略大
+    let playEnd = new Promise<any>(function (reslove, reject) {
+        window.setTimeout(reslove, 500);
+    });
+
+    playEnd.then(() => {
+        currentView.style.display = 'none';
+    })
 }
 
 
-function createIntroduceElement(page: Page) {
+function createIntroduceView(page: Page) {
     let introduceView = document.createElement('section');
     introduceView.style.display = 'none';
     introduceView.style.paddingTop = '0px';
 
     let introduceElement = document.createElement('div');
-    introduceElement.className = 'introduce';
-    introduceElement.innerHTML = '';
-
+    introduceElement.className = 'container';
 
     let indicator = document.createElement("div");
-    indicator.innerHTML = `<div class="pull-down-indicator">
-        <h4 class="text-center">
+    indicator.className = 'pull-down-indicator';
+    indicator.innerHTML = 
+        `<h4 class="text-center">
             <div class="init">
                 <i class="icon-chevron-down"></i>
                 <span>上拉查看图文详情</span>
@@ -115,13 +132,24 @@ function createIntroduceElement(page: Page) {
                 <i class="icon-chevron-down"></i>
                 <span>释放查看图文详情</span>
             </div>
-        </h4>
-    </div>`;
+        </h4>`;
 
     introduceView.appendChild(indicator);
     introduceView.appendChild(introduceElement);
 
     enableBounceTopForAndroid(introduceView);
+    enablePullDown({
+        view: introduceView, 
+        statusSwitchDistance:50,
+        callback: function () {
+            viewDown(introduceView, page.dataView);
+        }
+    });
+
+    let { id } = page.routeData.values
+    services.shop.productIntroduce(id).then(o => {
+        introduceElement.innerHTML = o;
+    });
 
     return introduceView;
 }
@@ -281,6 +309,73 @@ function enableBounceTopForAndroid(view: HTMLElement) {
     });
 }
 
-function enablePullDown() {
+function enablePullDown(options: { view: HTMLElement, statusSwitchDistance?: number, callback?: () => void }) {
+    options = options || <any>{};
+    let view = options.view;
+    let callback = options.callback;
+    let statusSwitchDistance = options.statusSwitchDistance || 20;
 
+    if (view == null) throw new Error('Argument view can not be null.');
+
+    let indicator = view.querySelector('.pull-down-indicator') as HTMLElement;
+    if (indicator == null) {
+        throw new Error('Indicator element is not exists.');
+    }
+
+    let beginTop: number;
+    view.addEventListener('touchstart', function (event) {
+        let rect = indicator.getBoundingClientRect();
+        beginTop = rect.top;
+    });
+
+    view.addEventListener('touchmove', function (event) {
+        console.log(`scrollTop:${view.scrollTop}`);
+        
+        let scrollOnTop = view.scrollTop <= 0;
+        
+        let rect = indicator.getBoundingClientRect();
+        let currentTop = rect.top;
+        let deltaHeight = currentTop - beginTop;
+        if (deltaHeight > statusSwitchDistance && scrollOnTop) {
+            status('ready');
+        }
+        else {
+            status('init');
+        }
+    });
+
+    view.addEventListener('touchend', function (event) {
+        if (status() == 'ready' && callback != null) {
+            callback();
+        }
+        status('init');
+    });
+
+    type Status = 'init' | 'ready';
+    let _status: Status;
+    function status(value?: Status): Status {
+        if (value == undefined) {
+            return _status;
+        }
+
+        _status = value;
+
+        let readyElement = <HTMLElement>indicator.querySelector('.ready');
+        let initElement = <HTMLElement>indicator.querySelector('.init');
+        if (_status == 'init') {
+            if (readyElement)
+                readyElement.style.display = 'none';
+
+            if (initElement)
+                initElement.style.display = 'block';
+        }
+        else if (_status == 'ready') {
+            if (readyElement)
+                readyElement.style.display = 'block';
+
+            if (initElement)
+                initElement.style.display = 'none';
+        }
+        return _status;
+    }
 }
