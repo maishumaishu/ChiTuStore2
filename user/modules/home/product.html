@@ -58,6 +58,10 @@
         <div style="margin-left:100px;">{{argument.value}}</div>
         <div class="clearfix"></div>
     </div>
+    <div v-if="product.Arguments == null || product.Arguments.length == 0" 
+         style="height:120px;padding-top:40px;text-align:center;">
+        <h4>暂无商品信息</h4>
+    </div>
 </div>
 <hr/>
 

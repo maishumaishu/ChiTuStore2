@@ -1,3 +1,4 @@
+import Vue = require('vue');
 import { Page } from 'chitu.mobile';
 import * as services from 'services';
 import { isAndroid } from 'site'

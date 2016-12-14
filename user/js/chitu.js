@@ -280,7 +280,7 @@
         }
         back(args = undefined) {
             return new Promise((reslove, reject) => {
-                if (this.page_stack.length == 0) {
+                if (this.page_stack.length == 1) {
                     reject();
                     chitu.fireCallback(this.backFail, this, {});
                     return;
