@@ -1,13 +1,14 @@
 import { Page } from 'chitu.mobile';
 import * as services from 'services';
 import { isAndroid } from 'site'
-import { enablePullUp, enablePullDown } from 'core/ui'
+import { enablePullUp, enablePullDown, enableBounceLeft, enableBounceRight } from 'core/ui'
 
 export default function (page: Page) {
     let { id } = page.routeData.values
 
 
     let q = Promise.all([services.home.getProduct(id)]);
+    //let introduceView: HTMLElement;
 
     page.load.add(async () => {
         let result = await q;
@@ -36,17 +37,21 @@ export default function (page: Page) {
                     return str;
                 }
             },
-            mounted() {
+            async mounted() {
                 page.loadingView.style.display = 'none';
+                let introduceView = await createIntroduceView(page);
+                page.element.appendChild(introduceView);
+
+
                 enablePullUp({
                     view: page.dataView,
                     statusSwitchDistance: 30,
-                    async callback() {
-                        let introduceView = await createIntroduceView(page);
-                        page.element.appendChild(introduceView);
+                    callback() {
                         viewUp(page.dataView, introduceView);
                     }
                 });
+                enableBounceLeft(page.dataView);
+                enableBounceRight(page.dataView);
             }
         });
     })
@@ -76,6 +81,10 @@ function viewUp(currentView: HTMLElement, nextView: HTMLElement) {
 
     playEnd.then(() => {
         currentView.style.display = 'none';
+        currentView.style.removeProperty('transform');
+        currentView.style.removeProperty('transition');
+        nextView.style.removeProperty('transform');
+        nextView.style.removeProperty('transition');
     })
 }
 
@@ -102,6 +111,10 @@ function viewDown(currentView: HTMLElement, previousView: HTMLElement) {
 
     playEnd.then(() => {
         currentView.style.display = 'none';
+        currentView.style.removeProperty('transform');
+        currentView.style.removeProperty('transition');
+        previousView.style.removeProperty('transform');
+        previousView.style.removeProperty('transition');
     })
 }
 

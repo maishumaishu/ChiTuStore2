@@ -3,7 +3,6 @@ var u = navigator.userAgent;
 let isAndroid = u.indexOf('Android') > -1;
 
 
-
 class Errors {
     static argumentNull(argName: string) {
         let msg = `Argument ${argName} can not be null or empty.`;
@@ -13,47 +12,27 @@ class Errors {
 
 
 class ui {
+    private static horizontal_swipe_angle = 35;
+    private static vertical_pull_angle = 65;
+
+    private static angle(x, y) {
+        var d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
+        return d;
+    }
 
     //================================================================================
     // 使得元素具有回弹效果，仅适用于安卓系统
     /** 使得元素顶端具有回弹效果 */
     @singlePerElement()
     static enableBounceTopForAndroid(view: HTMLElement) {
-        if (!isAndroid) {
-            return;
-        }
-        let topString = getComputedStyle(view).top;
-        let viewStartTop = new Number(topString.substr(0, topString.length - 2)).valueOf();
-        let startY;
-        view.addEventListener('touchstart', function (event) {
-            startY = event.touches[0].pageY;
-        });
-
-        view.addEventListener('touchmove', function (event) {
-
-            let { scrollTop, scrollHeight } = view;
-
-            //===================================
-            // deltaY 正数表示向上移动，现在只考虑这种情况
-            let deltaY = event.touches[0].pageY - startY;
-
-            if (scrollTop <= 0 && deltaY > 0) {
-                let viewCurrentTop = viewStartTop + deltaY / 2;
-                view.style.top = viewCurrentTop + 'px';
-                //===================================
-                // 禁用原来的滚动
-                event.preventDefault();
-                //===================================
-            }
-        });
-
-        view.addEventListener('touchend', function (event) {
-            view.style.top = viewStartTop + 'px';
-            view.style.overflowY = 'scroll';
-        });
+        return ui.enableverticalBounceForAndroid(view, 'top');
     }
 
     static enableBounceBootomForAndroid(view: HTMLElement) {
+        return ui.enableverticalBounceForAndroid(view, 'bottom');
+    }
+
+    private static enableverticalBounceForAndroid(view: HTMLElement, side: 'top' | 'bottom') {
         if (!isAndroid) {
             return;
         }
@@ -61,8 +40,10 @@ class ui {
         let topString = getComputedStyle(view).top;
         let viewStartTop = new Number(topString.substr(0, topString.length - 2)).valueOf();
         let startY;
+        let startX;
         view.addEventListener('touchstart', function (event) {
             startY = event.touches[0].pageY;
+            startX = event.touches[0].pageX;
         });
 
         view.addEventListener('touchmove', function (event) {
@@ -73,15 +54,15 @@ class ui {
             //===================================
             // deltaY 负数表示向上移动，现在只考虑这种情况
             let deltaY = event.touches[0].pageY - startY;
+            let condition = side == 'bottom' ?
+                scrollTop >= scrollHeight - view.clientHeight && deltaY < 0 :
+                scrollTop <= 0 && deltaY > 0;
 
-            if (scrollOnBottom && deltaY < 0) {
+            if (condition) {
                 console.log('scrollOnBottom');
 
                 let viewCurrentTop = viewStartTop + deltaY / 2;
                 view.style.top = viewCurrentTop + 'px';
-
-                let rect = view.getBoundingClientRect();
-                console.log(`top:${rect.top}`);
 
                 //===================================
                 // 禁用原来的滚动
@@ -90,10 +71,11 @@ class ui {
             }
         });
 
-        view.addEventListener('touchend', function (event) {
+        let end = function (event) {
             view.style.top = viewStartTop + 'px';
-            view.style.overflowY = 'scroll';
-        });
+        };
+        view.addEventListener('touchend', end);
+        view.addEventListener('touchcancel', end);
     }
 
     //================================================================================
@@ -248,6 +230,78 @@ class ui {
         }
     }
 
+    @singlePerElement()
+    static enableBounceLeft(view: HTMLElement) {
+        return ui.enableHorizontalBounce(view, 'left');
+    }
+
+    @singlePerElement()
+    static enableBounceRight(view: HTMLElement) {
+        return ui.enableHorizontalBounce(view, 'right');
+    }
+
+    static enableHorizontalBounce(view: HTMLElement, side: 'left' | 'right') {
+        let startX: number;
+        let startY: number;
+        let viewLeftString = getComputedStyle(view).left;
+        if (viewLeftString == 'auto')
+            viewLeftString = '0px';
+
+        let moving = false;
+        let viewLeft = new Number(viewLeftString.substring(0, viewLeftString.length - 2)).valueOf();
+
+        view.addEventListener('touchstart', function (event) {
+            startX = event.targetTouches[0].pageX;
+            startY = event.targetTouches[0].pageY;
+        });
+
+        view.addEventListener('touchmove', function (event) {
+            if (moving) {
+                event.preventDefault();
+            }
+
+            let rect = view.getBoundingClientRect();
+            let currentX = event.targetTouches[0].pageX;
+            let currentY = event.targetTouches[0].pageY;
+            let deltaX = currentX - startX;// 正数向右
+
+            let angle = ui.angle(currentX - startX, currentY - startY);
+            let allowMove = angle < ui.horizontal_swipe_angle;
+            if (!allowMove)
+                return;
+
+            if ((side == 'left' && deltaX > 0) || (side == 'right' && deltaX < 0)) {
+                let left = viewLeft + deltaX;
+                view.style.left = left + 'px';
+                moving = true;
+            }
+        });
+
+        let end = function (event) {
+            view.style.left = viewLeftString;
+            moving = false;
+        }
+        view.addEventListener('touchend', end);
+        view.addEventListener('touchcancel', end);
+    }
+
+    @singlePerElement()
+    static swipeLeft(options: { view: HTMLElement, statusSwitchDistance?: number, callback?: () => void }) {
+        options = options || <any>{};
+
+        if (!options.view)
+            throw Errors.argumentNull('options.view');
+
+        let startLeft: number;
+        options.view.addEventListener('touchstart', function (event) {
+            let rect = options.view.getBoundingClientRect();
+            startLeft = rect.left;
+        });
+
+        options.view.addEventListener('touchmove', function (event) {
+            let rect = options.view.getBoundingClientRect();
+        });
+    }
 }
 
 /** 使得某个方法只适用于某个元素一次 */
@@ -299,4 +353,8 @@ export let enableBounceBootomForAndroid = ui.enableBounceBootomForAndroid;
 export let enablePullUp = ui.enablePullUp;
 
 /** 使得元素具有下拉拉功能 */
-export let enablePullDown = ui.enablePullDown; 
+export let enablePullDown = ui.enablePullDown;
+
+export let enableBounceLeft = ui.enableBounceLeft;
+
+export let enableBounceRight = ui.enableBounceRight;
