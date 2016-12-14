@@ -1,5 +1,5 @@
 
-var es5 = true;
+var es5 = false;
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
 var app_deps = [];
@@ -34,9 +34,9 @@ requirejs.config({
         text: 'js/text',
         move: 'js/move',
         vue: 'js/vue',
+        core: modulesPath + '/core',
         services: modulesPath + '/services',
         site: modulesPath + '/site',
-        Controls: modulesPath + '/controls',
         'chitu.mobile': modulesPath + '/core/chitu.mobile',
         'vue.ext': modulesPath + '/core/vue.ext',
         'carousel': modulesPath + '/core/carousel',
