@@ -1,6 +1,6 @@
 ## 前言
 
-ChiTuStore2 是一个开源的移动电商 Web APP，它是 ChiTuStore 的升级版 。
+ChiTuStore2 是一个开源的移动电商 Web APP，它是 ChiTuStore (https://github.com/ansiboy/ChiTuStore) 的升级版 。
 
 ChiTuStore 写于大慨三年多前，2003 年中。但是这几年，前端飞速发展，H5 不断完善，es6 的推出，更为优秀框架的涌现。ChiTu 
 Store 的代码显得略为陈旧了。同时为了学习新前端知识，决定把它重写。
@@ -60,6 +60,10 @@ Linux + nginx
 ## 演示地址
 
 http://web.alinq.cn/store2
+
+## 讨论群
+
+QQ 群：119038574
 
 ## 项目进展
 
