@@ -19,13 +19,19 @@ class MyApplication extends chitu.Application {
     }
 
     protected parseRouteString(routeString: string) {
-        let routeData = super.parseRouteString(routeString);
+        let routeData = new chitu.RouteData(this.fileBasePath, routeString, '_');
 
         let headerPath, footerPath;
         switch (routeData.pageName) {
             case 'home.index':
             case 'home.product':
                 headerPath = `text!ui/headers/${routeData.pageName}.html`;
+                break;
+            case 'home.class':
+            case 'home.newsList':
+            case 'shopping.shoppingCart':
+            case 'user.index':
+                headerPath = `text!ui/headers/default.html`;
                 break;
             default:
                 headerPath = `text!ui/headers/defaultWithBack.html`;
@@ -34,6 +40,10 @@ class MyApplication extends chitu.Application {
 
         switch (routeData.pageName) {
             case 'home.index':
+            case 'home.newsList':
+            case 'home.class':
+            case 'shopping.shoppingCart':
+            case 'user.index':
                 footerPath = `text!ui/menu.html`;
                 break;
         }
@@ -68,8 +78,7 @@ class MyApplication extends chitu.Application {
             }
         });
         let className = routeData.pageName.split('.').join('-');
-        //className = className + ' immersion';
-        page.element.className = className;
+        page.element.className = 'page ' + className;
         return page;
     }
 }
@@ -77,7 +86,10 @@ class MyApplication extends chitu.Application {
 export let app = window['app'] = new MyApplication();
 app.run();
 
+var u = navigator.userAgent;
+export let isAndroid = u.indexOf('Android') > -1;
+
 if (!location.hash) {
-    app.redirect('home/index');
+    app.redirect('home_index');
 }
 

@@ -46,25 +46,12 @@ export class Page extends chitu.Page {
             this.createView(className);
         }
 
-        this.showView('loading');
+        this.view('error').style.display = 'none';
+
         this.load.add((sender: Page, args: any) => {
             this._viewCompleted = true;
             this.view('main').innerHTML = args.viewHTML || '';
         });
-
-        this.resize.add((sender, args) => {
-            let elements = this.element.querySelectorAll(viewTagName);
-            for (let i = 0; i < elements.length; i++) {
-                let element = elements.item(i) as HTMLElement;
-                let h = window.innerHeight - args.headerHeight - args.footerHeight;
-                element.style.height = h + 'px';
-                element.style.top = args.headerHeight + 'px';
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            this.resize.fire(this, { headerHeight: this.headerHeight, footerHeight: this.footerHeight });
-        })
     }
 
     private createView(className: string) {
@@ -74,20 +61,11 @@ export class Page extends chitu.Page {
         return childElement;
     }
 
-    showView(name: ViewClassName) {
-        for (let item of this.views) {
-            if (name == item)
-                this.view(item).style.display = 'block';
-            else
-                this.view(item).style.display = 'none';
-        }
-    }
-
     showError(err: Error) {
         let element = this.view('error');
         console.assert(element != null);
         element.innerHTML = `<span>${err.message}</span>`;
-        this.showView('error');
+        element.style.display = 'block';
     }
 
     protected view(className: ViewClassName) {
@@ -95,8 +73,12 @@ export class Page extends chitu.Page {
         return element;
     }
 
-    get mainView() {
+    get dataView() {
         return this.view('main');
+    }
+
+    get loadingView() {
+        return this.view('loading');
     }
 
     get header(): HTMLElement {
@@ -145,31 +127,10 @@ export class Application extends chitu.Application {
     }
 
     protected parseRouteString(routeString: string) {
+        routeString = routeString.replace(new RegExp('_'), '/');
         let routeData = super.parseRouteString(routeString);
         routeData.resources.push({ name: 'viewHTML', path: `text!${routeData.actionPath}.html` });
 
         return routeData;
     }
 }
-
-type ActionCallback = ((page:chitu.Page, loadPromise:Promise<any>) => Promise<any> | void);
-export function action(callback: ActionCallback) {
-    return (page: Page) => {
-
-        let pageLoadPromise = new Promise((reslove, reject) => {
-            if (page.viewCompleted)
-                reslove();
-
-            page.load.add(() => reslove());
-        });
-
-        let p = (callback(page,pageLoadPromise) || Promise.resolve()) as Promise<any>;
-        p.then(() => {
-            window.setTimeout(function () {
-                page.showView('main');
-            }, 100);
-        }).catch((err: Error) => {
-            page.showError(err);
-        });
-    };
-};

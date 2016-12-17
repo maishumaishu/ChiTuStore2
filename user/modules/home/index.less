@@ -3,9 +3,13 @@
 
 .home-index {
 
-    .scrollViewTopPadding(@header-height);
-    .scrollViewBottomPadding(@menu-height);
-    
+    // .scrollViewTopPadding(@header-height);
+    // .scrollViewBottomPadding(@menu-height);
+    section {
+        padding-top: @header-height;
+        padding-bottom: @menu-height; 
+    }
+
     nav {
         border: none;
         height: 50px;
@@ -109,7 +113,7 @@
 @quickbar_icon_fontsize: 40px;
 @quickbar_icon_top: 12px;
 
-.Home-Index {
+.home-index {
     .quickbar {
         .text {
             margin-top: 6px;
