@@ -2,13 +2,13 @@
     <li v-on:click="all" v-bind:class="{active:type == 'all'}">
         全部
     </li>
-    <li v-on:click="Paid" v-bind:class="{active:type == 'Paid'}">
+    <li v-on:click="paid" v-bind:class="{active:type == 'paid'}">
         已付款
     </li>
-    <li v-on:click="WaitingForPayment" v-bind:class="{active:type == 'WaitingForPayment'}">
+    <li v-on:click="waitingForPayment" v-bind:class="{active:type == 'waitingForPayment'}">
         待发货
     </li>
-    <li v-on:click="Send" v-bind:class="{active:type == 'Send'}">
+    <li v-on:click="send" v-bind:class="{active:type == 'send'}">
         已发货
     </li>
 </ul>
@@ -41,8 +41,12 @@
                 实付款：<span class="price">￥{{order.Amount.toFixed(2)}}</span>
             </h4>
             <div class="pull-right">
-                <label class="pull-right"> {{type=='Paid'?'已付款':'待发货'}}</label>
+                <label class="pull-right"> {{type=='paid'?'已付款':'待发货'}}</label>
             </div>
         </div>
     </div>
 </template>
+<div v-show="isLoading" class="data-loading">
+    <i class="icon-spinner icon-spin"></i>
+    <span>数据正在加载中...</span>
+</div>

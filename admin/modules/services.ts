@@ -194,13 +194,13 @@ export module shop {
         maximumRows?: number,
         filter?: string
     }
+    const PAGE_SIZE = 20;
     export function products(type: 'onShelve' | 'offShelve' | 'all', pageIndex: number) {
         console.assert(pageIndex >= 0);
 
         let url = 'AdminServices/Shop/Product/GetProducts';
         //let filter = 'true';
 
-        const PAGE_SIZE = 20;
         let args: DataSourceSelectArguments = {
             startRowIndex: PAGE_SIZE * pageIndex,
             maximumRows: PAGE_SIZE,
@@ -219,12 +219,12 @@ export module shop {
                 return { dataItems: o.DataItems, loadComplete: o.DataItems.length < PAGE_SIZE };
             });
     }
-    export function orders(type: 'all' | 'Send' | 'Paid' | 'WaitingForPayment') {
+    export function orders(type: 'all' | 'send' | 'paid' | 'waitingForPayment') {
         let args: DataSourceSelectArguments = {
             startRowIndex: 0,
             maximumRows: 20,
         }
-        args.filter = type == 'all' ? '' : "Status='" + type + "'";
+        args.filter = type == 'all' ? '' : "status='" + type + "'";
         let url = 'AdminServices/Shop/Order/GetOrders';
         return get<DataSourceSelectResult<any>>(url, args).
             then(o => {
@@ -233,7 +233,7 @@ export module shop {
                         d.ImageUrl = (d.ImagePath == null ? '' : (d.ImagePath.indexOf('http://') == -1 ? imgUrl + d.ImagePath : d.ImagePath) || '').split(',')[0];
                     })
                 })
-                return { dataItems: o.DataItems };
+                return { dataItems: o.DataItems, loadComplete: o.DataItems.length < PAGE_SIZE };
             });
     }
 }
