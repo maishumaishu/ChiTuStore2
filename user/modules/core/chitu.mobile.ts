@@ -52,6 +52,7 @@ export class Page extends chitu.Page {
             this._viewCompleted = true;
             this.view('main').innerHTML = args.viewHTML || '';
         });
+
     }
 
     private createView(className: string) {
@@ -101,7 +102,11 @@ export class Page extends chitu.Page {
         this.headerHeight = headerHeight;
         headerElement.style.height = headerHeight + 'px';
         this.element.appendChild(headerElement);
-        this.resize.fire(this, { headerHeight, footerHeight: this.footerHeight });
+
+        // headerElement.style.width = this.element.clientWidth + 'px';
+        // window.addEventListener('resize', () => {
+        //     headerElement.style.width = this.element.clientWidth + 'px';
+        // });
         return headerElement;
     }
 
@@ -112,7 +117,11 @@ export class Page extends chitu.Page {
         let footerElement = document.createElement('footer');
         footerElement.style.height = footerHeight + 'px';
         this.element.appendChild(footerElement);
-        this.resize.fire(this, { headerHeight: this.headerHeight, footerHeight });
+
+        // footerElement.style.width = this.element.clientWidth + 'px';
+        // window.addEventListener('resize', () => {
+        //     footerElement.style.width = this.element.clientWidth + 'px';
+        // });
         return footerElement;
     }
 }

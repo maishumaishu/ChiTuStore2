@@ -51,9 +51,9 @@ class Carousel {
         addClassName(this.activeItem(), 'active');
         addClassName(this.indicators[this.active_index], 'active');
 
-        hammer.on('panstart', (e: Hammer.PanEvent) => this.panstart(e))
-            .on('panmove', (e: Hammer.PanEvent) => this.panmove(e))
-            .on('panend', (e: Hammer.PanEvent) => this.panend(e));
+        hammer.on('panstart', (e: PanEvent) => this.panstart(e))
+            .on('panmove', (e: PanEvent) => this.panmove(e))
+            .on('panend', (e: PanEvent) => this.panend(e));
 
         options = Object.assign({ autoplay: true }, options);
         this.autoplay = options.autoplay;
@@ -64,13 +64,13 @@ class Carousel {
 
     }
 
-    private panstart(e: Hammer.PanEvent) {
+    private panstart(e: PanEvent) {
         if (this.is_pause)
             return false;
 
         this.stop();
     }
-    private panmove(e: Hammer.PanEvent) {
+    private panmove(e: PanEvent) {
         if ((e.direction & Hammer.DIRECTION_VERTICAL) != 0) {
             console.log('DIRECTION_VERTICAL');
         }
@@ -92,7 +92,7 @@ class Carousel {
             move(this.prevItem()).x(e.deltaX - this.window_width).duration(0).end();
         }
     }
-    private panend(e: Hammer.PanEvent) {
+    private panend(e: PanEvent) {
         if (this.paned == false)
             return;
 
