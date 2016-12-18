@@ -79,6 +79,10 @@ class MyApplication extends chitu.Application {
             if (footerHTML) {
                 let element = page.createFooter(50);
                 element.innerHTML = footerHTML;
+                var activeElement = element.querySelector(`[name="${routeData.pageName}"]`) as HTMLElement;
+                if (activeElement) {
+                    activeElement.className = 'active';
+                }
             }
         });
         let className = routeData.pageName.split('.').join('-');

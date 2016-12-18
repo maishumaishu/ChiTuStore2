@@ -224,6 +224,10 @@ export class PageViewGesture {
             event.preventDefault();
         }
 
+
+        let readyElement: HTMLElement;
+        let initElement: HTMLElement;
+
         var moveVertical = (event: TouchEvent, deltaY: number) => {
             let currentElement = viewNode.element;
 
@@ -240,11 +244,6 @@ export class PageViewGesture {
                 }
             }
             //=================================================
-
-            let readyElement: HTMLElement;
-            let initElement: HTMLElement;
-
-
             if (scrollTop <= 0 && deltaY > 0) {
                 let indicator: HTMLElement = viewNode.element.querySelector('.pull-down-indicator') as HTMLElement;
                 if (indicator) {
@@ -276,7 +275,6 @@ export class PageViewGesture {
             }
         }
 
-
         var endVertical = (event: TouchEvent, deltaY: number) => {
             let bottomViewNode = viewNode.bottom;
             let topViewNode = viewNode.top;
@@ -289,6 +287,11 @@ export class PageViewGesture {
             }
             else if (isAndroid) {
                 transform(viewNode.element, this.positions.current, '0.4s');
+            }
+
+            if(readyElement != null && initElement != null){
+                initElement.style.display = 'block';
+                readyElement.style.display = 'none';
             }
         }
 
@@ -317,7 +320,6 @@ export class PageViewGesture {
                         });
                 }
             }
-
         }
 
         let end = (event) => {
@@ -472,4 +474,20 @@ export function imageDelayLoad(element: HTMLImageElement, imageText: string) {
         return img_src;
     }
 
+}
+
+/**
+ * 滚动到底部触发回调事件
+ */
+export function scrollOnBottom(element: HTMLElement, callback: Function, deltaHeight?: number) {
+    console.assert(element != null);
+    console.assert(callback != null);
+    deltaHeight = deltaHeight || 10;
+    element.addEventListener('scroll', function () {
+        let maxScrollTop = element.scrollHeight - element.clientHeight;
+        //let deltaHeight = 10;
+        if (element.scrollTop + deltaHeight >= maxScrollTop) {
+            callback();
+        }
+    });
 }
