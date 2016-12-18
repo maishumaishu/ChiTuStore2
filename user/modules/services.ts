@@ -140,7 +140,22 @@ function post<T>(url: string, contentType: ContentType, data?: any) {
     return ajax<T>(url, options);
 }
 
-const imageBasePath = 'http://service.alinq.cn:2015/Shop';
+export function imageUrl(path: string) {
+    if (path.startsWith('http://localhost')) {
+        path = path.substr('http://localhost'.length);
+    }
+    const imageBasePath = 'http://service.alinq.cn:2800/AdminServices/Shop';
+    let url: string;
+    if (!path.startsWith('http')) {
+        url = imageBasePath + path;
+    }
+    else {
+        url = path;
+    }
+    url = url + `?application-token=${config.appToken}&storeId=${config.storeId}`;
+    return url;
+}
+
 export module home {
     type HomeProduct = { Id: string, Name: string, ImagePath: string };
     export function proudcts(pageIndex?: number): Promise<HomeProduct[]> {
@@ -148,7 +163,7 @@ export module home {
         let url = config.service.site + 'Home/GetHomeProducts';
         return get<HomeProduct[]>(url, { pageIndex }).then((products) => {
             for (let product of products) {
-                product.ImagePath = imageBasePath + product.ImagePath;
+                product.ImagePath = imageUrl(product.ImagePath); //imageBasePath + product.ImagePath;
             }
             return products;
         });
@@ -173,8 +188,9 @@ export module home {
         return get<Product>(url, { productId }).then(product => {
             product.Count = 1;
             if (!product.ImageUrls && product.ImageUrl != null)
-                product.ImageUrls = (<string>product.ImageUrl).split(',');
+                product.ImageUrls = (<string>product.ImageUrl).split(',').map(o => imageUrl(o));
 
+            product.ImageUrl = product.ImageUrls[0];
             return product;
         });
     }
@@ -184,9 +200,9 @@ export module home {
     }
 }
 
-export module shop{
-    export function productIntroduce(productId:string):Promise<string>{
+export module shop {
+    export function productIntroduce(productId: string): Promise<string> {
         let url = config.service.shop + 'Product/GetProductIntroduce';
-        return get<{Introduce:string}>(url,{productId}).then(o=>o.Introduce);
+        return get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
     }
 }

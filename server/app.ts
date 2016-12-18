@@ -28,7 +28,7 @@ async function request(req: express.Request, res: express.Response, data?: strin
         let port = config.realServicePort;
 
         if (!req.query.storeId) {
-            throw errors.queryStringRequired('store-id');
+            throw errors.queryStringRequired('storeId');
         }
 
         let headers: any = Object.assign(req.headers, {

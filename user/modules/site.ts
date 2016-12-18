@@ -1,6 +1,10 @@
 import * as services from 'services';
 import { Application, Page } from 'chitu.mobile';
 
+export let config = {
+    imageText: '零食有约'
+}
+
 class MyPage extends Page {
     constructor(params) {
         super(params);

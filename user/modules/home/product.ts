@@ -1,9 +1,8 @@
 import Vue = require('vue');
 import { Page } from 'chitu.mobile';
 import * as services from 'services';
-import { isAndroid } from 'site'
-import { PageView } from 'core/ui'
-// enablePullUp, enablePullDown, enableBounceLeft, enableBounceRight, 
+import * as site from 'site'
+import { PageViewGesture, imageDelayLoad } from 'core/ui'
 import Hammer = require('hammer');
 
 export default function (page: Page) {
@@ -53,7 +52,7 @@ export default function (page: Page) {
             let introduceView2 = createHorizontalIntroduceView(page);
             page.element.appendChild(introduceView);
             page.element.appendChild(introduceView2);
-            let pageView = new PageView({
+            let pageView = new PageViewGesture({
                 element: page.dataView,
                 right: { element: introduceView2 },
                 bottom: { element: introduceView }
@@ -78,6 +77,12 @@ function createIntroduceView(page: Page) {
         loadIntroduce.then(o => {
             let introduceElement = introduceView.querySelector('.container') as HTMLElement;
             introduceElement.innerHTML = o;
+            let imgs = introduceElement.querySelectorAll('img');
+            for (let i = 0; i < imgs.length; i++) {
+                let img = imgs.item(i) as HTMLImageElement;
+                img.src = services.imageUrl(img.src);
+                imageDelayLoad(img, site.config.imageText);
+            }
         });
     })
 
@@ -97,9 +102,15 @@ function createHorizontalIntroduceView(page: Page) {
 
     loadIntroduce.then(o => {
         introduceContent.innerHTML = o;
+        let imgs = introduceContent.querySelectorAll('img');
+        for (let i = 0; i < imgs.length; i++) {
+            let img = imgs.item(i) as HTMLImageElement;
+            img.src = services.imageUrl(img.src);
+            imageDelayLoad(img, site.config.imageText);
+        }
     });
 
-  
+
 
     return introduceView;
 }

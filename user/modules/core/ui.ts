@@ -11,22 +11,40 @@ class Errors {
 }
 
 
-class ui {
-    static horizontal_swipe_angle = 35;
-    static vertical_pull_angle = 65;
-
-    static angle(x, y) {
-        var d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
-        return d;
-    }
+type PageViewNode = {
+    element: HTMLElement,
+    right?: RightViewNode,
+    left?: LeftViewNode,
+    bottom?: BottomViewNode,
+    top?: TopviewNode
 }
 
-type ViewNode = {
+type LeftViewNode = {
     element: HTMLElement,
-    right?: ViewNode,
-    left?: ViewNode,
-    bottom?: ViewNode,
-    top?: ViewNode
+    top?: TopviewNode,
+    left?: LeftViewNode,
+    bottom?: BottomViewNode
+}
+
+type RightViewNode = {
+    element: HTMLElement,
+    top?: TopviewNode,
+    right?: RightViewNode,
+    bottom?: BottomViewNode
+}
+
+type BottomViewNode = {
+    element: HTMLElement,
+    left?: LeftViewNode,
+    right?: RightViewNode,
+    bottom?: BottomViewNode,
+}
+
+type TopviewNode = {
+    element: HTMLElement,
+    left?: LeftViewNode,
+    right?: RightViewNode,
+    top?: TopviewNode
 }
 
 type Position = { left: number, top: number };
@@ -48,7 +66,7 @@ function transform(element: HTMLElement, position: Position, time: '0s' | '0.4s'
     })
 }
 
-export class PageView {
+export class PageViewGesture {
 
     switchDistances = {
         left: 150,
@@ -60,8 +78,16 @@ export class PageView {
     private elementTop: number;
     private elementLeft: number;
 
-    private _currentViewNode: ViewNode;
-    constructor(viewNode: ViewNode) {
+    private positions: {
+        left: Position,
+        right: Position,
+        top: Position,
+        bottom: Position,
+        current: Position
+    }
+
+    private _currentViewNode: PageViewNode;
+    constructor(viewNode: PageViewNode) {
 
         this._currentViewNode = viewNode;
         let { top, left } = getComputedStyle(viewNode.element);
@@ -72,83 +98,75 @@ export class PageView {
         this.elementTop = new Number(top.substr(0, top.length - 2)).valueOf();
         this.elementLeft = new Number(left.substr(0, left.length - 2)).valueOf();
 
+        let {clientWidth, clientHeight} = viewNode.element;
+        this.positions = {
+            left: { left: this.elementLeft - clientWidth, top: this.elementTop },
+            top: { left: this.elementLeft, top: this.elementTop - clientHeight },
+            right: { left: this.elementLeft + clientWidth, top: this.elementTop },
+            bottom: { left: this.elementLeft, top: this.elementTop + clientHeight },
+            current: { left: this.elementLeft, top: this.elementTop },
+        }
+
+        let stack = new Array<PageViewNode>();
+        stack.push(viewNode);
+        while (stack.length > 0) {
+            let item = stack.pop();
+            item['visited'] = true;
+            if (item.left && !item.left['visited']) {
+                stack.push(item.left as PageViewNode);
+                (item.left as PageViewNode).right = item;
+            }
+            if (item.top && !item.top['visited']) {
+                stack.push(item.top as PageViewNode);
+                (item.top as PageViewNode).bottom = item;
+            }
+            if (item.right && !item.right['visited']) {
+                stack.push(item.right as PageViewNode);
+                (item.right as PageViewNode).left = item;
+            }
+            if (item.bottom && !item.bottom['visited']) {
+                stack.push(item.bottom as PageViewNode);
+                (item.bottom as PageViewNode).top = item;
+            }
+
+            this.enableGesture(item);
+        }
 
         viewNode.bottom.element.style.display = 'none';
         //==================================
         // init position
         let elements = this.getElements(this.currentViewNode);
         if (elements.leftElement) {
-            let position = this.leftElementPosition();
-            transform(elements.leftElement, position, '0s');
+            transform(elements.leftElement, this.positions.left, '0s');
             elements.leftElement.style.display = 'none';
         }
 
         if (elements.rightElement) {
-            let position = this.rightElementPosition();
-            transform(elements.rightElement, position, '0s');
+            transform(elements.rightElement, this.positions.right, '0s');
             elements.rightElement.style.display = 'none';
         }
 
         if (elements.topElement) {
-            let position = this.topElementPosition();
-            transform(elements.topElement, position, '0s');
+            transform(elements.topElement, this.positions.top, '0s');
             elements.topElement.style.display = 'none';
         }
 
         if (elements.bottomElement) {
-            let position = this.bottomElementPosition();
-            transform(elements.bottomElement, position, '0s');
+            transform(elements.bottomElement, this.positions.bottom, '0s');
             elements.bottomElement.style.display = 'none';
         }
         //==================================
-
-        this.enableGesture(viewNode.element);
-        this.enableGesture(viewNode.right.element);
-        this.enableGesture(viewNode.bottom.element);
-
-        viewNode.right.left = viewNode;
-        viewNode.bottom.top = viewNode;
     }
 
     private get currentViewNode() {
         return this._currentViewNode;
     }
-    private set currentViewNode(value: ViewNode) {
+    private set currentViewNode(value: PageViewNode) {
         this._currentViewNode = value;
     }
 
-    private bottomElementPosition(): { left: number, top: number } {
-        let left = this.elementLeft;
-        let top = this.elementTop + this.currentViewNode.element.clientHeight;
-        return { left, top };
-    }
 
-    private topElementPosition(): { left: number, top: number } {
-        let left = this.elementLeft;
-        let top = this.elementTop - this.currentViewNode.element.clientHeight;
-        return { left, top };
-    }
-
-    private leftElementPosition(): Position {
-        let left = this.elementLeft - this.currentViewNode.element.clientWidth;
-        let top = this.elementTop;
-        return { left, top };
-    }
-
-    private rightElementPosition(): Position {
-        let left = this.elementLeft + this.currentViewNode.element.clientWidth;
-        let top = this.elementTop;
-        return { left, top };
-    }
-
-    private currentElementPosition(): Position {
-        let left = this.elementLeft;
-        let top = this.elementTop;
-        return { left, top };
-    }
-
-
-    private enableGesture(element: HTMLElement) {
+    private enableGesture(viewNode: PageViewNode) {
         let startY, currentY;
         let startX, currentX;
         let moving: 'horizontal' | 'vertical';
@@ -156,35 +174,38 @@ export class PageView {
         let status: 'init' | 'ready';
         let action: 'pullDown' | 'pullUp' | 'swipeLeft' | 'swipeRight';
 
-        element.addEventListener('touchstart', function (event: TouchEvent) {
+
+        let horizontal_swipe_angle = 35;
+        let vertical_pull_angle = 65;
+
+        viewNode.element.addEventListener('touchstart', function (event: TouchEvent) {
             startY = event.touches[0].pageY;
             startX = event.touches[0].pageX;
         })
 
-        element.addEventListener('touchmove', (event: TouchEvent) => {
+        viewNode.element.addEventListener('touchmove', (event: TouchEvent) => {
             currentX = event.targetTouches[0].pageX;
             currentY = event.targetTouches[0].pageY;
-            let angle = ui.angle(currentX - startX, currentY - startY);
-            if (angle < ui.horizontal_swipe_angle && moving != 'vertical') {
+            let angle = calculateAngle(currentX - startX, currentY - startY);
+            if (angle < horizontal_swipe_angle && moving != 'vertical') {
                 moving = 'horizontal';
                 moveHorizontal(event, currentX - startX);
             }
-            else if (angle > ui.vertical_pull_angle && moving != 'horizontal') {
+            else if (angle > vertical_pull_angle && moving != 'horizontal') {
                 moving = 'vertical';
                 moveVertical(event, currentY - startY);
             }
         })
 
+        var calculateAngle = (x, y) => {
+            let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
+            return d;
+        }
 
         var moveHorizontal = (event: TouchEvent, deltaX: number) => {
-            let currentElement = this.currentViewNode.element;
-            let rightElement: HTMLElement;
-            if (this.currentViewNode.right)
-                rightElement = this.currentViewNode.right.element;
+            let currentElement = viewNode.element;
 
-            let leftElement: HTMLElement;
-            if (this.currentViewNode.left)
-                leftElement = this.currentViewNode.left.element;
+            let {rightElement, leftElement} = this.getElements(viewNode);
 
             let left = this.elementLeft + deltaX;
             transform(currentElement, { left, top: this.elementTop }, '0s');
@@ -204,7 +225,7 @@ export class PageView {
         }
 
         var moveVertical = (event: TouchEvent, deltaY: number) => {
-            let currentElement = this.currentViewNode.element;
+            let currentElement = viewNode.element;
 
             let { scrollTop, scrollHeight } = currentElement;
 
@@ -225,7 +246,7 @@ export class PageView {
 
 
             if (scrollTop <= 0 && deltaY > 0) {
-                let indicator: HTMLElement = this.currentViewNode.element.querySelector('.pull-down-indicator') as HTMLElement;
+                let indicator: HTMLElement = viewNode.element.querySelector('.pull-down-indicator') as HTMLElement;
                 if (indicator) {
                     readyElement = <HTMLElement>indicator.querySelector('.ready');
                     initElement = <HTMLElement>indicator.querySelector('.init');
@@ -235,7 +256,7 @@ export class PageView {
                 action = 'pullDown';
             }
             else if (scrollTop + currentElement.clientHeight >= scrollHeight && deltaY < 0) {
-                let indicator: HTMLElement = this.currentViewNode.element.querySelector('.pull-up-indicator') as HTMLElement;
+                let indicator: HTMLElement = viewNode.element.querySelector('.pull-up-indicator') as HTMLElement;
                 if (indicator) {
                     readyElement = <HTMLElement>indicator.querySelector('.ready');
                     initElement = <HTMLElement>indicator.querySelector('.init');
@@ -257,8 +278,8 @@ export class PageView {
 
 
         var endVertical = (event: TouchEvent, deltaY: number) => {
-            let bottomViewNode = this.currentViewNode.bottom;
-            let topViewNode = this.currentViewNode.top;
+            let bottomViewNode = viewNode.bottom;
+            let topViewNode = viewNode.top;
 
             if (action == 'pullDown' && status == 'ready' && topViewNode != null) {
                 this.showView(topViewNode);
@@ -267,35 +288,36 @@ export class PageView {
                 this.showView(bottomViewNode);
             }
             else if (isAndroid) {
-                transform(this.currentViewNode.element, this.currentElementPosition(), '0.4s');
+                transform(viewNode.element, this.positions.current, '0.4s');
             }
         }
 
         var endHorizontal = (event: TouchEvent, deltaX: number) => {
-            let currentElement = this.currentViewNode.element;
-            let elements = this.getElements(this.currentViewNode);
+            let currentElement = viewNode.element;
+            let elements = this.getElements(viewNode);
             this.enableNativeScroll(currentElement);
-            if (action == 'swipeLeft' && status == 'ready' && this.currentViewNode != null) {
-                this.showView(this.currentViewNode.right);
+            if (action == 'swipeLeft' && status == 'ready' && viewNode != null) {
+                this.showView(viewNode.right);
             }
-            else if (action == 'swipeRight' && status >= 'ready' && this.currentViewNode.left != null) {
-                this.showView(this.currentViewNode.left);
+            else if (action == 'swipeRight' && status >= 'ready' && viewNode.left != null) {
+                this.showView(viewNode.left);
             }
             else {
-                transform(this.currentViewNode.element, this.currentElementPosition(), '0.4s');
+                transform(viewNode.element, this.positions.current, '0.4s');
                 if (action == 'swipeLeft') {
-                    transform(elements.rightElement, this.rightElementPosition(), '0.4s')
+                    transform(elements.rightElement, this.positions.right, '0.4s')
                         .then(() => {
                             elements.rightElement.style.display = 'none';
                         });
                 }
                 else if (action == 'swipeRight') {
-                    transform(elements.leftElement, this.leftElementPosition(), '0.4s')
+                    transform(elements.leftElement, this.positions.left, '0.4s')
                         .then(() => {
                             elements.leftElement.style.display = 'none';
                         });
                 }
             }
+
         }
 
         let end = (event) => {
@@ -310,11 +332,11 @@ export class PageView {
             status = null;
         }
 
-        element.addEventListener('touchcancel', (event) => end(event));
-        element.addEventListener('touchend', (event) => end(event));
+        viewNode.element.addEventListener('touchcancel', (event) => end(event));
+        viewNode.element.addEventListener('touchend', (event) => end(event));
     }
 
-    private getElements(viewNode: ViewNode) {
+    private getElements(viewNode: PageViewNode) {
         let leftElement: HTMLElement;
         let rightElement: HTMLElement;
         let topElement: HTMLElement;
@@ -340,30 +362,34 @@ export class PageView {
         };
     }
 
-    showView(viewNode: ViewNode) {
+    showView(viewNode: PageViewNode) {
         let currentViewNode = this.currentViewNode;
         let { leftElement } = this.getElements(currentViewNode);
 
         viewNode.element.style.display = 'block';
         let currentElementTransform: Promise<any>;
         if (viewNode == this.currentViewNode.right) {
-            currentElementTransform = transform(currentViewNode.element, this.leftElementPosition(), '0.4s');
-            transform(viewNode.element, this.currentElementPosition(), '0.4s');
+            currentElementTransform = transform(currentViewNode.element, this.positions.left, '0.4s');
+            transform(viewNode.element, this.positions.current, '0.4s');
         }
         else if (viewNode == currentViewNode.left) {
-            currentElementTransform = transform(currentViewNode.element, this.rightElementPosition(), '0.4s');
-            transform(viewNode.element, this.currentElementPosition(), '0.4s');
+            currentElementTransform = transform(currentViewNode.element, this.positions.right, '0.4s');
+            transform(viewNode.element, this.positions.current, '0.4s');
         }
         else if (viewNode == currentViewNode.bottom) {
             //======================================================================
             // 这两句的顺序不能倒过来
-            currentElementTransform = transform(currentViewNode.element, this.topElementPosition(), '0.4s');
-            transform(viewNode.element, this.currentElementPosition(), '0.4s');
+            currentElementTransform = transform(currentViewNode.element, this.positions.top, '0.4s');
+            window.setTimeout(() => {
+                transform(viewNode.element, this.positions.current, '0.4s');
+            }, 50);
             //======================================================================
         }
         else if (viewNode == currentViewNode.top) {
-            currentElementTransform = transform(currentViewNode.element, this.bottomElementPosition(), '0.4s');
-            transform(viewNode.element, this.currentElementPosition(), '0.4s');
+            currentElementTransform = transform(currentViewNode.element, this.positions.bottom, '0.4s');
+            window.setTimeout(() => {
+                transform(viewNode.element, this.positions.current, '0.4s');
+            }, 50)
         }
 
         console.assert(currentElementTransform != null);
@@ -383,6 +409,67 @@ export class PageView {
     private enableNativeScroll(element: HTMLElement) {
         element.style.overflowY = 'scroll';
     }
+}
 
+export function imageDelayLoad(element: HTMLImageElement, imageText: string) {
+    var PREVIEW_IMAGE_DEFAULT_WIDTH = 200;
+    var PREVIEW_IMAGE_DEFAULT_HEIGHT = 200;
+
+    var src = element.getAttribute('src') || '';
+    var img_width = PREVIEW_IMAGE_DEFAULT_WIDTH;
+    var img_height = PREVIEW_IMAGE_DEFAULT_HEIGHT;
+    var match = src.match(/_\d+_\d+/);
+    if (match && match.length > 0) {
+        var arr = match[0].split('_');
+        img_width = new Number(arr[1]).valueOf();
+        img_height = new Number(arr[2]).valueOf();
+    }
+
+    element.setAttribute('width', img_width + 'px');
+    element.setAttribute('height', img_height + 'px');
+
+
+    var src_replace = getPreviewImage(img_width, img_height);
+    element.setAttribute('src', src_replace);
+
+    var image: HTMLImageElement = new Image();
+    image.onload = function () {
+        element.src = (this as HTMLImageElement).src;
+    };
+    image.src = src;
+
+    function getPreviewImage(img_width, img_height) {
+
+        var scale = (img_height / img_width).toFixed(2);
+        var img_name = 'img_log' + scale;
+        var img_src = localStorage.getItem(img_name);
+        if (img_src)
+            return img_src;
+
+        var MAX_WIDTH = 320;
+        var width = MAX_WIDTH;
+        var height = width * new Number(scale).valueOf();
+
+        var canvas = document.createElement('canvas');
+        canvas.width = width; //img_width;
+        canvas.height = height; //img_height;
+
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'whitesmoke';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 设置字体
+        ctx.font = "Bold 40px Arial";
+        // 设置对齐方式
+        ctx.textAlign = "left";
+        // 设置填充颜色
+        ctx.fillStyle = "#999";
+        // 设置字体内容，以及在画布上的位置
+        ctx.fillText(imageText, canvas.width / 2 - 75, canvas.height / 2);
+
+        img_src = canvas.toDataURL('/png');
+        localStorage.setItem(img_name, img_src);
+        return img_src;
+    }
 
 }

@@ -1,20 +1,4 @@
 import Vue = require('vue');
-export function createVueInstance<T>(options: VueOptions<T>): T & VueInstance {
-    // let _mounted = options.mounted;
-    // options.mounted = function () {
-    //     let self = this as T & VueInstance;
-    //     let imgs = self.$el.querySelectorAll('img');
-    //     for (let i = 0; i < imgs.length; i++) {
-    //         processImageElement(imgs.item(i) as HTMLImageElement);
-    //     }
-    //     if (_mounted) {
-    //         _mounted.apply(this);
-    //     }
-    // }
-    let vm = new Vue<T>(options)
-
-    return vm;;
-}
 
 export let config = {
     /** 图片的基本路径，图片地址如果不以 http 开头，则加上该路径 */
@@ -29,9 +13,6 @@ function processImageElement(element: HTMLImageElement) {
     var PREVIEW_IMAGE_DEFAULT_HEIGHT = 200;
 
     var src = element.getAttribute('src') || '';
-    // if (element.className.indexOf('img-full') < 0)
-    //     element.className = element.className + ' img-full';
-
     var img_width = PREVIEW_IMAGE_DEFAULT_WIDTH;
     var img_height = PREVIEW_IMAGE_DEFAULT_HEIGHT;
     var match = src.match(/_\d+_\d+/);
@@ -49,10 +30,7 @@ function processImageElement(element: HTMLImageElement) {
     element.setAttribute('src', src_replace);
 
     var image: HTMLImageElement = new Image();
-    //image['element'] = element;
-    //image['updateScrollView'] = match == null || match.length == 0;
     image.onload = function () {
-        //(<HTMLImageElement>this['element']).src = this.src;
         element.src = (this as HTMLImageElement).src;
     };
     image.src = getImageUrl(src);
@@ -65,42 +43,44 @@ function processImageElement(element: HTMLImageElement) {
         }
         return src;
     }
-}
 
+    function getPreviewImage(img_width, img_height) {
 
-function getPreviewImage(img_width, img_height) {
+        var scale = (img_height / img_width).toFixed(2);
+        var img_name = 'img_log' + scale;
+        var img_src = localStorage.getItem(img_name);
+        if (img_src)
+            return img_src;
 
-    var scale = (img_height / img_width).toFixed(2);
-    var img_name = 'img_log' + scale;
-    var img_src = localStorage.getItem(img_name);
-    if (img_src)
+        var MAX_WIDTH = 320;
+        var width = MAX_WIDTH;
+        var height = width * new Number(scale).valueOf();
+
+        var canvas = document.createElement('canvas');
+        canvas.width = width; //img_width;
+        canvas.height = height; //img_height;
+
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'whitesmoke';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 设置字体
+        ctx.font = "Bold 40px Arial";
+        // 设置对齐方式
+        ctx.textAlign = "left";
+        // 设置填充颜色
+        ctx.fillStyle = "#999";
+        // 设置字体内容，以及在画布上的位置
+        ctx.fillText(config.imageDisaplyText, canvas.width / 2 - 75, canvas.height / 2);
+
+        img_src = canvas.toDataURL('/png');
+        localStorage.setItem(img_name, img_src);
         return img_src;
+    }
 
-    var MAX_WIDTH = 320;
-    var width = MAX_WIDTH;
-    var height = width * new Number(scale).valueOf();
-
-    var canvas = document.createElement('canvas');
-    canvas.width = width; //img_width;
-    canvas.height = height; //img_height;
-
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'whitesmoke';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 设置字体
-    ctx.font = "Bold 40px Arial";
-    // 设置对齐方式
-    ctx.textAlign = "left";
-    // 设置填充颜色
-    ctx.fillStyle = "#999";
-    // 设置字体内容，以及在画布上的位置
-    ctx.fillText(config.imageDisaplyText, canvas.width / 2 - 75, canvas.height / 2);
-
-    img_src = canvas.toDataURL('/png');
-    localStorage.setItem(img_name, img_src);
-    return img_src;
 }
+
+
 
 
 Vue.component(`cv-img`, {
