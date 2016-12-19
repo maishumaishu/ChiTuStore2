@@ -70,8 +70,8 @@ export class PageViewGesture {
 
     switchDistances = {
         left: 150,
-        top: 30,
-        bottom: 30,
+        top: 60,
+        bottom: 60,
         right: 150
     }
 
@@ -231,7 +231,6 @@ export class PageViewGesture {
                 }
             }
             this.disableNativeScroll(currentElement);
-            //event.preventDefault();
         }
 
 
@@ -243,24 +242,13 @@ export class PageViewGesture {
 
             let { scrollTop, scrollHeight } = currentElement;
 
-            //=================================================
-            // 实现视图的上下移动
-            if (isAndroid) {
-                let { scrollTop, scrollHeight, clientHeight } = currentElement;
-                if ((scrollTop <= 0 && deltaY > 0) || (scrollTop >= scrollHeight - clientHeight && deltaY < 0)) {
-                    //currentElement.style.transform = `translate(0px, ${this.elementTop + deltaY}px)`;
-                    transform(currentElement, { left: this.elementLeft, top: this.elementTop + deltaY }, '0s');
-                    event.preventDefault();
-                }
-            }
-            //=================================================
             if (scrollTop <= 0 && deltaY > 0) {
                 let indicator: HTMLElement = viewNode.element.querySelector('.pull-down-indicator') as HTMLElement;
                 if (indicator) {
                     readyElement = <HTMLElement>indicator.querySelector('.ready');
                     initElement = <HTMLElement>indicator.querySelector('.init');
                 }
-
+                transform(currentElement, { left: this.elementLeft, top: this.elementTop + deltaY / 2 }, '0s');
                 status = Math.abs(deltaY) <= this.switchDistances.top ? 'init' : 'ready';
                 action = 'pullDown';
             }
@@ -270,7 +258,7 @@ export class PageViewGesture {
                     readyElement = <HTMLElement>indicator.querySelector('.ready');
                     initElement = <HTMLElement>indicator.querySelector('.init');
                 }
-
+                transform(currentElement, { left: this.elementLeft, top: this.elementTop + deltaY / 2 }, '0s');
                 status = Math.abs(deltaY) <= this.switchDistances.bottom ? 'init' : 'ready';
                 action = 'pullUp';
             }
@@ -295,7 +283,7 @@ export class PageViewGesture {
             else if (action == 'pullUp' && status == 'ready' && bottomViewNode != null) {
                 this.showView(bottomViewNode);
             }
-            else if (isAndroid) {
+            else {
                 transform(viewNode.element, this.positions.current, '0.4s');
             }
 

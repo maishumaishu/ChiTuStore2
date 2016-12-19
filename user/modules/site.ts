@@ -63,6 +63,10 @@ class MyApplication extends chitu.Application {
         routeData.resources.push({ name: 'pageCSS', path: cssPath });
         routeData.resources.push({ name: 'viewHTML', path: `text!pages${path}.html` });
 
+        if (routeData.pageName == 'home.newsList') {
+            routeData.resources.push({ name: 'dataList', path: `controls/dataList` });
+        }
+
         return routeData;
     }
 

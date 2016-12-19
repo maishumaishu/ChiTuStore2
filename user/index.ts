@@ -34,6 +34,7 @@ requirejs.config({
         text: 'js/text',
         move: 'js/move',
         vue: 'js/vue',
+        controls: modulesPath + '/controls',
         core: modulesPath + '/core',
         services: modulesPath + '/services',
         site: modulesPath + '/site',

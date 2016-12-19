@@ -198,6 +198,10 @@ export module home {
         let url = config.service.site + 'Home/GetAdvertItems'
         return get(url);
     }
+    export function newsList(pageIndex: number): Promise<any[]> {
+        let url = config.service.site + 'Info/GetNewsList';
+        return get(url, { pageIndex });
+    }
 }
 
 export module shop {
