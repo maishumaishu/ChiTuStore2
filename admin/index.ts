@@ -52,7 +52,6 @@ requirejs.config({
 requirejs(['site', 'vue', 'vue.ext', 'errorHandle'], function (args, vue, vue_ext) {
     window['Vue'] = vue;
     vue_ext.config.imageDisaplyText = '零食有约';
-    //vue_ext.config.imageBaseUrl = 'http://service.alinq.cn:2015/Shop';
 });
 
 

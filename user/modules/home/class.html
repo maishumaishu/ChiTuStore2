@@ -1,1 +1,7 @@
-<h1>Class</h1>
+<div>
+    <div v-for="item in cateories" class="col-xs-3" style="margin-top:10px;padding:0px;text-align:center">
+        <image-box :src="item.ImagePath" class="img-responsive-100 img-full">
+        </image-box>
+        <span class="mini interception">{{item.Name}}</span>
+    </div>
+</div>

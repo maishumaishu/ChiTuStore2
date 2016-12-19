@@ -27,12 +27,12 @@
     </div>
 
     <div class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
-        <span class="pull-left">价格：<strong data-bind="money: product.Price" class="price">￥{{product.Price}}</strong></span>
+        <span class="pull-left">价格：<strong data-bind="money: product.Price" class="price">￥{{product.Price.toFixed(2)}}</strong></span>
         <span v-if="product.Score" class="pull-left" style="display: none;">积分：<strong class="price">{{product.Score}}</strong></span>
         <span class="pull-right">{{product.Unit}}</span>
         <div class="clearfix"></div>
         <p class="oldprice" v-if="product.MemberPrice != null && product.MemberPrice != product.Price" style="display: none;">
-            促销价：<span class="price">￥{{product.MemberPrice}}</span>
+            促销价：<span class="price">￥{{product.MemberPrice.toFixed(2)}}</span>
         </p>
     </div>
 

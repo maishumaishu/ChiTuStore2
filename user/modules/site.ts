@@ -6,7 +6,7 @@ export let config = {
 }
 
 export let browser = function () {
-   let browser = {
+    let browser = {
         msie: false, firefox: false, opera: false, safari: false,
         chrome: false, netscape: false, appname: 'unknown',
         version: 0
@@ -49,6 +49,7 @@ class MyApplication extends chitu.Application {
         switch (routeData.pageName) {
             case 'home.index':
             case 'home.product':
+            case 'home.class':
                 headerPath = `text!ui/headers/${routeData.pageName}.html`;
                 break;
             case 'home.class':
@@ -83,9 +84,9 @@ class MyApplication extends chitu.Application {
         routeData.resources.push({ name: 'pageCSS', path: cssPath });
         routeData.resources.push({ name: 'viewHTML', path: `text!pages${path}.html` });
 
-        if (routeData.pageName == 'home.newsList') {
-            routeData.resources.push({ name: 'dataList', path: `controls/dataList` });
-        }
+        // if (routeData.pageName == 'home.newsList') {
+        //     routeData.resources.push({ name: 'dataList', path: `controls/dataList` });
+        // }
 
         return routeData;
     }

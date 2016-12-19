@@ -194,9 +194,12 @@ export module home {
             return product;
         });
     }
-    export function advertItems(): Promise<any[]> {
+    export function advertItems(): Promise<{ ImgUrl: string }[]> {
         let url = config.service.site + 'Home/GetAdvertItems'
-        return get(url);
+        return get<{ ImgUrl: string }[]>(url).then(items => {
+            items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
+            return items;
+        });
     }
     export function newsList(pageIndex: number): Promise<any[]> {
         let url = config.service.site + 'Info/GetNewsList';
@@ -208,5 +211,9 @@ export module shop {
     export function productIntroduce(productId: string): Promise<string> {
         let url = config.service.shop + 'Product/GetProductIntroduce';
         return get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
+    }
+    export function cateories(){
+        let url = config.service.shop + 'Product/GetCategories';
+        return get<any[]>(url);
     }
 }
