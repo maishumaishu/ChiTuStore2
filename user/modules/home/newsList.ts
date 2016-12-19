@@ -1,5 +1,5 @@
 import { Page } from 'chitu.mobile';
-import * as services from 'modules/services';
+import * as services from 'services';
 import Vue = require('vue');
 
 export default function (page: Page) {

@@ -5,6 +5,26 @@ export let config = {
     imageText: '零食有约'
 }
 
+export let browser = function () {
+   let browser = {
+        msie: false, firefox: false, opera: false, safari: false,
+        chrome: false, netscape: false, appname: 'unknown',
+        version: 0
+    };
+    let userAgent = window.navigator.userAgent.toLowerCase();
+    if (/(msie|firefox|opera|chrome|netscape)\D+(\d[\d.]*)/.test(userAgent)) {
+        browser[RegExp.$1] = true;
+        browser.appname = RegExp.$1;
+        browser.version = new Number(RegExp.$2).valueOf();
+    } else if (/version\D+(\d[\d.]*).*safari/.test(userAgent)) { // safari 
+        browser.safari = true;
+        browser.appname = 'safari';
+        browser.version = new Number(RegExp.$2).valueOf();
+    }
+
+    return browser;
+} ();
+
 class MyPage extends Page {
     constructor(params) {
         super(params);
