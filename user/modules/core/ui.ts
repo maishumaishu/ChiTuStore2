@@ -195,6 +195,10 @@ export class PageViewGesture {
                 moving = 'vertical';
                 moveVertical(event, currentY - startY);
             }
+
+            if (action != null) {
+                event.preventDefault();
+            }
         })
 
         var calculateAngle = (x, y) => {
@@ -209,19 +213,25 @@ export class PageViewGesture {
 
             let left = this.elementLeft + deltaX;
             transform(currentElement, { left, top: this.elementTop }, '0s');
-            if (deltaX < 0 && rightElement != null) {
-                transform(rightElement, { left: left + currentElement.clientWidth, top: this.elementTop }, '0s');
+            if (deltaX < 0) {
                 action = 'swipeLeft';
-                status = Math.abs(deltaX) >= this.switchDistances.left ? 'ready' : 'init';
+
+                if (rightElement != null) {
+                    transform(rightElement, { left: left + currentElement.clientWidth, top: this.elementTop }, '0s');
+                    status = Math.abs(deltaX) >= this.switchDistances.left ? 'ready' : 'init';
+                }
             }
-            else if (deltaX > 0 && leftElement != null) {
-                let left = deltaX - leftElement.clientWidth;
-                transform(leftElement, { left, top: this.elementTop }, '0s');
+            else if (deltaX > 0) {
                 action = 'swipeRight';
-                status = Math.abs(deltaX) >= this.switchDistances.right ? 'ready' : 'init';
+
+                if (leftElement != null) {
+                    let left = deltaX - leftElement.clientWidth;
+                    transform(leftElement, { left, top: this.elementTop }, '0s');
+                    status = Math.abs(deltaX) >= this.switchDistances.right ? 'ready' : 'init';
+                }
             }
             this.disableNativeScroll(currentElement);
-            event.preventDefault();
+            //event.preventDefault();
         }
 
 
@@ -289,7 +299,7 @@ export class PageViewGesture {
                 transform(viewNode.element, this.positions.current, '0.4s');
             }
 
-            if(readyElement != null && initElement != null){
+            if (readyElement != null && initElement != null) {
                 initElement.style.display = 'block';
                 readyElement.style.display = 'none';
             }
@@ -307,13 +317,13 @@ export class PageViewGesture {
             }
             else {
                 transform(viewNode.element, this.positions.current, '0.4s');
-                if (action == 'swipeLeft') {
+                if (action == 'swipeLeft' && elements.rightElement != null) {
                     transform(elements.rightElement, this.positions.right, '0.4s')
                         .then(() => {
                             elements.rightElement.style.display = 'none';
                         });
                 }
-                else if (action == 'swipeRight') {
+                else if (action == 'swipeRight' && elements.leftElement != null) {
                     transform(elements.leftElement, this.positions.left, '0.4s')
                         .then(() => {
                             elements.leftElement.style.display = 'none';
