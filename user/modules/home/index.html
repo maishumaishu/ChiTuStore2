@@ -64,18 +64,18 @@
 <div class="clearfix"></div>
 </div>
 <div class="row products" style="margin: 0px;">
-  
+
 <data-list @load="loadProducts">
   <template scope="props">
-    <div class="col-xs-6 text-center item">
-      <image-box :src="props.item.ImagePath" class="img-responsive-70 img-full"></image-box>
+    <a :href="`#home_product?id=${props.item.ProductId}`" class="col-xs-6 text-center item">
+      <image-box :src="props.item.ImagePath"></image-box>
       <div class="bottom">
         <div class="interception">{{props.item.Name}}</div>
         <div>
           <div class="price pull-left">￥{{props.item.Price.toFixed(2)}}</div>
         </div>
       </div>
-    </div>
+    </a>
   </template>
 </data-list>
 </div>
