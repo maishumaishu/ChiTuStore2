@@ -6,8 +6,8 @@
 <!-- Wrapper for slides -->
 <div class="carousel-inner">
   <div v-for="(item, index) in advertItems" v-bind:class="{active: index == 0}" class="item">
-    <cv-img v-bind:src="item.ImgUrl" class="img-responsive">
-    </cv-img>
+    <image-box v-bind:src="item.ImgUrl" class="img-responsive">
+    </image-box>
     <div class="carousel-caption">
     </div>
   </div>
@@ -16,19 +16,19 @@
 
 <div style="padding-top:20px;padding-bottom:20px;">
 <div class="quickbar">
-  <div class="col-xs-3 text-center">
-    <a href="#User_Favors">
-        <div style="position:relative;left:50%;">
-<div class="item">
-  <i class="icon-heart"></i>
-</div>
-</div>
-<div class="text">我的收藏</div>
+
+  <a class="col-xs-3 text-center" href="#user_favors">
+    <div style="position:relative;left:50%;">
+    <div class="item">
+      <i class="icon-heart"></i>
+    </div>
+    </div>
+    <div class="text">我的收藏</div>
 </a>
-</div>
-<div class="col-xs-3 text-center">
-  <!--<img src="images/APP/order.png" class="img-responsive-70" /><br />-->
-  <a href="#Shopping_OrderList">
+
+
+<!--<img src="images/APP/order.png" class="img-responsive-70" /><br />-->
+<a class="col-xs-3 text-center" href="#shopping_orderList">
         <div style="position:relative;left:50%;">
 <div class="item">
   <i class="icon-list"></i>
@@ -36,10 +36,10 @@
 </div>
 <div class="text">订单查询</div>
 </a>
-</div>
-<div class="col-xs-3 text-center">
-  <!--<img src="images/APP/recharge.png" class="img-responsive-70" /><br />-->
-  <a href="#User_RechargeList">
+
+
+<!--<img src="images/APP/recharge.png" class="img-responsive-70" /><br />-->
+<a class="col-xs-3 text-center" href="#User_RechargeList">
         <div style="position:relative;left:50%;">
 <div class="item">
   <i class="icon-credit-card"></i>
@@ -47,18 +47,18 @@
 </div>
 <div class="text">会员充值</div>
 </a>
-</div>
-<div class="col-xs-3 text-center">
-  <!--<img src="images/APP/score.png" class="img-responsive-70" /><br />-->
-  <a href="#Home_ProductList_category_cc5a34d4-9e9d-4b9e-8715-46a3ba69dbe1">
-        <div style="position:relative;left:50%;width:0px;">
+
+
+<!--<img src="images/APP/score.png" class="img-responsive-70" /><br />-->
+<a class="col-xs-3 text-center" href="#Home_ProductList_category_cc5a34d4-9e9d-4b9e-8715-46a3ba69dbe1">
+    <div style="position:relative;left:50%;width:0px;">
 <div class="item">
   <i class="icon-exchange"></i>
 </div>
 </div>
 <div class="text">积分兑换</div>
 </a>
-</div>
+
 <div class="clearfix"></div>
 </div>
 <div class="clearfix"></div>

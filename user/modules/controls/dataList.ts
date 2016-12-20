@@ -32,14 +32,14 @@ Vue.component('data-list', {
     },
     methods: {
         fireLoad(pageIndex, reslove, reject) {
-            reject = reject || (() => { });
             let self = this as ModelData & ModelMethods & VueInstance;
+            if (self.status == 'complted')
+                return;
+
+            reject = reject || (() => { });
             self.status = 'loading';
             self.$emit('load', pageIndex, reslove, reject);
         }
-    },
-    computed: {
-
     },
     mounted: function () {
         let self = this as ModelData & ModelMethods & VueInstance;

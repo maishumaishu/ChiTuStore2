@@ -2,28 +2,9 @@ import * as services from 'services';
 import { Application, Page } from 'chitu.mobile';
 
 export let config = {
-    imageText: '零食有约'
+    imageText: '零食有约',
+    defaultUrl: 'home_index'
 }
-
-export let browser = function () {
-    let browser = {
-        msie: false, firefox: false, opera: false, safari: false,
-        chrome: false, netscape: false, appname: 'unknown',
-        version: 0
-    };
-    let userAgent = window.navigator.userAgent.toLowerCase();
-    if (/(msie|firefox|opera|chrome|netscape)\D+(\d[\d.]*)/.test(userAgent)) {
-        browser[RegExp.$1] = true;
-        browser.appname = RegExp.$1;
-        browser.version = new Number(RegExp.$2).valueOf();
-    } else if (/version\D+(\d[\d.]*).*safari/.test(userAgent)) { // safari 
-        browser.safari = true;
-        browser.appname = 'safari';
-        browser.version = new Number(RegExp.$2).valueOf();
-    }
-
-    return browser;
-} ();
 
 class MyPage extends Page {
     constructor(params) {
@@ -37,6 +18,8 @@ class MyPage extends Page {
 }
 
 class MyApplication extends chitu.Application {
+    private _cachePages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
+
     constructor() {
         super();
         this.pageType = MyPage;
@@ -84,10 +67,6 @@ class MyApplication extends chitu.Application {
         routeData.resources.push({ name: 'pageCSS', path: cssPath });
         routeData.resources.push({ name: 'viewHTML', path: `text!pages${path}.html` });
 
-        // if (routeData.pageName == 'home.newsList') {
-        //     routeData.resources.push({ name: 'dataList', path: `controls/dataList` });
-        // }
-
         return routeData;
     }
 
@@ -112,17 +91,18 @@ class MyApplication extends chitu.Application {
         });
         let className = routeData.pageName.split('.').join('-');
         page.element.className = 'page ' + className;
+        page.allowCache = this._cachePages.indexOf(page.name) >= 0;
         return page;
     }
 }
 
 export let app = window['app'] = new MyApplication();
 app.run();
-
-var u = navigator.userAgent;
-export let isAndroid = u.indexOf('Android') > -1;
+app.backFail.add(() => {
+    app.redirect(config.defaultUrl);
+});
 
 if (!location.hash) {
-    app.redirect('home_index');
+    app.redirect(config.defaultUrl);
 }
 

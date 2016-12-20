@@ -1,7 +1,7 @@
 <div class="row">
-    <div v-for="item in cateories" class="col-xs-3">
+    <a :href="`#home_productList?categoryId=${item.Id}`" v-for="item in cateories" class="col-xs-3">
         <image-box :src="item.ImagePath">
         </image-box>
         <span class="mini interception">{{item.Name}}</span>
-    </div>
+    </a>
 </div>
