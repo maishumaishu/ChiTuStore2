@@ -12,12 +12,11 @@ export default function (page: Page) {
     let data = { advertItems };
     let pageIndex = 0;
 
-    let q = Promise.all([services.home.advertItems()])
-        .then(result => {
-            data.advertItems = result[0];
-            page.loadingView.style.display = 'none';
-            pageIndex = pageIndex + 1;
-        });
+    let q = services.home.advertItems().then(items => {
+        data.advertItems = items;
+        page.loadingView.style.display = 'none';
+        pageIndex = pageIndex + 1;
+    })
 
     page.load.add(() => {
         new Vue({
