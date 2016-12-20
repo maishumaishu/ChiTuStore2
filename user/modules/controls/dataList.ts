@@ -1,8 +1,11 @@
 import Vue = require('vue');
 
-type Model = {
+type ModelData = {
     dataSource: Array<any>,
-    status: 'loading' | 'complted'
+    status: 'loading' | 'complted' | 'finish'
+}
+type ModelMethods = {
+    fireLoad: (pageIndex, reslove, reject?) => void
 }
 
 let template =
@@ -21,17 +24,25 @@ let template =
     </div>`
 Vue.component('data-list', {
     template,
-    data(): Model {
+    data(): ModelData {
         return {
             dataSource: [],
             status: 'loading',
         };
     },
+    methods: {
+        fireLoad(pageIndex, reslove, reject) {
+            reject = reject || (() => { });
+            let self = this as ModelData & ModelMethods & VueInstance;
+            self.status = 'loading';
+            self.$emit('load', pageIndex, reslove, reject);
+        }
+    },
     computed: {
 
     },
     mounted: function () {
-        let self = this as Model & VueInstance;
+        let self = this as ModelData & ModelMethods & VueInstance;
         let pageIndex = 0;
         let pageSize: number;
         let reslove = (items: Array<any>) => {
@@ -39,20 +50,19 @@ Vue.component('data-list', {
                 pageSize = items.length || 1;
             }
 
-            self.status = items.length < pageSize ? 'complted' : 'loading';
+            self.status = items.length < pageSize ? 'complted' : 'finish';
             items.forEach(o => this.dataSource.push(o));
             pageIndex = pageIndex + 1;
         }
-        let reject = (err) => {
 
-        }
-        self.$emit('load', pageIndex, reslove, reject);
-        window.setTimeout(function () {
+        window.setTimeout(() => {
+
+            self.fireLoad(pageIndex, reslove);
             scrollOnBottom(self.$parent.$el, function () {
-                (<any>self).isLoading = true;
-                self.$emit('load', pageIndex, reslove, reject);
+                self.fireLoad(pageIndex, reslove);
             })
-        }, 300);
+
+        }, 100);
     }
 })
 
