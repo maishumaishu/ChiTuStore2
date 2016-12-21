@@ -3,63 +3,9 @@
 
 .home-index {
 
-    // .scrollViewTopPadding(@header-height);
-    // .scrollViewBottomPadding(@menu-height);
     section {
         padding-top: @header-height;
         padding-bottom: @menu-height; 
-    }
-
-    nav {
-        border: none;
-        height: 50px;
-    }
-    
-    .right-icon {
-        position: absolute;
-        top: -4px;
-        right: 8px;
-        text-align: center;
-        color: white;
-        font-size: 32px;
-
-        & div {
-            position: relative;
-            font-size: 10px;
-            /*padding-left:4px;*/
-            top: -10px;
-            left: -4px;
-        }
-
-        & .badge {
-            position: relative;
-            right: -50px;
-            color: @brand-primary;
-            background-color: @btn-primary-color;
-        }
-    }
-
-    .pull-down {
-        height: 120px;
-        margin-top: -70px;
-
-        [name="slogan"] {
-            color: @brand-primary;
-            bottom: -40px;
-            position: relative;
-            font-size: 18px;
-            font-family: STXingkai,STXinwei;
-            /*margin-top:-40px;*/
-            img {
-                width: 240px;
-                margin-bottom: 8px;
-            }
-        }
-
-        [name="status-text"] {
-            position: relative;
-            bottom: -55px;
-        }
     }
 
     .products {
@@ -78,17 +24,19 @@
                 border-left: 1px solid white;
                 border-bottom: 1px solid @gray-lighter;
             }
-            /*&:nth-child(1) {
-                margin-top: 0px;
-            }*/
+
             .bottom {
                 text-align: left;
-                padding-top: 8px;
+                padding: 8px 0px 0px 8px;
             }
 
-            .price {
-                font-size: 16px;
-                padding-top: 4px;
+            //.price {
+            .price();
+            //}
+
+            img {
+                max-width: 70%;
+                height: auto;
             }
         }
 
@@ -103,18 +51,69 @@
             text-align: right;*/
         }
     }
-}
 
-//
+    header {
+        nav {
+            width: 100%;
+        }
+        .logo {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            height: 36px;
+        }
+        .search {
+            [name="search_input"] {
+                position: absolute;
+                top: 8px;
+                left: 46px;
+                right: 52px;
+                bottom: 2px;
+                width: auto;
+                background-color: white;
+                color: @gray-light;
+                text-align: left;
+            }
+        }
+        .search-icon {
+            position: absolute;
+            top: 12px;
+            right: 60px;
+            font-size: 20px;
+            color: #98a0af;
+        }
+        .right-icon {
+            position: absolute;
+            top: -4px;
+            right: 8px;
+            text-align: center;
+            color: white;
+            font-size: 32px;
 
+            & div {
+                position: relative;
+                font-size: 10px;
+                /*padding-left:4px;*/
+                top: -10px;
+                left: -4px;
+            }
 
-@quickbar_item_width: 60px;
-@quickbar_item_left: -28px;
-@quickbar_icon_fontsize: 40px;
-@quickbar_icon_top: 12px;
+            & .badge {
+                position: relative;
+                right: -50px;
+                color: @brand-primary;
+                background-color: @btn-primary-color;
+            }
+        }
+    }
+        .quickbar {
+        @quickbar_item_width: 60px;
+        @quickbar_item_left: -28px;
+        @quickbar_icon_fontsize: 40px;
+        @quickbar_icon_top: 12px;
 
-.home-index {
-    .quickbar {
+        padding: 20px 0px 0px 0px;
+
         .text {
             margin-top: 6px;
             //padding-right: 12px;
@@ -203,38 +202,6 @@
                     top: @quickbar_icon_top - 2;
                 }
             }
-        }
-    }
-
-    header {
-        nav {
-            width: 100%;
-        }
-        .logo {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            height: 36px;
-        }
-        .search {
-            [name="search_input"] {
-                position: absolute;
-                top: 8px;
-                left: 46px;
-                right: 52px;
-                bottom: 2px;
-                width: auto;
-                background-color: white;
-                color: @gray-light;
-                text-align: left;
-            }
-        }
-        .search-icon {
-            position: absolute;
-            top: 12px;
-            right: 60px;
-            font-size: 20px;
-            color: #98a0af;
         }
     }
 }

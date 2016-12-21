@@ -9,12 +9,11 @@ export default function (page: Page) {
     let { id } = page.routeData.values
 
 
-    let q = Promise.all([services.home.getProduct(id)]);
+    let productPromise = services.home.getProduct(id);
 
 
     page.load.add(async () => {
-        let result = await q;
-        let product = result[0];
+        let product = await productPromise;
 
         let node = page.dataView;
         let vm = new Vue({

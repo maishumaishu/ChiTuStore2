@@ -1,7 +1,7 @@
-<div>
-    <div v-for="item in cateories" class="col-xs-3 catetory">
-        <image-box :src="item.ImagePath" class="img-responsive-100 img-full">
+<div class="row">
+    <a :href="`#home_productList?categoryId=${item.Id}`" v-for="item in cateories" class="col-xs-3">
+        <image-box :src="item.ImagePath">
         </image-box>
         <span class="mini interception">{{item.Name}}</span>
-    </div>
+    </a>
 </div>
