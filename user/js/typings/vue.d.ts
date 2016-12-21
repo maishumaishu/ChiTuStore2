@@ -5,20 +5,21 @@ declare interface VueInstance {
     $set(object: Object, key: string, value: any);
 }
 
-interface VueOptions<T> {
+interface VueOptions<TData, TMethods> {
     el?: string | HTMLElement,
     beforeUpdate?: () => void,
     computed?: any,
-    data?: T | (() => T),
-    methods?: any,
+    data?: TData | (() => TData),
+    methods?: TMethods,
     mounted?: () => void,
+    render?: (createElement: Function, context: any) => void,
     updated?: () => void,
     watch?: any,
 }
 
 declare interface VueStatic {
-    new <T>(options: VueOptions<T>): T & VueInstance;
-    component<T>(name: string, options: { template: string, props?: any } & VueOptions<T>): T & VueInstance;
+    new <TData, TMethods>(options: VueOptions<TData, TMethods>): TData & TMethods & VueInstance;
+    component<TData, TMethods>(name: string, options: { template: string, props?: any } & VueOptions<TData, TMethods>): TData & TMethods & VueInstance;
     set(object: Object, key: string, value: any);
     nextTick(callback: Function, context?: any);
 }

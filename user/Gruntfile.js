@@ -3,7 +3,7 @@ module.exports = function(grunt) {
     // var dest_user_root = 'build/user';
 
     var src_user_root = '.';
-    var dest_user_root = '../build/user';
+    var dest_user_root = 'build';
 
     var ts_options = {
         module: 'amd',
@@ -24,11 +24,12 @@ module.exports = function(grunt) {
         babel: {
             options: {
                 sourceMap: false,
-                presets: ["es2015"]
+                presets: ["es2015"],
+                plugins: ["transform-vue-jsx"]
             },
             dist: {
                 files: [
-                    { expand: true, cwd: dest_user_root + '/modules', src: ['**/*.js'], dest: dest_user_root + '/modules.es5' }
+                    { expand: true, cwd: dest_user_root + '/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5' }
                 ]
             }
         },

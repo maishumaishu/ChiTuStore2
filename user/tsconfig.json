@@ -3,7 +3,8 @@
         "target": "es6",
         "module": "amd",
         "sourceMap": false,
-        "outDir": "../build/user",
-        "experimentalDecorators": true
+        "outDir": "build",
+        "experimentalDecorators": true,
+        "jsx": "preserve"
     }
 }
