@@ -2,8 +2,8 @@
     <div name="productImages" class="swiper-container">
         <div v-for="imageUrl in product.ImageUrls" class="swiper-wrapper">
             <div class="swiper-slide" style="text-align:center;">
-                <cv-img v-bind:src="imageUrl" class="img-responsive-100 img-full">
-                </cv-img>
+                <image-box v-bind:src="imageUrl" class="img-responsive-100 img-full">
+                </image-box>
             </div>
         </div>
         <div v-if="product.ImageUrls.length > 1" name="productImages-pagination" class="swiper-pagination"></div>
@@ -15,7 +15,7 @@
                 <h4 class="text-left" style="font-weight:bold;padding-left:20px;">{{product.Name}}</h4>
             </div>
             <div class="pull-right">
-                <h4 name="productNameChevron" style="">
+                <h4 name="productNameChevron">
                     <i class="icon-chevron-right"></i>
                 </h4>
             </div>

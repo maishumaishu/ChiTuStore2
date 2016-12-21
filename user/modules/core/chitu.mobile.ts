@@ -50,7 +50,8 @@ export class Page extends chitu.Page {
 
         this.load.add((sender: Page, args: any) => {
             this._viewCompleted = true;
-            this.view('main').innerHTML = args.viewHTML || '';
+            if (args.viewHTML)
+                this.view('main').innerHTML = args.viewHTML || '';
         });
 
     }

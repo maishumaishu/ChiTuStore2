@@ -8,11 +8,6 @@ declare module 'chitu.mobile' {
     export = cm;
 }
 
-declare module 'vue.ext' {
-    import m = require('modules/core/vue.ext');
-    export = m;
-}
-
 declare module 'services' {
     import * as cm from 'modules/services';
     export = cm;

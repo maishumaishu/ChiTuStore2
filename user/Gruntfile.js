@@ -1,9 +1,7 @@
-module.exports = function(grunt) {
-    // var src_user_root = 'client/user';
-    // var dest_user_root = 'build/user';
+module.exports = function (grunt) {
 
     var src_user_root = '.';
-    var dest_user_root = 'build';
+    var dest_user_root = '../build/user';
 
     var ts_options = {
         module: 'amd',
@@ -29,7 +27,8 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: [
-                    { expand: true, cwd: dest_user_root + '/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5' }
+                    { expand: true, cwd: 'build/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5' },
+                    { expand: true, cwd: 'build/modules', src: ['**/*.jsx'], dest: dest_user_root + '/modules', ext: '.js' }
                 ]
             }
         },
@@ -41,6 +40,7 @@ module.exports = function(grunt) {
                         src: ['js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/*.*', 'ui/**/*.*', 'index.html'],
                     },
                     { expand: true, cwd: src_user_root + '/modules', dest: dest_user_root + '/pages', src: ['**/*.html'] },
+                    { expand: true, cwd: 'build', dest: dest_user_root, src: ['**/*.js'] },
                 ],
             }
         },
@@ -63,5 +63,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-stylus');
     grunt.loadNpmTasks('grunt-contrib-less');
 
-    grunt.registerTask('default', ['shell', 'less', 'copy', 'babel']);
+    grunt.registerTask('default', ['shell', 'less', 'babel', 'copy']);
 }

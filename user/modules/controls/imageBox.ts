@@ -91,11 +91,11 @@ Vue.component(`image-box`, {
         };
     },
     mounted: function () {
-        let self = this as VueInstance;
+        let self = this as VueInstance<any>;
         processImageElement(self.$el as HTMLImageElement);
     },
     updated: function () {
-        let self = this as VueInstance;
+        let self = this as VueInstance<any>;
         processImageElement(self.$el as HTMLImageElement);
     }
 });

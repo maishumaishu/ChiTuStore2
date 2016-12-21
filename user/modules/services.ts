@@ -212,8 +212,8 @@ export module shop {
         let url = config.service.shop + 'Product/GetProductIntroduce';
         return get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
     }
-    export function cateories(){
+    export function cateories() {
         let url = config.service.shop + 'Product/GetCategories';
-        return get<any[]>(url);
+        return get<{ Id: string, Name: string }[]>(url);
     }
 }

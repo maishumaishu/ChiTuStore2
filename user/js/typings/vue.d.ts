@@ -1,8 +1,8 @@
 
-declare interface VueInstance {
+declare interface VueInstance<TData> {
     $el: HTMLElement;
-    $parent: VueInstance;
-    $data: any,
+    $parent: VueInstance<any>;
+    $data: TData,
     $methods: any,
     $emit(event: string, ...args: any[]);
     $watch(expOrFn: string | Function, callback: Function, options?: { deep?: boolean, immediate?: boolean }): Function;
@@ -23,7 +23,7 @@ interface VueOptions<TData, TMethods> {
 }
 
 declare interface VueStatic {
-    new <TData, TMethods>(options: VueOptions<TData, TMethods>): TData & TMethods & VueInstance;
+    new <TData, TMethods>(options: VueOptions<TData, TMethods>): TData & TMethods & VueInstance<TData>;
     component<TData, TMethods>(name: string, options: { template: string, props?: any } & VueOptions<TData, TMethods>): Function;
     set(object: Object, key: string, value: any);
     nextTick(callback: Function, context?: any);

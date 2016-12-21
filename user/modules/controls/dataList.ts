@@ -32,7 +32,7 @@ Vue.component('data-list', {
     },
     methods: {
         fireLoad(pageIndex, reslove, reject) {
-            let self = this as ModelData & ModelMethods & VueInstance;
+            let self = this as ModelData & ModelMethods & VueInstance<any>;
             if (self.status == 'complted')
                 return;
 
@@ -42,7 +42,7 @@ Vue.component('data-list', {
         }
     },
     mounted: function () {
-        let self = this as ModelData & ModelMethods & VueInstance;
+        let self = this as ModelData & ModelMethods & VueInstance<any>;
         let pageIndex = 0;
         let pageSize: number;
         let reslove = (items: Array<any>) => {

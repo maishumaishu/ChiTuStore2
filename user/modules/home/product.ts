@@ -4,6 +4,7 @@ import * as services from 'services';
 import * as site from 'site'
 import { PageViewGesture, imageDelayLoad } from 'core/ui'
 import Hammer = require('hammer');
+import 'controls/imageBox';
 
 export default function (page: Page) {
     let { id } = page.routeData.values
