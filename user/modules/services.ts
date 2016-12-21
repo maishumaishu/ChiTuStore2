@@ -201,9 +201,14 @@ export module home {
             return items;
         });
     }
-    export function newsList(pageIndex: number): Promise<any[]> {
+
+    type News = { Id: string, Title: string, ImgUrl: string, CreateDateTime: string };
+    export function newsList(pageIndex: number) {
         let url = config.service.site + 'Info/GetNewsList';
-        return get(url, { pageIndex });
+        return get<News[]>(url, { pageIndex }).then(items => {
+            items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
+            return items;
+        });
     }
 }
 

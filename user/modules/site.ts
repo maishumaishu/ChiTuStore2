@@ -65,7 +65,7 @@ class MyApplication extends chitu.Application {
         let path = routeData.actionPath.substr(routeData.basePath.length);
         let cssPath = `css!content/app` + path;
         routeData.resources.push({ name: 'pageCSS', path: cssPath });
-        if (routeData.pageName != 'home.class')
+        if (routeData.pageName == 'home.index')
             routeData.resources.push({ name: 'viewHTML', path: `text!pages${path}.html` });
 
         return routeData;
