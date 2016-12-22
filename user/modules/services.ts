@@ -156,6 +156,21 @@ export function imageUrl(path: string) {
     return url;
 }
 
+function parseDate(value: string): Date {
+    const prefix = '/Date(';
+    if (value.startsWith(prefix)) {
+        let star = prefix.length;
+        let len = value.length - prefix.length - ')/'.length;
+        let str = value.substr(star, len);
+        let num = parseInt(str);
+        let date = new Date(num);
+        return date;
+    }
+
+    throw new Error('not implment.');
+
+}
+
 export module home {
     type HomeProduct = { Id: string, Name: string, ImagePath: string };
     export function proudcts(pageIndex?: number): Promise<HomeProduct[]> {
@@ -173,7 +188,7 @@ export module home {
         return get(url);
     }
 
-    type Product = {
+    export type Product = {
         Id: string, Arguments: Array<{ key: string, value: string }>,
         BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
         GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
@@ -202,12 +217,21 @@ export module home {
         });
     }
 
-    type News = { Id: string, Title: string, ImgUrl: string, CreateDateTime: string };
+    export type News = { Id: string, Title: string, ImgUrl: string, Date: string, Content: string };
     export function newsList(pageIndex: number) {
         let url = config.service.site + 'Info/GetNewsList';
         return get<News[]>(url, { pageIndex }).then(items => {
             items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
             return items;
+        });
+    }
+
+    export function news(newsId: string) {
+        let url = config.service.site + 'Info/GetNews';
+        return get<News>(url, { newsId }).then(item => {
+            item.ImgUrl = imageUrl(item.ImgUrl);
+            item.Date = parseDate(item.Date).toLocaleDateString();
+            return item;
         });
     }
 }
@@ -220,5 +244,20 @@ export module shop {
     export function cateories() {
         let url = config.service.shop + 'Product/GetCategories';
         return get<{ Id: string, Name: string }[]>(url);
+    }
+
+    export type ShoppingCartItem = {
+        Id: string, Amount: number, Count: number, ImageUrl: string,
+        Price: number, ProductId: string, Selected: boolean, Name: string,
+        IsGiven: boolean
+    };
+    export class shoppingCart {
+        static getItems() {
+            let url = config.service.shop + `ShoppingCart/GetItems`;
+            return get<ShoppingCartItem[]>(url, {}).then(items => {
+                items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
+                return items;
+            });
+        }
     }
 }

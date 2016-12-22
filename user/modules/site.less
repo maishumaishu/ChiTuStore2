@@ -64,7 +64,6 @@ a {
 
     &.loading {
         width: 100%;
-
         font-size: 120px;
         text-align: center;  
         padding-top: 80px;
@@ -80,7 +79,7 @@ header {
     margin: 0;
     border: 0;
     width: 100%;
-    /*height: @header-height;*/
+    height: @header-height;
     position: fixed;
     background-color: @brand-primary; 
     z-index: @zindex-navbar-fixed;
@@ -103,6 +102,7 @@ header {
         top: 8px;
         left: 12px;
     }
+    .defaultHeader();
 }
 
 footer {

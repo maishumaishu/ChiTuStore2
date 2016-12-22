@@ -6,11 +6,11 @@ import 'controls/imageBox';
 
 export default function (page: Page) {
 
-    page.dataView.innerHTML = 
-`<div class="container">
+    page.dataView.innerHTML =
+        `<div class="container">
     <data-list ref="newsList" v-on:load="newsListLoad">
         <template scope="props">
-            <a class="item" href="'#home_news?id=' + props.item.Id">
+            <a class="item" :href="'#home_news?id=' + props.item.Id">
                 <image-box :src="props.item.ImgUrl" class="img-responsive"></image-box>
                 <div class="title">{{ props.item.Title }}</div>
             </a>
@@ -32,5 +32,22 @@ export default function (page: Page) {
                     .catch(err => reject(err));
             }
         },
+    })
+
+    createHeader(page);
+}
+
+function createHeader(page: Page) {
+    new Vue({
+        el: page.header,
+        render(h) {
+            return (
+                <header>
+                    <nav class="bg-primary" style="width:100%;">
+                        <h4>微资讯</h4>
+                    </nav>
+                </header>
+            );
+        }
     })
 }

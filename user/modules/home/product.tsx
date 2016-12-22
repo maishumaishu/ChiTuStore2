@@ -6,62 +6,61 @@ import { PageViewGesture, imageDelayLoad } from 'core/ui'
 import Hammer = require('hammer');
 import 'controls/imageBox';
 
-export default function (page: Page) {
+export default async function (page: Page) {
     let { id } = page.routeData.values
 
 
     let productPromise = services.home.getProduct(id);
+    let html = (await chitu.loadjs(`text!pages/home/product.html`))[0]
 
+    page.dataView.innerHTML = html;
 
-    page.load.add(async () => {
-        let product = await productPromise;
+    let product = await productPromise;
 
-        let node = page.dataView;
-        let vm = new Vue({
-            el: page.dataView,
-            data: {
-                product
-            },
-            computed: {
-                productSelectedText
-            },
-            mounted
-        });
+    let node = page.dataView;
+    let vm = new Vue({
+        el: page.dataView,
+        data: {
+            product
+        },
+        computed: {
+            productSelectedText
+        },
+        mounted
+    });
 
-        function productSelectedText() {
-            var str = '';
-            var props = product.CustomProperties;
-            for (var i = 0; i < props.length; i++) {
-                var options = props[i].Options;
-                for (var j = 0; j < options.length; j++) {
-                    if (options[j].Selected) {
-                        str = str + options[j].Name + ' ';
-                        break;
-                    }
+    function productSelectedText() {
+        var str = '';
+        var props = product.CustomProperties;
+        for (var i = 0; i < props.length; i++) {
+            var options = props[i].Options;
+            for (var j = 0; j < options.length; j++) {
+                if (options[j].Selected) {
+                    str = str + options[j].Name + ' ';
+                    break;
                 }
             }
-            str = str + product.Count + '件';
-            return str;
         }
+        str = str + product.Count + '件';
+        return str;
+    }
 
-        async function mounted() {
-            page.loadingView.style.display = 'none';
+    async function mounted() {
+        page.loadingView.style.display = 'none';
 
+        let introduceView = createIntroduceView(page);
+        let introduceView2 = createHorizontalIntroduceView(page);
+        page.element.appendChild(introduceView);
+        page.element.appendChild(introduceView2);
+        let pageView = new PageViewGesture({
+            element: page.dataView,
+            right: { element: introduceView2 },
+            bottom: { element: introduceView }
+        });
+    }
 
-            let introduceView = createIntroduceView(page);
-            let introduceView2 = createHorizontalIntroduceView(page);
-            page.element.appendChild(introduceView);
-            page.element.appendChild(introduceView2);
-            let pageView = new PageViewGesture({
-                element: page.dataView,
-                right: { element: introduceView2 },
-                bottom: { element: introduceView }
-            });
-        }
-    })
+    createHeader(page);
 }
-
-
 
 function createIntroduceView(page: Page) {
     let introduceView = document.createElement('section');
@@ -89,7 +88,6 @@ function createIntroduceView(page: Page) {
     return introduceView;
 }
 
-
 function createHorizontalIntroduceView(page: Page) {
     let introduceView = document.createElement('section');
 
@@ -110,8 +108,23 @@ function createHorizontalIntroduceView(page: Page) {
         }
     });
 
-
-
     return introduceView;
 }
 
+function createHeader(page: Page) {
+    new Vue({
+        el: page.header,
+        render(h) {
+            return (
+                <header>
+                    <nav class="bg-primary" style="width:100%;">
+                        <a name="back-button" href="javascript:app.back()" class="leftButton" style="padding-right:20px;padding-left:20px;margin-left:-20px;">
+                            <i class="icon-chevron-left"></i>
+                        </a>
+                        <h4>商品信息</h4>
+                    </nav>
+                </header>
+            );
+        }
+    })
+}

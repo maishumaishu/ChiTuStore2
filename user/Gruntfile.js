@@ -22,12 +22,12 @@ module.exports = function (grunt) {
         babel: {
             options: {
                 sourceMap: false,
-                presets: ["es2015"],
+                //presets: ["es2015"],
                 plugins: ["transform-vue-jsx"]
             },
             dist: {
                 files: [
-                    { expand: true, cwd: 'build/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5' },
+                    //{ expand: true, cwd: 'build/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5' },
                     { expand: true, cwd: 'build/modules', src: ['**/*.jsx'], dest: dest_user_root + '/modules', ext: '.js' }
                 ]
             }

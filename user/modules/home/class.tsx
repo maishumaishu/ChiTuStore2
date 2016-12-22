@@ -7,12 +7,12 @@ export default function (page: Page) {
     let cateoriesPromise = services.shop.cateories();
     let vm = new Vue({
         el: page.dataView,
-        data:{
-             cateories: [],
+        data: {
+            cateories: [],
         },
         render
     });
-    
+
     cateoriesPromise.then(items => {
         vm.cateories = items;
         page.loadingView.style.display = 'none';
@@ -32,4 +32,26 @@ export default function (page: Page) {
             </section>
         );
     }
+
+    createHeader(page);
+}
+
+function createHeader(page: Page) {
+    new Vue({
+        el: page.header,
+        render(h) {
+            return (
+                <header>
+                    <nav class="search bg-primary">
+                        <div name="search-box" class="form-control" style="">
+                            寻找商品、品牌、品类
+                        </div>
+                        <div class="search-icon">
+                            <i class="icon-search"></i>
+                        </div>
+                    </nav>
+                </header>
+            );
+        }
+    })
 }
