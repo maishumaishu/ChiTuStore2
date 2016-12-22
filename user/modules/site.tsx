@@ -3,10 +3,15 @@ import { Page } from 'chitu.mobile';
 import { config as imageBoxConfig } from 'controls/imageBox';
 import * as chitu from 'chitu';
 
-imageBoxConfig.imageDisaplyText = '零食有约';
+//imageBoxConfig.imageDisaplyText = '零食有约';
 
 export let config = {
-    imageText: imageBoxConfig.imageDisaplyText,
+    get imageText() {
+        return imageBoxConfig.imageDisaplyText;
+    },
+    set imageText(value) {
+        imageBoxConfig.imageDisaplyText = value;
+    },
     defaultUrl: 'home_index'
 }
 

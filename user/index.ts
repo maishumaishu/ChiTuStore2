@@ -22,9 +22,9 @@ var browser = function () {
 } ();
 
 // 通浏览器版本设定是否使用 es5
-// if (browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
-//     es5 = false;
-// }
+if (browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
+    es5 = false;
+}
 
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
@@ -71,10 +71,9 @@ requirejs.config({
     }
 });
 
-requirejs(['site', 'vue'], function (args, vue, vue_ext) {
+requirejs(['site', 'vue'], function (site, vue) {
     window['Vue'] = vue;
-    // vue_ext.config.imageDisaplyText = '零食有约';
-    // vue_ext.config.imageBaseUrl = 'http://service.alinq.cn:2015/Shop';
+    site.config.imageText = '零食有约';
 });
 
 
