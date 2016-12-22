@@ -6,17 +6,6 @@ export let config = {
     defaultUrl: 'home_index'
 }
 
-class MyPage extends Page {
-    constructor(params) {
-        super(params);
-
-        this.view('loading').innerHTML = `
-<div class="spin">
-    <i class="icon-spinner icon-spin"></i>
-</div>`;
-    }
-}
-
 let DEFAULT_HEADER_HTML = `
 <nav class="bg-primary" style="width:100%;">
     <h4>&nbsp;</h4>
@@ -30,6 +19,11 @@ let DEFAULT_HEADER_WITH_BACK_HTML = `
     <h4>&nbsp;</h4>
 </nav>`;
 
+let LOADING_HTML = `
+<div class="spin">
+    <i class="icon-spinner icon-spin"></i>
+</div>`;
+
 
 class MyApplication extends chitu.Application {
     private _cachePages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
@@ -37,7 +31,6 @@ class MyApplication extends chitu.Application {
 
     constructor() {
         super();
-        this.pageType = MyPage;
         this.topLevelPages = this._cachePages;
     }
 
@@ -48,6 +41,9 @@ class MyApplication extends chitu.Application {
 
     protected createPage(routeData: chitu.RouteData) {
         let page = super.createPage(routeData) as Page;
+
+        page.loadingView.innerHTML = LOADING_HTML;
+
         let headerElement = page.createHeader(50);
 
         if (this.topLevelPages.indexOf(routeData.pageName) >= 0) {
@@ -88,3 +84,8 @@ if (!location.hash) {
     app.redirect(config.defaultUrl);
 }
 
+//================================================================================
+
+export function createDefaultHeader(h, title: string) {
+
+}

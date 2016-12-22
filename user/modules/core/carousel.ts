@@ -1,7 +1,4 @@
-import Hammer = require('hammer');
-import move = require('move'); // 说明：使用 move.js 框加，比直接使用 webkitTransform 样式要高效，后者在 iphone 真机上会卡。
 
-//TODO: 活动圆点的显示
 //TODO: 如果 items 为0,或者为 1 的情况。
 
 class Errors {
@@ -18,7 +15,7 @@ class Carousel {
     private playTimeId: number = 0;// 0 为停止中，－1 为已停止，非 0 为播放中。
     private playing = false;
     private paned = false;
-    private window_width = window.outerWidth; //$(window).width();
+    private window_width;// = window.outerWidth; //$(window).width();
     private active_position: number; // 记录活动页的位置（按页面的百份比）
     private active_index: number;
     private items: HTMLElement[];
@@ -30,6 +27,7 @@ class Carousel {
         if (element == null)
             throw Errors.argumentNull('element');
 
+        this.window_width = document.body.clientWidth;
         this.items = new Array<HTMLElement>();
         let q = element.querySelectorAll('.item');
         for (let i = 0; i < q.length; i++) {
@@ -45,15 +43,10 @@ class Carousel {
 
         this.active_index = this.active_index >= 0 ? this.active_index : 0;
 
-        var hammer = new Hammer.Manager(element);
-        var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_HORIZONTAL, });
-        hammer.add(pan);
         addClassName(this.activeItem(), 'active');
         addClassName(this.indicators[this.active_index], 'active');
 
-        hammer.on('panstart', (e: PanEvent) => this.panstart(e))
-            .on('panmove', (e: PanEvent) => this.panmove(e))
-            .on('panend', (e: PanEvent) => this.panend(e));
+        this.listenTouch(element);
 
         options = Object.assign({ autoplay: true }, options);
         this.autoplay = options.autoplay;
@@ -64,35 +57,93 @@ class Carousel {
 
     }
 
-    private panstart(e: PanEvent) {
+    private listenTouch(element: HTMLElement) {
+        let startY, currentY;
+        let startX, currentX;
+        let moving: 'horizontal' | 'vertical';
+
+        //let status: 'init' | 'ready';
+        //let action: 'pullDown' | 'pullUp' | 'swipeLeft' | 'swipeRight';
+
+
+        let horizontal_swipe_angle = 35;
+        let vertical_pull_angle = 65;
+
+        element.addEventListener('touchstart', (event: TouchEvent) => {
+            startY = event.touches[0].pageY;
+            startX = event.touches[0].pageX;
+            this.panstart(event);
+        })
+
+        element.addEventListener('touchmove', (event: TouchEvent) => {
+            currentX = event.targetTouches[0].pageX;
+            currentY = event.targetTouches[0].pageY;
+            let angle = calculateAngle(currentX - startX, currentY - startY);
+            if (angle < horizontal_swipe_angle) {
+                moving = 'horizontal';
+                this.panmove(event, currentX - startX);
+            }
+            // else if (angle > vertical_pull_angle && moving != 'horizontal') {
+            //     moving = 'vertical';
+            // }
+
+            if (moving != null) {
+                event.preventDefault();
+            }
+        })
+
+        var calculateAngle = (x, y) => {
+            let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
+            return d;
+        }
+
+
+        let readyElement: HTMLElement;
+        let initElement: HTMLElement;
+
+
+
+        var endHorizontal = (event: TouchEvent, deltaX: number) => {
+            moving = null;
+            this.panend(event, deltaX);
+        }
+
+        element.addEventListener('touchcancel', (event) => endHorizontal(event, currentX - startX));
+        element.addEventListener('touchend', (event) => endHorizontal(event, currentX - startX));
+    }
+
+    private panstart(e: TouchEvent) {
         if (this.is_pause)
             return false;
 
         this.stop();
     }
-    private panmove(e: PanEvent) {
-        if ((e.direction & Hammer.DIRECTION_VERTICAL) != 0) {
-            console.log('DIRECTION_VERTICAL');
-        }
-        var percent_position = Math.floor(e.deltaX / window.outerWidth * 100);
+    private panmove(e: TouchEvent, deltaX: number) {
+        var percent_position = Math.floor(deltaX / document.body.clientWidth * 100);
         if (this.active_position == percent_position || this.playing == true) {
             return;
         }
 
         this.paned = true;
-        move(this.activeItem()).x(e.deltaX).duration(0).end();
+        this.move(this.activeItem(), deltaX, 0);
         this.active_position = percent_position;
 
         if (percent_position < 0) {
             this.nextItem().className = 'item next';
-            move(this.nextItem()).x(this.window_width + e.deltaX).duration(0).end();
+            this.move(this.nextItem(),this.window_width + deltaX,0);
         }
         else if (percent_position > 0) {
             this.prevItem().className = 'item prev';
-            move(this.prevItem()).x(e.deltaX - this.window_width).duration(0).end();
+            this.move(this.prevItem(),deltaX - this.window_width,0);
         }
     }
-    private panend(e: PanEvent) {
+
+    private move(element: HTMLElement, deltaX: number, time: number) {
+        element.style.transform = `translate(${deltaX}px, 0px)`;
+        element.style.transition = `${time/1000}s`;
+    }
+
+    private panend(e: TouchEvent, deltaX: number) {
         if (this.paned == false)
             return;
 
@@ -100,8 +151,8 @@ class Carousel {
         var duration_time = 200;
         let p = MOVE_PERSEND;
         if (this.active_position > 0 && this.active_position >= p) {
-            move(this.activeItem()).x(this.window_width).duration(duration_time).end();
-            move(this.prevItem()).x(0).duration(duration_time).end();
+            this.move(this.activeItem(), this.window_width, duration_time);
+            this.move(this.prevItem(), 0, duration_time);
 
             window.setTimeout(() => {
                 removeClassName(this.prevItem(), 'prev', 'next');
@@ -112,12 +163,12 @@ class Carousel {
             }, duration_time);
         }
         else if (this.active_position > 0 && this.active_position < p) {
-            move(this.activeItem()).x(0).duration(duration_time).end();
-            move(this.prevItem()).x(0 - this.window_width).duration(duration_time).end();
+            this.move(this.activeItem(), 0, duration_time);//
+            this.move(this.prevItem(), 0 - this.window_width, duration_time);
         }
         else if (this.active_position <= 0 - p) {
-            move(this.activeItem()).x(0 - this.window_width).duration(duration_time).end();
-            move(this.nextItem()).x(0).duration(duration_time).end();
+            this.move(this.activeItem(), 0 - this.window_width, duration_time);
+            this.move(this.nextItem(), 0, duration_time);
 
             window.setTimeout(() => {
                 removeClassName(this.nextItem(), 'prev', 'next');
@@ -129,8 +180,8 @@ class Carousel {
         }
         else {
             // 取消滑动到下一页，还原回原来的位置。
-            move(this.activeItem()).x(0).duration(duration_time).end();
-            move(this.nextItem()).x(this.window_width).duration(duration_time).end();
+            this.move(this.activeItem(), 0, duration_time);
+            this.move(this.nextItem(), this.window_width, duration_time);
         }
 
         window.setTimeout(() => {

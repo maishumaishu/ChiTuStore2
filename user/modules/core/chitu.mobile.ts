@@ -104,10 +104,6 @@ export class Page extends chitu.Page {
         headerElement.style.height = headerHeight + 'px';
         this.element.appendChild(headerElement);
 
-        // headerElement.style.width = this.element.clientWidth + 'px';
-        // window.addEventListener('resize', () => {
-        //     headerElement.style.width = this.element.clientWidth + 'px';
-        // });
         return headerElement;
     }
 
@@ -119,10 +115,6 @@ export class Page extends chitu.Page {
         footerElement.style.height = footerHeight + 'px';
         this.element.appendChild(footerElement);
 
-        // footerElement.style.width = this.element.clientWidth + 'px';
-        // window.addEventListener('resize', () => {
-        //     footerElement.style.width = this.element.clientWidth + 'px';
-        // });
         return footerElement;
     }
 }
