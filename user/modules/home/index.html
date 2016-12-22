@@ -1,9 +1,7 @@
 <div style="min-height:80px;" name="ad-swiper" class="carousel slide" data-ride="carousel">
-<!-- Indicators -->
   <ol class="carousel-indicators">
     <li v-for="item in advertItems" data-target="#carousel-ad"></li>
   </ol>
-<!-- Wrapper for slides -->
   <div class="carousel-inner">
     <div v-for="(item, index) in advertItems" v-bind:class="{active: index == 0}" class="item">
       <image-box v-bind:src="item.ImgUrl" class="img-responsive">
