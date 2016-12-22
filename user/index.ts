@@ -22,9 +22,9 @@ var browser = function () {
 } ();
 
 // 通浏览器版本设定是否使用 es5
-if (browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
-    es5 = false;
-}
+// if (browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
+//     es5 = false;
+// }
 
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';

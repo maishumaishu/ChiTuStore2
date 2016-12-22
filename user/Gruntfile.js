@@ -20,15 +20,25 @@ module.exports = function (grunt) {
             },
         },
         babel: {
-            options: {
-                sourceMap: false,
-                //presets: ["es2015"],
-                plugins: ["transform-vue-jsx"]
-            },
             dist: {
+                options: {
+                    sourceMap: false,
+                    //presets: ["es2015"],
+                    plugins: ["transform-vue-jsx"]
+                },
                 files: [
-                    //{ expand: true, cwd: 'build/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5' },
                     { expand: true, cwd: 'build/modules', src: ['**/*.jsx'], dest: dest_user_root + '/modules', ext: '.js' }
+                ]
+            },
+            es5: {
+                options: {
+                    sourceMap: false,
+                    presets: ["es2015"],
+                    plugins: ["transform-vue-jsx"]
+                },
+                files: [
+                    { expand: true, cwd: 'build/modules', src: ['core/chitu.mobile.js'], dest: dest_user_root + '/modules.es5' },
+                    { expand: true, cwd: 'build/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5', ext: '.js' },
                 ]
             }
         },

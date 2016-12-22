@@ -1,8 +1,12 @@
 import * as services from 'services';
-import { Application, Page } from 'chitu.mobile';
+import { Page } from 'chitu.mobile';
+import { config as imageBoxConfig } from 'controls/imageBox';
+import * as chitu from 'chitu';
+
+imageBoxConfig.imageDisaplyText = '零食有约';
 
 export let config = {
-    imageText: '零食有约',
+    imageText: imageBoxConfig.imageDisaplyText,
     defaultUrl: 'home_index'
 }
 
@@ -31,6 +35,7 @@ class MyApplication extends chitu.Application {
 
     constructor() {
         super();
+        this.pageType = Page;
         this.topLevelPages = this._cachePages;
     }
 

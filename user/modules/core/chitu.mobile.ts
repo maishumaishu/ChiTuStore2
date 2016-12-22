@@ -30,7 +30,7 @@ const viewTagName = 'section';
 
 type ViewClassName = 'main' | 'loading' | 'error';
 export class Page extends chitu.Page {
-    private app: Application;
+    private app: chitu.Application;
     private views: ViewClassName[] = ['main', 'loading', 'error'];
     private headerHeight = 0;
     private footerHeight = 0;
@@ -40,7 +40,7 @@ export class Page extends chitu.Page {
     constructor(params: chitu.PageParams) {
         super(params);
 
-        this.app = params.app as Application;
+        this.app = params.app as chitu.Application;
 
         for (let className of this.views) {
             this.createView(className);
@@ -119,20 +119,20 @@ export class Page extends chitu.Page {
     }
 }
 
-export class Application extends chitu.Application {
+// export class Application extends chitu.Application {
 
-    error = chitu.Callbacks();
+//     error = chitu.Callbacks();
 
-    constructor() {
-        super();
-        super.pageType = Page;
-    }
+//     constructor() {
+//         super();
+//         super.pageType = Page;
+//     }
 
-    protected parseRouteString(routeString: string) {
-        routeString = routeString.replace(new RegExp('_'), '/');
-        let routeData = super.parseRouteString(routeString);
-        routeData.resources.push({ name: 'viewHTML', path: `text!${routeData.actionPath}.html` });
+//     protected parseRouteString(routeString: string) {
+//         routeString = routeString.replace(new RegExp('_'), '/');
+//         let routeData = super.parseRouteString(routeString);
+//         routeData.resources.push({ name: 'viewHTML', path: `text!${routeData.actionPath}.html` });
 
-        return routeData;
-    }
-}
+//         return routeData;
+//     }
+// }
