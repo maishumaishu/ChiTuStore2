@@ -8,12 +8,12 @@ import 'controls/imageBox';
 
 export default function (page: Page) {
 
-    let advertItems = [];
-    let currentView: 'default' | 'search';
     let searchKeyWords: Array<string> = [];
     let data = {
-        advertItems, currentView,
-        searchKeyWords
+        advertItems: new Array<any>(), 
+        currentView:('default' as 'default' | 'search'),
+        searchKeyWords: new Array<string>(), 
+        historyKeywords: new Array<string>()
     };
     let methods = {
         showSearchView() {
@@ -21,11 +21,11 @@ export default function (page: Page) {
             services.home.searchKeywords().then(items => {
                 data.searchKeyWords = items;
             })
+        },
+        clearHistoryKeywords: function () {
+
         }
     }
-
-    //data.currentView = 'search';
-    //methods.showSearchView();
 
     let pageIndex = 0;
     let q = services.home.advertItems().then(items => {
@@ -93,7 +93,7 @@ export default function (page: Page) {
                     <header style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc' }}>
                         <nav style="">
                             <span style="">
-                                <a on-click={() => data.currentView = 'default'} class="pull-left left-button" style="padding: 14px 8px 0px 12px;">
+                                <a on-click={() => data.currentView = 'default'} class="pull-left left-button" style="padding: 14px 12px 0px 12px;">
                                     <i class="icon-chevron-left"></i>
                                 </a>
                             </span>
@@ -143,15 +143,14 @@ export default function (page: Page) {
                                 <h4>历史搜索</h4>
                                 <hr class="row" />
 
-                                <div data-bind="visible:ko.unwrap(historyKeywords).length>0" style="display: none;">
-
+                                <div style={{ display: data.historyKeywords.length > 0 ? 'block' : 'none' }}>
                                     <div class="button">
-                                        <button data-bind="tap:clearHistoryKeywords,click:clearHistoryKeywords" class="btn btn-default btn-block">清除历史搜索记录</button>
+                                        <button on-click={methods.clearHistoryKeywords} class="btn btn-default btn-block">清除历史搜索记录</button>
                                     </div>
                                 </div>
 
 
-                                <div data-bind="visible:ko.unwrap(historyKeywords).length==0" class="norecords">
+                                <div style={{ display: data.historyKeywords.length == 0 ? 'block' : 'none' }} class="norecords">
                                     <div class="user-favors norecords">
                                         <div class="icon">
                                             <i class="icon-search"></i>
