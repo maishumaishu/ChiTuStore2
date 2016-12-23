@@ -41,6 +41,7 @@ declare namespace chitu {
     class Application {
         pageCreated: Callback<Application, Page>;
         protected pageType: PageConstructor;
+        protected pageDisplayType: PageDisplayConstructor;
         private _runned;
         private zindex;
         private page_stack;
@@ -110,11 +111,14 @@ declare namespace chitu {
         new (args: Page): any;
     }
     interface PageConstructor {
-        new (args: PageParams): any;
+        new (args: PageParams): Page;
+    }
+    interface PageDisplayConstructor {
+        new (): PageDisplayer;
     }
     interface PageDisplayer {
-        show(page: Page): any;
-        hide(page: Page): any;
+        show(page: Page): Promise<any>;
+        hide(page: Page): Promise<any>;
     }
     interface PageParams {
         app: Application;
@@ -148,9 +152,9 @@ declare namespace chitu {
         on_hidden(): void;
         on_closing(): void;
         on_closed(): void;
-        show(): void;
-        hide(): void;
-        close(): void;
+        show(): Promise<any>;
+        hide(): Promise<any>;
+        close(): Promise<any>;
          element: HTMLElement;
         previous: Page;
          routeData: RouteData;
@@ -159,8 +163,8 @@ declare namespace chitu {
         private loadPageAction(routeData);
     }
     class PageDisplayerImplement implements PageDisplayer {
-        show(page: Page): void;
-        hide(page: Page): void;
+        show(page: Page): Promise<void>;
+        hide(page: Page): Promise<void>;
     }
 }
 

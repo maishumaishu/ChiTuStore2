@@ -138,6 +138,7 @@
         constructor() {
             this.pageCreated = chitu.Callbacks();
             this.pageType = chitu.Page;
+            this.pageDisplayType = chitu.PageDisplayerImplement;
             this._runned = false;
             this.page_stack = new Array();
             this.cachePages = {};
@@ -162,7 +163,7 @@
         createPage(routeData) {
             let previous_page = this.pages[this.pages.length - 1];
             let element = this.createPageElement(routeData);
-            let displayer = new chitu.PageDisplayerImplement();
+            let displayer = new this.pageDisplayType();
             console.assert(this.pageType != null);
             let page = new this.pageType({
                 app: this,
@@ -272,6 +273,9 @@
             if (this.currentPage != null)
                 this.setLocationHash(this.currentPage.routeData.routeString);
         }
+        clearPageStack() {
+            this.page_stack = [];
+        }
         redirect(routeString, args) {
             let location = window.location;
             let result = this.showPage(routeString, args);
@@ -280,12 +284,12 @@
         }
         back(args = undefined) {
             return new Promise((reslove, reject) => {
-                if (this.page_stack.length == 1) {
+                this.closeCurrentPage();
+                if (this.page_stack.length == 0) {
                     reject();
                     chitu.fireCallback(this.backFail, this, {});
                     return;
                 }
-                this.closeCurrentPage();
                 reslove();
             });
         }
@@ -458,19 +462,22 @@ var chitu;
         }
         show() {
             this.on_showing();
-            this._displayer.show(this);
-            this.on_shown();
+            return this._displayer.show(this).then(o => {
+                this.on_shown();
+            });
         }
         hide() {
             this.on_hiding();
-            this._displayer.hide(this);
-            this.on_hidden();
+            return this._displayer.hide(this).then(o => {
+                this.on_hidden();
+            });
         }
         close() {
-            this.hide();
-            this.on_closing();
-            this._element.remove();
-            this.on_closed();
+            return this.hide().then(() => {
+                this.on_closing();
+                this._element.remove();
+                this.on_closed();
+            });
         }
         get element() {
             return this._element;
@@ -548,12 +555,14 @@ var chitu;
             if (page.previous != null) {
                 page.previous.element.style.display = 'none';
             }
+            return Promise.resolve();
         }
         hide(page) {
             page.element.style.display = 'none';
             if (page.previous != null) {
                 page.previous.element.style.display = 'block';
             }
+            return Promise.resolve();
         }
     }
     chitu.PageDisplayerImplement = PageDisplayerImplement;
@@ -581,8 +590,8 @@ var chitu;
                 for (var i = 0; i < arguments.length; i++)
                     args[i] = arguments[i];
                 reslove(args);
-            }, function () {
-                reject();
+            }, function (err) {
+                reject(err);
             });
         });
     }

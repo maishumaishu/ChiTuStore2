@@ -206,6 +206,7 @@ var chitu;
 
             this.pageCreated = chitu.Callbacks();
             this.pageType = chitu.Page;
+            this.pageDisplayType = chitu.PageDisplayerImplement;
             this._runned = false;
             this.page_stack = new Array();
             this.cachePages = {};
@@ -229,7 +230,7 @@ var chitu;
             value: function createPage(routeData) {
                 var previous_page = this.pages[this.pages.length - 1];
                 var element = this.createPageElement(routeData);
-                var displayer = new chitu.PageDisplayerImplement();
+                var displayer = new this.pageDisplayType();
                 console.assert(this.pageType != null);
                 var page = new this.pageType({
                     app: this,
@@ -347,6 +348,11 @@ var chitu;
                 if (this.currentPage != null) this.setLocationHash(this.currentPage.routeData.routeString);
             }
         }, {
+            key: 'clearPageStack',
+            value: function clearPageStack() {
+                this.page_stack = [];
+            }
+        }, {
             key: 'redirect',
             value: function redirect(routeString, args) {
                 var location = window.location;
@@ -362,12 +368,12 @@ var chitu;
                 var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
 
                 return new Promise(function (reslove, reject) {
+                    _this3.closeCurrentPage();
                     if (_this3.page_stack.length == 0) {
                         reject();
                         chitu.fireCallback(_this3.backFail, _this3, {});
                         return;
                     }
-                    _this3.closeCurrentPage();
                     reslove();
                 });
             }
@@ -662,24 +668,33 @@ var chitu;
         }, {
             key: 'show',
             value: function show() {
+                var _this = this;
+
                 this.on_showing();
-                this._displayer.show(this);
-                this.on_shown();
+                return this._displayer.show(this).then(function (o) {
+                    _this.on_shown();
+                });
             }
         }, {
             key: 'hide',
             value: function hide() {
+                var _this2 = this;
+
                 this.on_hiding();
-                this._displayer.hide(this);
-                this.on_hidden();
+                return this._displayer.hide(this).then(function (o) {
+                    _this2.on_hidden();
+                });
             }
         }, {
             key: 'close',
             value: function close() {
-                this.hide();
-                this.on_closing();
-                this._element.remove();
-                this.on_closed();
+                var _this3 = this;
+
+                return this.hide().then(function () {
+                    _this3.on_closing();
+                    _this3._element.remove();
+                    _this3.on_closed();
+                });
             }
         }, {
             key: 'createActionDeferred',
@@ -702,10 +717,10 @@ var chitu;
         }, {
             key: 'loadPageAction',
             value: function loadPageAction(routeData) {
-                var _this = this;
+                var _this4 = this;
 
                 var action_deferred = new Promise(function (reslove, reject) {
-                    _this.createActionDeferred(routeData).then(function (actionResult) {
+                    _this4.createActionDeferred(routeData).then(function (actionResult) {
                         if (!actionResult) throw chitu.Errors.exportsCanntNull(routeData.pageName);
                         var actionName = 'default';
                         var action = actionResult[actionName];
@@ -713,7 +728,7 @@ var chitu;
                             throw chitu.Errors.canntFindAction(routeData.pageName);
                         }
                         if (typeof action == 'function') {
-                            if (action['prototype'] != null) new action(_this);else action(_this);
+                            if (action['prototype'] != null) new action(_this4);else action(_this4);
                             reslove();
                         } else {
                             reject();
@@ -736,7 +751,7 @@ var chitu;
                         var name = resourceNames[i];
                         args[name] = resourceResults[i];
                     }
-                    _this.on_load(args);
+                    _this4.on_load(args);
                 });
                 return result;
             }
@@ -783,6 +798,7 @@ var chitu;
                 if (page.previous != null) {
                     page.previous.element.style.display = 'none';
                 }
+                return Promise.resolve();
             }
         }, {
             key: 'hide',
@@ -791,6 +807,7 @@ var chitu;
                 if (page.previous != null) {
                     page.previous.element.style.display = 'block';
                 }
+                return Promise.resolve();
             }
         }]);
 
@@ -825,8 +842,8 @@ var chitu;
                 for (var i = 0; i < arguments.length; i++) {
                     args[i] = arguments[i];
                 }reslove(args);
-            }, function () {
-                reject();
+            }, function (err) {
+                reject(err);
             });
         });
     }

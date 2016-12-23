@@ -9,7 +9,8 @@ let config = {
         account: `http://${SERVICE_HOST}/Account/`,
     },
     appToken: '58424776034ff82470d06d3d',
-    storeId: '58401d1906c02a2b8877bd13'
+    storeId: '58401d1906c02a2b8877bd13',
+    userToken: '584cfabb4918e4186a77ff1e'
 }
 
 function isError(data: any): Error {
@@ -34,6 +35,12 @@ let error = chitu.Callbacks();
 let token = '';
 
 function userToken(value?: string) {
+    /** ------ 测试代码 ------- */
+    if (config.userToken) {
+        return config.userToken;
+    }
+    //==========================
+    
     if (value !== undefined) {
         localStorage.setItem('userToken', value);
         return;
@@ -234,6 +241,17 @@ export module home {
             return item;
         });
     }
+
+    //type KeyWord = { Text: string };
+    export function searchKeywords() {
+        let url = config.service.site + 'Home/GetSearchKeywords';
+        return get<Array<string>>(url);
+    }
+
+    export function historySearchWords() {
+        let url = config.service.site + 'Home/HistorySearchWords';
+        return get<Array<string>>(url);
+    }
 }
 
 export module shop {
@@ -245,7 +263,6 @@ export module shop {
         let url = config.service.shop + 'Product/GetCategories';
         return get<{ Id: string, Name: string }[]>(url);
     }
-
     export type ShoppingCartItem = {
         Id: string, Amount: number, Count: number, ImageUrl: string,
         Price: number, ProductId: string, Selected: boolean, Name: string,

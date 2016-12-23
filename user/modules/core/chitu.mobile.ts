@@ -36,12 +36,13 @@ export class Page extends chitu.Page {
     private footerHeight = 0;
     private resize = chitu.Callbacks<Page, { headerHeight: number, footerHeight: number }>();
     private _viewCompleted: boolean = false;
+    public displayStatic: boolean = false;
 
     constructor(params: chitu.PageParams) {
         super(params);
 
         this.app = params.app as chitu.Application;
-
+        //super.dis
         for (let className of this.views) {
             this.createView(className);
         }
@@ -119,20 +120,59 @@ export class Page extends chitu.Page {
     }
 }
 
-// export class Application extends chitu.Application {
+export class Application extends chitu.Application {
+    constructor() {
+        super();
+        this.pageDisplayType = PageDisplayImplement;
+    }
+    
+}
 
-//     error = chitu.Callbacks();
+class PageDisplayImplement implements chitu.PageDisplayer {
+    show(page: Page): Promise<any> {
 
-//     constructor() {
-//         super();
-//         super.pageType = Page;
-//     }
 
-//     protected parseRouteString(routeString: string) {
-//         routeString = routeString.replace(new RegExp('_'), '/');
-//         let routeData = super.parseRouteString(routeString);
-//         routeData.resources.push({ name: 'viewHTML', path: `text!${routeData.actionPath}.html` });
+        let maxZIndex = 1;
+        let pageElements = document.getElementsByClassName('page');
+        for (let i = 0; i < pageElements.length; i++) {
+            let zIndex = new Number((<HTMLElement>pageElements.item(i)).style.zIndex || '0').valueOf();
+            if (zIndex > maxZIndex) {
+                maxZIndex = zIndex;
+            }
+        }
 
-//         return routeData;
-//     }
-// }
+        page.element.style.zIndex = `${maxZIndex + 1}`;
+        page.element.style.display = 'block';
+        if (page.displayStatic) {
+            return Promise.resolve();
+        }
+
+        page.element.style.transform = `translate(100%,0px)`;
+        window.setTimeout(function () {
+            page.element.style.transform = `translate(0px,0px)`;
+            page.element.style.transition = '0.4s';
+        }, 100)
+
+        return new Promise<any>(reslove => {
+            window.setTimeout(function () {
+                reslove();
+            }, 1000)
+        });
+    }
+    hide(page: Page) {
+        if (page.displayStatic) {
+            page.element.style.display = 'none';
+            return Promise.resolve();
+        }
+
+        page.element.style.transform = `translate(100%,0px)`;
+        page.element.style.transition = '0.4s';
+
+        return new Promise<any>(reslove => {
+            window.setTimeout(function () {
+                page.element.style.display = 'none';
+                reslove();
+            }, 1000)
+        });
+    }
+} 

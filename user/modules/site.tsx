@@ -1,9 +1,7 @@
 import * as services from 'services';
-import { Page } from 'chitu.mobile';
+import { Application, Page } from 'chitu.mobile';
 import { config as imageBoxConfig } from 'controls/imageBox';
 import * as chitu from 'chitu';
-
-//imageBoxConfig.imageDisaplyText = '零食有约';
 
 export let config = {
     get imageText() {
@@ -34,7 +32,7 @@ let LOADING_HTML = `
 </div>`;
 
 
-class MyApplication extends chitu.Application {
+class MyApplication extends Application {
     private _cachePages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
     private topLevelPages: Array<string>;
 
@@ -77,7 +75,7 @@ class MyApplication extends chitu.Application {
 
         let className = routeData.pageName.split('.').join('-');
         page.element.className = 'page ' + className;
-        page.allowCache = this._cachePages.indexOf(page.name) >= 0;
+        page.displayStatic = page.allowCache = this._cachePages.indexOf(page.name) >= 0;
         return page;
     }
 
