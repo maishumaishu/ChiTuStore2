@@ -125,8 +125,15 @@ export class Application extends chitu.Application {
         super();
         this.pageDisplayType = PageDisplayImplement;
     }
-    
+
 }
+
+var touch_move_time: number = 0;
+window.addEventListener('touchmove', function (e) {
+    touch_move_time = Date.now();
+})
+
+var isiOS = navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
 
 class PageDisplayImplement implements chitu.PageDisplayer {
     show(page: Page): Promise<any> {
@@ -164,6 +171,16 @@ class PageDisplayImplement implements chitu.PageDisplayer {
             page.element.style.display = 'none';
             return Promise.resolve();
         }
+
+        //============================================
+        // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过滑屏返回，
+        // 通过滑屏返回，是不需要有返回效果的。
+        if (isiOS && Date.now() - touch_move_time < 500) {
+            page.element.style.display = 'none';
+            return Promise.resolve();
+        }
+        //============================================
+
 
         page.element.style.transform = `translate(100%,0px)`;
         page.element.style.transition = '0.4s';

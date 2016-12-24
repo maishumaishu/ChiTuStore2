@@ -10,17 +10,16 @@ export default function (page: Page) {
 
     let searchKeyWords: Array<string> = [];
     let data = {
-        advertItems: new Array<any>(), 
-        currentView:('default' as 'default' | 'search'),
-        searchKeyWords: new Array<string>(), 
-        historyKeywords: new Array<string>()
+        advertItems: new Array<any>(),
     };
+
+    let searchViewData = createSearchView(page);
     let methods = {
         showSearchView() {
-            data.currentView = 'search';
-            services.home.searchKeywords().then(items => {
-                data.searchKeyWords = items;
-            })
+            searchViewData.visible = true;
+        },
+        showDefaultView() {
+            searchViewData.visible = false;
         },
         clearHistoryKeywords: function () {
 
@@ -54,7 +53,7 @@ export default function (page: Page) {
     })
 
     createHeader(page);
-    createSearchView(page);
+
 
     function createHeader(page: Page) {
         let vm = new Vue({
@@ -93,7 +92,7 @@ export default function (page: Page) {
                     <header style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc' }}>
                         <nav style="">
                             <span style="">
-                                <a on-click={() => data.currentView = 'default'} class="pull-left left-button" style="padding: 14px 12px 0px 12px;">
+                                <a on-click={() => methods.showDefaultView()} class="pull-left left-button" style="padding: 14px 12px 0px 12px;">
                                     <i class="icon-chevron-left"></i>
                                 </a>
                             </span>
@@ -104,8 +103,8 @@ export default function (page: Page) {
                         </nav>
                     </header>
                 );
-                if (data.currentView == 'search')
 
+                if (searchViewData.visible)
                     return searchHeader;
 
                 return defaultHeader;
@@ -117,14 +116,26 @@ export default function (page: Page) {
     function createSearchView(page: Page) {
         let searchViewElement = document.createElement('section');
         page.element.appendChild(searchViewElement);
+        let data = {
+            historyKeywords: new Array<string>(), searchKeyWords: Array<string>(), visible: false
+        };
+        services.home.searchKeywords().then(items => {
+            data.searchKeyWords = items;
+        });
+
         let vm = new Vue({
             el: searchViewElement,
             data,
+            computed: {
+                visible() {
+
+                }
+            },
             mounted() {
                 page.element.appendChild(this.$el);
             },
             render(h) {
-                if (data.currentView == 'search') {
+                if (data.visible) {
                     return (
                         <section style={{ backgroundColor: '#fff' }} class="container">
                             <div class="clearfix">
@@ -167,6 +178,7 @@ export default function (page: Page) {
                 return null;
             }
         })
-        return vm;
+
+        return data;
     }
 };

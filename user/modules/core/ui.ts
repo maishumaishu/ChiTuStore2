@@ -186,6 +186,12 @@ export class PageViewGesture {
         viewNode.element.addEventListener('touchmove', (event: TouchEvent) => {
             currentX = event.targetTouches[0].pageX;
             currentY = event.targetTouches[0].pageY;
+            //========================================
+            // 表示侧划
+            if (currentX < 0) {
+                return;
+            }
+            //========================================
             let angle = calculateAngle(currentX - startX, currentY - startY);
             if (angle < horizontal_swipe_angle && moving != 'vertical') {
                 moving = 'horizontal';
