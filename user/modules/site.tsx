@@ -28,9 +28,11 @@ let DEFAULT_HEADER_WITH_BACK_HTML = `
 
 let LOADING_HTML = `
 <div class="spin">
-    <i class="icon-spinner icon-spin"></i>
+    <i class="icon-spinner"></i>
 </div>`;
 
+var isCordovaApp = location.protocol === 'file:';
+let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 
 class MyApplication extends Application {
     private _cachePages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
@@ -50,9 +52,8 @@ class MyApplication extends Application {
     protected createPage(routeData: chitu.RouteData) {
         let page = super.createPage(routeData) as Page;
 
-        page.loadingView.innerHTML = LOADING_HTML;
-
         let headerElement = page.createHeader(50);
+
         if (this.topLevelPages.indexOf(routeData.pageName) >= 0) {
             headerElement.innerHTML = DEFAULT_HEADER_HTML;
             requirejs([`text!ui/menu.html`], function (footerHTML) {
@@ -65,9 +66,14 @@ class MyApplication extends Application {
             })
         }
         else {
-            page.allowSwipeBack = true;
             headerElement.innerHTML = DEFAULT_HEADER_WITH_BACK_HTML;
+            //===================================================
+            // IOS WEB 浏览器自带滑动返回
+            page.allowSwipeBack = isCordovaApp || isAndroid;
+            //===================================================
         }
+
+        page.loadingView.innerHTML = LOADING_HTML;
 
         if (routeData.pageName == 'home.product') {
             page.createFooter(50);
@@ -80,6 +86,15 @@ class MyApplication extends Application {
         let className = routeData.pageName.split('.').join('-');
         page.element.className = 'page ' + className;
         page.displayStatic = page.allowCache = this._cachePages.indexOf(page.name) >= 0;
+
+        //=========================================
+        // 在 shown 加入转动，而不是一开始加，避免闪烁
+        page.shown.add((sender: Page) => {
+            let i = sender.loadingView.querySelector('i') as HTMLElement;
+            i.className = i.className + ' icon-spin';
+        })
+        //=========================================
+
         return page;
     }
 
@@ -91,6 +106,7 @@ app.run();
 app.backFail.add(() => {
     app.redirect(config.defaultUrl);
 });
+
 
 if (!location.hash) {
     app.redirect(config.defaultUrl);

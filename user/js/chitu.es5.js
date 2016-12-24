@@ -8,87 +8,11 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var chitu;
 (function (chitu) {
     var DEFAULT_FILE_BASE_PATH = 'modules';
-
-    var Resources = function () {
-        function Resources(routeData) {
-            _classCallCheck(this, Resources);
-
-            this.items = [];
-            this.routeData = routeData;
-        }
-
-        _createClass(Resources, [{
-            key: 'push',
-            value: function push() {
-                var _items;
-
-                var tmp = this.items;
-
-                for (var _len = arguments.length, items = Array(_len), _key = 0; _key < _len; _key++) {
-                    items[_key] = arguments[_key];
-                }
-
-                for (var i = 0; i < tmp.length; i++) {
-                    for (var j = 0; j < items.length; j++) {
-                        if (tmp[i].name == items[j].name) {
-                            throw chitu.Errors.resourceExists(tmp[i].name, this.routeData.pageName);
-                        }
-                    }
-                }
-                for (var _i = 0; _i < items.length; _i++) {
-                    for (var _j = _i + 1; _j < items.length; _j++) {
-                        if (items[_i].name == items[_j].name) {
-                            throw chitu.Errors.resourceExists(items[_i].name, this.routeData.pageName);
-                        }
-                    }
-                }
-                return (_items = this.items).push.apply(_items, items);
-            }
-        }, {
-            key: 'load',
-            value: function load() {
-                var _this = this;
-
-                this._loadCompleted = false;
-                return new Promise(function (reslove, reject) {
-                    var resourcePaths = _this.items.map(function (o) {
-                        return o.path;
-                    });
-                    var resourceNames = _this.items.map(function (o) {
-                        return o.name;
-                    });
-                    chitu.loadjs.apply(chitu, _toConsumableArray(resourcePaths || [])).then(function (resourceResults) {
-                        _this._loadCompleted = true;
-                        resourceResults = resourceResults || [];
-                        var args = {};
-                        for (var i = 0; i < resourceResults.length; i++) {
-                            var name = resourceNames[i];
-                            args[name] = resourceResults[i];
-                        }
-                        reslove(args);
-                    }).catch(function (err) {
-                        reject(err);
-                    });
-                });
-            }
-        }, {
-            key: 'map',
-            value: function map(callbackfn) {
-                return this.items.map(callbackfn);
-            }
-        }]);
-
-        return Resources;
-    }();
-
-    chitu.Resources = Resources;
 
     var RouteData = function () {
         function RouteData(basePath, routeString, pathSpliterChar) {
@@ -108,7 +32,6 @@ var chitu;
             this._routeString = routeString;
             this._pathBase = basePath;
             this.parseRouteString();
-            this._resources = new Resources(this);
             var routeData = this;
         }
 
@@ -169,11 +92,6 @@ var chitu;
             key: 'pageName',
             get: function get() {
                 return this._pageName;
-            }
-        }, {
-            key: 'resources',
-            get: function get() {
-                return this._resources;
             }
         }, {
             key: 'routeString',
@@ -276,13 +194,13 @@ var chitu;
         }, {
             key: 'run',
             value: function run() {
-                var _this2 = this;
+                var _this = this;
 
                 if (this._runned) return;
                 var app = this;
                 this.hashchange();
                 window.addEventListener('hashchange', function () {
-                    _this2.hashchange();
+                    _this.hashchange();
                 });
                 this._runned = true;
             }
@@ -596,8 +514,6 @@ var chitu;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var chitu;
@@ -731,19 +647,8 @@ var chitu;
                         reject(err);
                     });
                 });
-                var resourcePaths = routeData.resources.map(function (o) {
-                    return o.path;
-                });
-                var resourceNames = routeData.resources.map(function (o) {
-                    return o.name;
-                });
-                var result = Promise.all([action_deferred, chitu.loadjs.apply(chitu, _toConsumableArray(resourcePaths || []))]).then(function (data) {
-                    var resourceResults = data[1];
+                var result = action_deferred.then(function (data) {
                     var args = {};
-                    for (var i = 0; i < resourceResults.length; i++) {
-                        var name = resourceNames[i];
-                        args[name] = resourceResults[i];
-                    }
                     _this4.on_load(args);
                 });
                 return result;
@@ -823,18 +728,10 @@ var chitu;
         return path1 + path2;
     }
     chitu.combinePath = combinePath;
-    function loadjs() {
-        for (var _len = arguments.length, modules = Array(_len), _key = 0; _key < _len; _key++) {
-            modules[_key] = arguments[_key];
-        }
-
-        if (modules.length == 0) return Promise.resolve([]);
+    function loadjs(path) {
         return new Promise(function (reslove, reject) {
-            requirejs(modules, function () {
-                var args = [];
-                for (var i = 0; i < arguments.length; i++) {
-                    args[i] = arguments[i];
-                }reslove(args);
+            requirejs([path], function (result) {
+                reslove(result);
             }, function (err) {
                 reject(err);
             });

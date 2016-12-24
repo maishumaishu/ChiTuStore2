@@ -7,53 +7,6 @@
     })(function() {var chitu;
 (function (chitu) {
     const DEFAULT_FILE_BASE_PATH = 'modules';
-    class Resources {
-        constructor(routeData) {
-            this.items = [];
-            this.routeData = routeData;
-        }
-        push(...items) {
-            let tmp = this.items;
-            for (let i = 0; i < tmp.length; i++) {
-                for (let j = 0; j < items.length; j++) {
-                    if (tmp[i].name == items[j].name) {
-                        throw chitu.Errors.resourceExists(tmp[i].name, this.routeData.pageName);
-                    }
-                }
-            }
-            for (let i = 0; i < items.length; i++) {
-                for (let j = i + 1; j < items.length; j++) {
-                    if (items[i].name == items[j].name) {
-                        throw chitu.Errors.resourceExists(items[i].name, this.routeData.pageName);
-                    }
-                }
-            }
-            return this.items.push(...items);
-        }
-        load() {
-            this._loadCompleted = false;
-            return new Promise((reslove, reject) => {
-                let resourcePaths = this.items.map(o => o.path);
-                let resourceNames = this.items.map(o => o.name);
-                chitu.loadjs(...resourcePaths || []).then((resourceResults) => {
-                    this._loadCompleted = true;
-                    resourceResults = resourceResults || [];
-                    let args = {};
-                    for (let i = 0; i < resourceResults.length; i++) {
-                        let name = resourceNames[i];
-                        args[name] = resourceResults[i];
-                    }
-                    reslove(args);
-                }).catch((err) => {
-                    reject(err);
-                });
-            });
-        }
-        map(callbackfn) {
-            return this.items.map(callbackfn);
-        }
-    }
-    chitu.Resources = Resources;
     class RouteData {
         constructor(basePath, routeString, pathSpliterChar) {
             this._parameters = {};
@@ -73,7 +26,6 @@
             this._routeString = routeString;
             this._pathBase = basePath;
             this.parseRouteString();
-            this._resources = new Resources(this);
             let routeData = this;
         }
         parseRouteString() {
@@ -116,9 +68,6 @@
         }
         get pageName() {
             return this._pageName;
-        }
-        get resources() {
-            return this._resources;
         }
         get routeString() {
             return this._routeString;
@@ -528,15 +477,8 @@ var chitu;
                     reject(err);
                 });
             });
-            let resourcePaths = routeData.resources.map(o => o.path);
-            let resourceNames = routeData.resources.map(o => o.name);
-            let result = Promise.all([action_deferred, chitu.loadjs(...resourcePaths || [])]).then((data) => {
-                let resourceResults = data[1];
+            let result = action_deferred.then((data) => {
                 let args = {};
-                for (let i = 0; i < resourceResults.length; i++) {
-                    let name = resourceNames[i];
-                    args[name] = resourceResults[i];
-                }
                 this.on_load(args);
             });
             return result;
@@ -576,15 +518,10 @@ var chitu;
         return path1 + path2;
     }
     chitu.combinePath = combinePath;
-    function loadjs(...modules) {
-        if (modules.length == 0)
-            return Promise.resolve([]);
+    function loadjs(path) {
         return new Promise((reslove, reject) => {
-            requirejs(modules, function () {
-                var args = [];
-                for (var i = 0; i < arguments.length; i++)
-                    args[i] = arguments[i];
-                reslove(args);
+            requirejs([path], function (result) {
+                reslove(result);
             }, function (err) {
                 reject(err);
             });

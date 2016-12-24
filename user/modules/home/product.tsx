@@ -9,15 +9,13 @@ import 'controls/imageBox';
 export default async function (page: Page) {
     let { id } = page.routeData.values
 
-
-    let productPromise = services.home.getProduct(id);
-    let html = (await chitu.loadjs(`text!pages/home/product.html`))[0]
+    let result = await Promise.all([chitu.loadjs(`text!pages/home/product.html`), services.home.getProduct(id)]);//.then(function (result) {
+    let html = result[0];
+    let product = result[1];
 
     page.dataView.innerHTML = html;
 
-    let product = await productPromise;
-
-    let node = page.dataView;
+    //let node = page.dataView;
     let vm = new Vue({
         el: page.dataView,
         data: {
@@ -44,9 +42,11 @@ export default async function (page: Page) {
         str = str + product.Count + '件';
         return str;
     }
+    //})
+
+
 
     async function mounted() {
-        page.loadingView.style.display = 'none';
 
         let introduceView = createIntroduceView(page);
         let introduceView2 = createHorizontalIntroduceView(page);
@@ -57,7 +57,13 @@ export default async function (page: Page) {
             right: { element: introduceView2 },
             bottom: { element: introduceView }
         });
+
+        page.loadingView.style.display = 'none';
     }
+
+    // vm.$nextTick(() => {
+    //     page.loadingView.style.display = 'none';
+    // });
 
     createHeader(page);
     createFooter(page);
@@ -71,8 +77,7 @@ function createIntroduceView(page: Page) {
     let { id } = page.routeData.values
     let loadIntroduce = services.shop.productIntroduce(id);
 
-    chitu.loadjs('text!pages/home/product/introduce.html').then(result => {
-        let html = result[0];
+    chitu.loadjs('text!pages/home/product/introduce.html').then(html => {
         introduceView.innerHTML = html;
         loadIntroduce.then(o => {
             let introduceElement = introduceView.querySelector('.container') as HTMLElement;
@@ -148,8 +153,6 @@ function createFooter(page: Page) {
                     </nav>
                 </footer>
             );
-            // data-bind="text:shoppingCartNumber,visible:shoppingCartNumber"
-            // data-bind="tap: addToShoppingCart,click: addToShoppingCart, enable: ko.unwrap(product.Stock) > 0, text:ko.unwrap(product.Stock) > 0 ? '加入购物车' : '已经售磬'" data-dialog="toast:'成功添加到购物车'"
         }
     })
     return data;

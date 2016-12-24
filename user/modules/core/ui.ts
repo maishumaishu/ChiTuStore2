@@ -1,6 +1,6 @@
 
-var u = navigator.userAgent;
-let isAndroid = u.indexOf('Android') > -1;
+
+let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 
 
 class Errors {

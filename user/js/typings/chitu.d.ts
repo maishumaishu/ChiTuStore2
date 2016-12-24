@@ -1,19 +1,4 @@
 declare namespace chitu {
-    class Resources {
-        private items;
-        private routeData;
-        private _loadCompleted;
-        constructor(routeData: RouteData);
-        push(...items: {
-            name: string;
-            path: string;
-        }[]): number;
-        load(): Promise<{}>;
-        map<U>(callbackfn: (value: {
-            name: string;
-            path: string;
-        }) => U): U[];
-    }
     class RouteData {
         private _parameters;
         private path_string;
@@ -24,7 +9,6 @@ declare namespace chitu {
         private _pathBase;
         private _pageName;
         private _actionPath;
-        private _resources;
         private _routeString;
         private _loadCompleted;
         constructor(basePath: string, routeString: string, pathSpliterChar?: string);
@@ -33,7 +17,6 @@ declare namespace chitu {
          basePath: string;
          values: any;
          pageName: string;
-         resources: Resources;
          routeString: string;
          actionPath: string;
          loadCompleted: boolean;
@@ -171,7 +154,7 @@ declare namespace chitu {
 
 declare namespace chitu {
     function combinePath(path1: string, path2: string): string;
-    function loadjs(...modules: string[]): Promise<Array<any>>;
+    function loadjs(path: any): Promise<any>;
 }
 declare module "chitu" { 
             export = chitu; 

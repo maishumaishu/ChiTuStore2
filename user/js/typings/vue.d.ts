@@ -5,9 +5,10 @@ declare interface VueInstance<TData> {
     $data: TData,
     $methods: any,
     $emit(event: string, ...args: any[]);
-    $watch(expOrFn: string | Function, callback: Function, options?: { deep?: boolean, immediate?: boolean }): Function;
-    $on(event:string,callback:Function);
+    $nextTick(callback: Function);
+    $on(event: string, callback: Function);
     $set(object: Object, key: string, value: any);
+    $watch(expOrFn: string | Function, callback: Function, options?: { deep?: boolean, immediate?: boolean }): Function;
 }
 
 interface VueOptions<TData, TMethods> {

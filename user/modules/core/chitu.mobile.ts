@@ -42,8 +42,6 @@ export class Page extends chitu.Page {
     constructor(params: chitu.PageParams) {
         super(params);
 
-        //this.app = params.app as chitu.Application;
-        //super.dis
         for (let className of this.views) {
             this.createView(className);
         }
@@ -104,7 +102,7 @@ export class Page extends chitu.Page {
         let headerElement = document.createElement(headerTagName);
         this.headerHeight = headerHeight;
         headerElement.style.height = headerHeight + 'px';
-        this.element.appendChild(headerElement);
+        this.element.insertBefore(headerElement, this.dataView);
 
         return headerElement;
     }
@@ -136,11 +134,20 @@ window.addEventListener('touchmove', function (e) {
 
 var isiOS = navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
 
+function calculateAngle(x, y) {
+    let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
+    return d;
+}
+
 class PageDisplayImplement implements chitu.PageDisplayer {
     private app: chitu.Application;
+    private windowWidth: number;
+    private previousPageStartX: number;
 
     constructor(app: chitu.Application) {
         this.app = app;
+        this.windowWidth = window.innerWidth;
+        this.previousPageStartX = 0 - this.windowWidth / 3;
     }
 
     private enableGesture(page: Page) {
@@ -173,6 +180,12 @@ class PageDisplayImplement implements chitu.PageDisplayer {
             if (angle < horizontal_swipe_angle && deltaX > 0) {
                 page.element.style.transform = `translate(${deltaX}px, 0px)`;
                 page.element.style.transition = '0s';
+
+                if (page.previous != null) {
+                    page.previous.element.style.transform = `translate(${this.previousPageStartX + deltaX / 3}px, 0px)`;
+                    page.previous.element.style.transition = '0s';
+                }
+
                 disableNativeScroll(page.element);
                 moved = true;
                 event.preventDefault();
@@ -180,10 +193,6 @@ class PageDisplayImplement implements chitu.PageDisplayer {
             }
         })
 
-        var calculateAngle = (x, y) => {
-            let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
-            return d;
-        }
 
         let end = (event: TouchEvent) => {
             if (!moved)
@@ -197,11 +206,14 @@ class PageDisplayImplement implements chitu.PageDisplayer {
             else {
                 page.element.style.transform = `translate(0px, 0px)`;
                 page.element.style.transition = '0.4s';
+
+                if (page.previous) {
+                    page.previous.element.style.transform = `translate(${this.previousPageStartX}px,0px)`;
+                    page.previous.element.style.transition = `0.4s`;
+                }
             }
 
             moved = false;
-            //action = null;
-            //status = null;
         }
 
         page.element.addEventListener('touchcancel', (event) => end(event));
@@ -223,6 +235,7 @@ class PageDisplayImplement implements chitu.PageDisplayer {
 
         if (!(<any>page).gestured && page.allowSwipeBack) {
             this.enableGesture(page);
+            this.disableOffset(page);
             (<any>page).gestured = true;
         }
 
@@ -242,41 +255,83 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         }
 
         page.element.style.transform = `translate(100%,0px)`;
-        window.setTimeout(function () {
+        if (page.previous) {
+            page.previous.element.style.transform = `translate(0px,0px)`;
+        }
+        //=======================================================
+        // 必须 setTimeout 才有效果，哪怕延迟时间为 0
+        window.setTimeout(() => {
             page.element.style.transform = `translate(0px,0px)`;
             page.element.style.transition = '0.4s';
+
+            if (page.previous) {
+                page.previous.element.style.transform = `translate(${this.previousPageStartX}px,0px)`;
+                page.previous.element.style.transition = '0.4s';
+            }
+
         }, 100)
+        //=======================================================
 
         return new Promise<any>(reslove => {
             window.setTimeout(function () {
-                page.element.style.removeProperty('transform');
-                page.element.style.removeProperty('transition');
+                // page.element.style.removeProperty('transform');
+                // page.element.style.removeProperty('transition');
+
+                // if (page.previous) {
+                //     page.previous.element.style.removeProperty('transform');
+                //     page.previous.element.style.removeProperty('transition');
+                // }
+
                 reslove();
             }, 500)
         });
     }
-    hide(page: Page) {
-        if (page.displayStatic) {
-            page.element.style.display = 'none';
-            return Promise.resolve();
-        }
 
+    disableOffset(page: Page) {
+        page.element.addEventListener('touchmove', (event: TouchEvent) => {
+            if (window.pageYOffset < 0) {
+                event.preventDefault();
+            }
+        })
+    }
+
+    hide(page: Page) {
         //============================================
         // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过滑屏返回，
         // 通过滑屏返回，是不需要有返回效果的。
-        if (isiOS && Date.now() - touch_move_time < 500) {
+        if (isiOS && Date.now() - touch_move_time < 500 || page.displayStatic) {
             page.element.style.display = 'none';
+            if (page.previous) {
+                // page.previous.element.style.transform = `translate(0px, 0px)`;
+                // page.previous.element.style.transition = '0';
+                page.previous.element.style.removeProperty('transform');
+                page.previous.element.style.removeProperty('transition');
+            }
             return Promise.resolve();
         }
         //============================================
-
 
         page.element.style.transform = `translate(100%,0px)`;
         page.element.style.transition = '0.4s';
 
+        if (page.previous) {
+            //window.setTimeout(function () {
+            page.previous.element.style.transform = `translate(0px, 0px)`;
+            page.previous.element.style.transition = '0.4s';
+            //}, 100);
+        }
+
         return new Promise<any>(reslove => {
             window.setTimeout(function () {
                 page.element.style.display = 'none';
+                page.element.style.removeProperty('transform');
+                page.element.style.removeProperty('transition');
+
+                // if (page.previous) {
+                //     page.previous.element.style.removeProperty('transform');
+                //     page.previous.element.style.removeProperty('transition');
+                // }
+
                 reslove();
             }, 500)
         });
