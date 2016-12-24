@@ -230,7 +230,7 @@ var chitu;
             value: function createPage(routeData) {
                 var previous_page = this.pages[this.pages.length - 1];
                 var element = this.createPageElement(routeData);
-                var displayer = new this.pageDisplayType();
+                var displayer = new this.pageDisplayType(this);
                 console.assert(this.pageType != null);
                 var page = new this.pageType({
                     app: this,
@@ -363,19 +363,12 @@ var chitu;
         }, {
             key: 'back',
             value: function back() {
-                var _this3 = this;
-
                 var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
 
-                return new Promise(function (reslove, reject) {
-                    _this3.closeCurrentPage();
-                    if (_this3.page_stack.length == 0) {
-                        reject();
-                        chitu.fireCallback(_this3.backFail, _this3, {});
-                        return;
-                    }
-                    reslove();
-                });
+                this.closeCurrentPage();
+                if (this.page_stack.length == 0) {
+                    chitu.fireCallback(this.backFail, this, {});
+                }
             }
         }, {
             key: 'currentPage',

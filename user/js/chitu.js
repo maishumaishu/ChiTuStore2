@@ -163,7 +163,7 @@
         createPage(routeData) {
             let previous_page = this.pages[this.pages.length - 1];
             let element = this.createPageElement(routeData);
-            let displayer = new this.pageDisplayType();
+            let displayer = new this.pageDisplayType(this);
             console.assert(this.pageType != null);
             let page = new this.pageType({
                 app: this,
@@ -283,15 +283,10 @@
             return result;
         }
         back(args = undefined) {
-            return new Promise((reslove, reject) => {
-                this.closeCurrentPage();
-                if (this.page_stack.length == 0) {
-                    reject();
-                    chitu.fireCallback(this.backFail, this, {});
-                    return;
-                }
-                reslove();
-            });
+            this.closeCurrentPage();
+            if (this.page_stack.length == 0) {
+                chitu.fireCallback(this.backFail, this, {});
+            }
         }
     }
     chitu.Application = Application;

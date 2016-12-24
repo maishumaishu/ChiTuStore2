@@ -53,7 +53,6 @@ class MyApplication extends Application {
         page.loadingView.innerHTML = LOADING_HTML;
 
         let headerElement = page.createHeader(50);
-
         if (this.topLevelPages.indexOf(routeData.pageName) >= 0) {
             headerElement.innerHTML = DEFAULT_HEADER_HTML;
             requirejs([`text!ui/menu.html`], function (footerHTML) {
@@ -66,7 +65,12 @@ class MyApplication extends Application {
             })
         }
         else {
+            page.allowSwipeBack = true;
             headerElement.innerHTML = DEFAULT_HEADER_WITH_BACK_HTML;
+        }
+
+        if (routeData.pageName == 'home.product') {
+            page.createFooter(50);
         }
 
         let path = routeData.actionPath.substr(routeData.basePath.length);

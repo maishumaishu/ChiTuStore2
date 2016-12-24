@@ -30,18 +30,19 @@ const viewTagName = 'section';
 
 type ViewClassName = 'main' | 'loading' | 'error';
 export class Page extends chitu.Page {
-    private app: chitu.Application;
+    //private app: chitu.Application;
     private views: ViewClassName[] = ['main', 'loading', 'error'];
     private headerHeight = 0;
     private footerHeight = 0;
     private resize = chitu.Callbacks<Page, { headerHeight: number, footerHeight: number }>();
     private _viewCompleted: boolean = false;
     public displayStatic: boolean = false;
+    public allowSwipeBack = false;
 
     constructor(params: chitu.PageParams) {
         super(params);
 
-        this.app = params.app as chitu.Application;
+        //this.app = params.app as chitu.Application;
         //super.dis
         for (let className of this.views) {
             this.createView(className);
@@ -136,8 +137,94 @@ window.addEventListener('touchmove', function (e) {
 var isiOS = navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
 
 class PageDisplayImplement implements chitu.PageDisplayer {
+    private app: chitu.Application;
+
+    constructor(app: chitu.Application) {
+        this.app = app;
+    }
+
+    private enableGesture(page: Page) {
+        let startY, currentY;
+        let startX, currentX;
+        let moved = false;
+
+
+        let horizontal_swipe_angle = 35;
+        let vertical_pull_angle = 65;
+        let colse_position = window.innerWidth / 2;
+
+        page.element.addEventListener('touchstart', function (event: TouchEvent) {
+            startY = event.touches[0].pageY;
+            startX = event.touches[0].pageX;
+        })
+
+        page.element.addEventListener('touchmove', (event: TouchEvent) => {
+            currentX = event.targetTouches[0].pageX;
+            currentY = event.targetTouches[0].pageY;
+            //========================================
+            // currentX 表示 IOS 侧划
+            if (isiOS && currentX < 0) {
+                return;
+            }
+
+            //========================================
+            let deltaX = currentX - startX;
+            let angle = calculateAngle(deltaX, currentY - startY);
+            if (angle < horizontal_swipe_angle && deltaX > 0) {
+                page.element.style.transform = `translate(${deltaX}px, 0px)`;
+                page.element.style.transition = '0s';
+                disableNativeScroll(page.element);
+                moved = true;
+                event.preventDefault();
+                console.log('preventDefault gestured');
+            }
+        })
+
+        var calculateAngle = (x, y) => {
+            let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
+            return d;
+        }
+
+        let end = (event: TouchEvent) => {
+            if (!moved)
+                return;
+
+            let deltaX = currentX - startX;
+            if (deltaX > colse_position) {
+                //page.close();
+                this.app.back();
+            }
+            else {
+                page.element.style.transform = `translate(0px, 0px)`;
+                page.element.style.transition = '0.4s';
+            }
+
+            moved = false;
+            //action = null;
+            //status = null;
+        }
+
+        page.element.addEventListener('touchcancel', (event) => end(event));
+        page.element.addEventListener('touchend', (event) => end(event));
+
+        /** 禁用原生的滚动 */
+        function disableNativeScroll(element: HTMLElement) {
+            element.style.overflowY = 'hidden';
+        }
+
+        /** 启用原生的滚动 */
+        function enableNativeScroll(element: HTMLElement) {
+            element.style.overflowY = 'scroll';
+        }
+
+    }
+
     show(page: Page): Promise<any> {
 
+        if (!(<any>page).gestured && page.allowSwipeBack) {
+            this.enableGesture(page);
+            (<any>page).gestured = true;
+        }
 
         let maxZIndex = 1;
         let pageElements = document.getElementsByClassName('page');
@@ -162,8 +249,10 @@ class PageDisplayImplement implements chitu.PageDisplayer {
 
         return new Promise<any>(reslove => {
             window.setTimeout(function () {
+                page.element.style.removeProperty('transform');
+                page.element.style.removeProperty('transition');
                 reslove();
-            }, 1000)
+            }, 500)
         });
     }
     hide(page: Page) {
@@ -189,7 +278,7 @@ class PageDisplayImplement implements chitu.PageDisplayer {
             window.setTimeout(function () {
                 page.element.style.display = 'none';
                 reslove();
-            }, 1000)
+            }, 500)
         });
     }
 } 

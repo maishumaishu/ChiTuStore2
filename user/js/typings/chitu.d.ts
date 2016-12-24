@@ -61,8 +61,9 @@ declare namespace chitu {
         showPage(routeString: string, args?: any): Page;
         private setLocationHash(routeString);
         private closeCurrentPage();
+        private clearPageStack();
         redirect(routeString: string, args?: any): Page;
-        back(args?: any): Promise<void>;
+        back(args?: any): void;
     }
 }
 
@@ -114,7 +115,7 @@ declare namespace chitu {
         new (args: PageParams): Page;
     }
     interface PageDisplayConstructor {
-        new (): PageDisplayer;
+        new (app: Application): PageDisplayer;
     }
     interface PageDisplayer {
         show(page: Page): Promise<any>;

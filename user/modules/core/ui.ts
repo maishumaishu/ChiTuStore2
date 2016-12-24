@@ -204,6 +204,7 @@ export class PageViewGesture {
 
             if (action != null) {
                 event.preventDefault();
+                event.stopPropagation();
             }
         })
 
@@ -218,23 +219,19 @@ export class PageViewGesture {
             let {rightElement, leftElement} = this.getElements(viewNode);
 
             let left = this.elementLeft + deltaX;
-            transform(currentElement, { left, top: this.elementTop }, '0s');
-            if (deltaX < 0) {
+            if (deltaX < 0 && rightElement != null) {
                 action = 'swipeLeft';
 
-                if (rightElement != null) {
-                    transform(rightElement, { left: left + currentElement.clientWidth, top: this.elementTop }, '0s');
-                    status = Math.abs(deltaX) >= this.switchDistances.left ? 'ready' : 'init';
-                }
+                transform(currentElement, { left, top: this.elementTop }, '0s');
+                transform(rightElement, { left: left + currentElement.clientWidth, top: this.elementTop }, '0s');
+                status = Math.abs(deltaX) >= this.switchDistances.left ? 'ready' : 'init';
             }
-            else if (deltaX > 0) {
+            else if (deltaX > 0 && leftElement != null) {
                 action = 'swipeRight';
-
-                if (leftElement != null) {
-                    let left = deltaX - leftElement.clientWidth;
-                    transform(leftElement, { left, top: this.elementTop }, '0s');
-                    status = Math.abs(deltaX) >= this.switchDistances.right ? 'ready' : 'init';
-                }
+                let left = deltaX - leftElement.clientWidth;
+                transform(currentElement, { left: deltaX, top: this.elementTop }, '0s');
+                transform(leftElement, { left, top: this.elementTop }, '0s');
+                status = Math.abs(deltaX) >= this.switchDistances.right ? 'ready' : 'init';
             }
             this.disableNativeScroll(currentElement);
         }

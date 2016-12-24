@@ -60,6 +60,7 @@ export default async function (page: Page) {
     }
 
     createHeader(page);
+    createFooter(page);
 }
 
 function createIntroduceView(page: Page) {
@@ -127,4 +128,29 @@ function createHeader(page: Page) {
             );
         }
     })
+}
+
+function createFooter(page: Page) {
+    let data = {
+        productStock: 0
+    }
+    new Vue({
+        el: page.footer,
+        render(h) {
+            return (
+                <footer>
+                    <nav name="bottom_bar" class="">
+                        <span name="btn_shopping_cart" class="pull-left">
+                            <i class="icon-shopping-cart"></i>
+                            <span class="badge bg-primary">6</span>
+                        </span>
+                        <button name="btn_add" class="btn btn-primary pull-right">加入购物车</button>
+                    </nav>
+                </footer>
+            );
+            // data-bind="text:shoppingCartNumber,visible:shoppingCartNumber"
+            // data-bind="tap: addToShoppingCart,click: addToShoppingCart, enable: ko.unwrap(product.Stock) > 0, text:ko.unwrap(product.Stock) > 0 ? '加入购物车' : '已经售磬'" data-dialog="toast:'成功添加到购物车'"
+        }
+    })
+    return data;
 }
