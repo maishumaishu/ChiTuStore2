@@ -200,7 +200,7 @@ export class PageViewGesture {
             if (angle < horizontal_swipe_angle && moving != 'vertical') {
                 moving = 'horizontal';
                 moveHorizontal(event, currentX - startX);
-                event.stopPropagation();                
+                event.stopPropagation();
             }
             else if (angle > vertical_pull_angle && moving != 'horizontal') {
                 moving = 'vertical';
@@ -497,18 +497,13 @@ export function imageDelayLoad(element: HTMLImageElement, imageText: string) {
 
 }
 
-/**
- * 滚动到底部触发回调事件
- */
-export function scrollOnBottom(element: HTMLElement, callback: Function, deltaHeight?: number) {
-    console.assert(element != null);
-    console.assert(callback != null);
-    deltaHeight = deltaHeight || 10;
-    element.addEventListener('scroll', function () {
-        let maxScrollTop = element.scrollHeight - element.clientHeight;
-        //let deltaHeight = 10;
-        if (element.scrollTop + deltaHeight >= maxScrollTop) {
-            callback();
-        }
-    });
+
+export function buttonOnClick(callback: (event: Event) => Promise<any>) {
+    return function (event: Event) {
+        let button = (event.target as HTMLButtonElement);
+        button.setAttribute('disabled', '');
+        let p = callback(event);
+        p.then(() => button.removeAttribute('disabled'))
+            .catch(() => button.removeAttribute('disabled'));
+    }
 }

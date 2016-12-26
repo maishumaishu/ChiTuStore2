@@ -4,6 +4,7 @@ import * as services from 'services';
 import * as site from 'site'
 import { PageViewGesture, imageDelayLoad } from 'core/ui'
 import { mapGetters } from 'vuex';
+import * as ui from 'core/ui';
 
 import 'controls/imageBox';
 
@@ -152,9 +153,9 @@ function createFooter(page: Page) {
             itemsCount: () => state.itemsCount
         },
         methods: {
-            addToShoppingCart() {
-                services.shoppingCart.addItem(productId);
-            }
+            addToShoppingCart: ui.buttonOnClick(function (event) {
+                return services.shoppingCart.addItem(productId);
+            })
         }
     })
 
