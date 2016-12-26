@@ -31,6 +31,7 @@ declare interface VueStatic {
     component<TData, TMethods>(name: string, options: { template: string, props?: any } & VueOptions<TData, TMethods>): Function;
     set(object: Object, key: string, value: any);
     nextTick(callback: Function, context?: any);
+    use: (module: any) => void,
 }
 
 declare let Vue: VueStatic

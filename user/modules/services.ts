@@ -1,4 +1,7 @@
+import Vue = require('vue');
 import Vuex = require('vuex');
+
+Vue.use(Vuex)
 
 const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
 let config = {
@@ -10,7 +13,7 @@ let config = {
         account: `http://${SERVICE_HOST}/Account/`,
     },
     appToken: '58424776034ff82470d06d3d',
-    storeId: '58401d1906c02a2b8877bd13',
+    //storeId: '58401d1906c02a2b8877bd13',
     userToken: '584cfabb4918e4186a77ff1e'
 }
 
@@ -101,12 +104,16 @@ function get<T>(url: string, data?: any) {
         headers['user-token'] = userToken();
     }
 
-    let urlParams = `storeId=${storeId()}`;
+    let urlParams = '';//`storeId=${storeId()}`;
     for (let key in data) {
         urlParams = urlParams + `&${key}=${data[key]}`;
     }
 
-    url = url + '?' + urlParams;
+    // if (url.indexOf('?') < 0)
+    url = url.indexOf('?') < 0 ? url + '?' + urlParams : url + '&' + urlParams;
+    // else
+    //url = url + '&' + urlParams;
+
     let options = {
         headers,
         method: 'get',
@@ -115,10 +122,13 @@ function get<T>(url: string, data?: any) {
 }
 
 type ContentType = 'json' | 'default';
-function post<T>(url: string, contentType: ContentType, data?: any) {
+
+function post<T>(url: string, data?: Object) {
 
     console.assert(userToken() != null);
     console.assert(storeId() != null);
+
+
 
     data = data || {};
     let headers = {
@@ -126,6 +136,7 @@ function post<T>(url: string, contentType: ContentType, data?: any) {
         'user-token': userToken(),
     };
 
+    let contentType = 'json';
     if (contentType == 'json') {
         headers['content-type'] = 'application/json';
     }
@@ -179,15 +190,56 @@ export function imageUrl(path: string) {
     else {
         url = path;
     }
-    url = url + `?application-token=${config.appToken}&storeId=${config.storeId}`;
+    url = url + `?application-token=${config.appToken}&storeId=${storeId()}`;
     return url;
+}
+
+export module station {
+    export function url(path) {
+        return `${config.service.site}${path}?storeId=${storeId()}`;
+    }
+    export type News = { Id: string, Title: string, ImgUrl: string, Date: string, Content: string };
+    export function newsList(pageIndex: number) {
+        let url = station.url('Info/GetNewsList');
+        return get<News[]>(url, { pageIndex }).then(items => {
+            items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
+            return items;
+        });
+    }
+
+    export function news(newsId: string) {
+        let url = station.url('Info/GetNews');
+        return get<News>(url, { newsId }).then(item => {
+            item.ImgUrl = imageUrl(item.ImgUrl);
+            item.Date = parseDate(item.Date).toLocaleDateString();
+            return item;
+        });
+    }
+
+    export function searchKeywords() {
+        return get<Array<string>>(url('Home/GetSearchKeywords'));
+    }
+
+    export function historySearchWords() {
+        return get<Array<string>>(url('Home/HistorySearchWords'));
+    }
+
+    export function advertItems(): Promise<{ ImgUrl: string }[]> {
+        return get<{ ImgUrl: string }[]>(url('Home/GetAdvertItems')).then(items => {
+            items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
+            return items;
+        });
+    }
 }
 
 export module home {
     type HomeProduct = { Id: string, Name: string, ImagePath: string };
+    export function url() {
+
+    }
     export function proudcts(pageIndex?: number): Promise<HomeProduct[]> {
         pageIndex = pageIndex === undefined ? 0 : pageIndex;
-        let url = config.service.site + 'Home/GetHomeProducts';
+        let url = station.url('Home/GetHomeProducts');
         return get<HomeProduct[]>(url, { pageIndex }).then((products) => {
             for (let product of products) {
                 product.ImagePath = imageUrl(product.ImagePath); //imageBasePath + product.ImagePath;
@@ -204,67 +256,55 @@ export module home {
         Id: string, Arguments: Array<{ key: string, value: string }>,
         BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
         GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
-        ProductCategoryId: string, Count: number,
+        ProductCategoryId: string, Count: number, Name: string, IsFavored?: boolean
         CustomProperties: Array<{
             Name: string,
             Options: Array<{ Name: string, Selected: boolean, Value: string }>
         }>
     };
     export function getProduct(productId): Promise<Product> {
-        let url = config.service.shop + 'Product/GetProduct';
+        let url = shop.url('Product/GetProduct');
         return get<Product>(url, { productId }).then(product => {
             product.Count = 1;
             if (!product.ImageUrls && product.ImageUrl != null)
                 product.ImageUrls = (<string>product.ImageUrl).split(',').map(o => imageUrl(o));
 
             product.ImageUrl = product.ImageUrls[0];
+            product.IsFavored = null;
+
+            isFavored(productId).then((result) => {
+                product.IsFavored = result;
+            })
             return product;
         });
     }
-    export function advertItems(): Promise<{ ImgUrl: string }[]> {
-        let url = config.service.site + 'Home/GetAdvertItems'
-        return get<{ ImgUrl: string }[]>(url).then(items => {
-            items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
-            return items;
-        });
+    //=====================================================================
+    // 收藏夹
+    export function isFavored(productId: string) {
+        return get<boolean>(shop.url('Product/IsFavored'), { productId });
     }
+    export function favorProduct(productId) {
+        return post(shop.url('Product/FavorProduct'), { productId });
+    }
+    export function unfavor(productId: string) {
+        return post(shop.url('Product/UnFavorProduct'), { productId });
+    }
+    //=====================================================================
 
-    export type News = { Id: string, Title: string, ImgUrl: string, Date: string, Content: string };
-    export function newsList(pageIndex: number) {
-        let url = config.service.site + 'Info/GetNewsList';
-        return get<News[]>(url, { pageIndex }).then(items => {
-            items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
-            return items;
-        });
-    }
 
-    export function news(newsId: string) {
-        let url = config.service.site + 'Info/GetNews';
-        return get<News>(url, { newsId }).then(item => {
-            item.ImgUrl = imageUrl(item.ImgUrl);
-            item.Date = parseDate(item.Date).toLocaleDateString();
-            return item;
-        });
-    }
 
-    export function searchKeywords() {
-        let url = config.service.site + 'Home/GetSearchKeywords';
-        return get<Array<string>>(url);
-    }
-
-    export function historySearchWords() {
-        let url = config.service.site + 'Home/HistorySearchWords';
-        return get<Array<string>>(url);
-    }
 }
 
 export module shop {
+    export function url(path: string) {
+        return `${config.service.shop}${path}?storeId=${storeId()}`;
+    }
     export function productIntroduce(productId: string): Promise<string> {
-        let url = config.service.shop + 'Product/GetProductIntroduce';
+        let url = shop.url('Product/GetProductIntroduce');
         return get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
     }
     export function cateories() {
-        let url = config.service.shop + 'Product/GetCategories';
+        let url = shop.url('Product/GetCategories');
         return get<{ Id: string, Name: string }[]>(url);
     }
     export type ShoppingCartItem = {
@@ -307,8 +347,8 @@ export module shoppingCart {
 
     export function addItem(productId: string, count?: number) {
         count = count || 1;
-        let url = `${config.service.shop}ShoppingCart/AddItem?storeId=${config.storeId}'`;
-        return post<ShoppingCartItem[]>(url, 'json', { productId, count }).then((result) => {
+        let url = shop.url('ShoppingCart/AddItem');
+        return post<ShoppingCartItem[]>(url, { productId, count }).then((result) => {
             let sum = 0;
             result.forEach(o => sum = sum + o.Count);
             store.commit('setItemsCount', sum);
@@ -316,7 +356,7 @@ export module shoppingCart {
     }
 
     export function getItems() {
-        let url = config.service.shop + `ShoppingCart/GetItems`;
+        let url = shop.url('ShoppingCart/GetItems');
         return get<ShoppingCartItem[]>(url, {}).then(items => {
             items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
             return items;

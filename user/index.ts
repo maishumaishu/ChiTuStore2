@@ -48,9 +48,9 @@ requirejs.config({
         vue: {
             exports: 'Vue'
         },
-        vuex: {
-            deps: ['vue']
-        },
+        // vuex: {
+        //     deps: ['vue']
+        // },
         site: {
             deps: app_deps
         }

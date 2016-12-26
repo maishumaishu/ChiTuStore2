@@ -27,7 +27,7 @@ export default function (page: Page) {
     }
 
     let pageIndex = 0;
-    let q = services.home.advertItems().then(items => {
+    let q = services.station.advertItems().then(items => {
         data.advertItems = items;
         page.loadingView.style.display = 'none';
         pageIndex = pageIndex + 1;
@@ -119,7 +119,7 @@ export default function (page: Page) {
         let data = {
             historyKeywords: new Array<string>(), searchKeyWords: Array<string>(), visible: false
         };
-        services.home.searchKeywords().then(items => {
+        services.station.searchKeywords().then(items => {
             data.searchKeyWords = items;
         });
 

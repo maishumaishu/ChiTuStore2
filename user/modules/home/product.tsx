@@ -63,6 +63,47 @@ export default async function (page: Page) {
         createHeader(page);
         createFooter(page);
     });
+
+    function createHeader(page: Page) {
+        type ModelMethods = {
+            favor: Function
+        }
+        let methods: ModelMethods = {
+            favor: ui.buttonOnClick(function (event) {
+                if (product.IsFavored) {
+                    return services.home.unfavor(product.Id).then(() => {
+                        product.IsFavored = false;
+                    })
+                }
+                
+                return services.home.favorProduct(product.Id).then(() => {
+                    product.IsFavored = true;
+                });
+            })
+        }
+        new Vue({
+            el: page.header,
+            methods,
+            render(h) {
+                let model = this as ModelMethods;
+                return (
+                    <header>
+                        <nav class="bg-primary" style="width:100%;">
+                            <a name="back-button" href="javascript:app.back()" class="leftButton" style="padding-right:20px;padding-left:20px;margin-left:-20px;">
+                                <i class="icon-chevron-left"></i>
+                            </a>
+                            <h4>商品信息</h4>
+                            <button class="rightButton" on-click={model.favor}>
+                                <i class="icon-heart-empty" style={{ fontWeight: `800`, fontSize: `20px`, display: product.IsFavored ? 'none' : 'block' }} ></i>
+                                <i class="icon-heart" style={{ display: product.IsFavored ? 'block' : 'none' }}></i>
+                            </button>
+                        </nav>
+                    </header>
+                );
+            }
+        })
+    }
+
 }
 
 function createIntroduceView(page: Page) {
@@ -113,23 +154,6 @@ function createHorizontalIntroduceView(page: Page) {
     return introduceView;
 }
 
-function createHeader(page: Page) {
-    new Vue({
-        el: page.header,
-        render(h) {
-            return (
-                <header>
-                    <nav class="bg-primary" style="width:100%;">
-                        <a name="back-button" href="javascript:app.back()" class="leftButton" style="padding-right:20px;padding-left:20px;margin-left:-20px;">
-                            <i class="icon-chevron-left"></i>
-                        </a>
-                        <h4>商品信息</h4>
-                    </nav>
-                </header>
-            );
-        }
-    })
-}
 
 function createFooter(page: Page) {
     let data = {

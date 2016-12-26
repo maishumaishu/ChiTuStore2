@@ -1,5 +1,5 @@
 import { Page } from 'chitu.mobile';
-import { home, imageUrl } from 'services';
+import { station, imageUrl } from 'services';
 import * as ui from 'core/ui';
 import * as site from 'site';
 
@@ -8,17 +8,14 @@ import Vue = require('vue');
 export default function (page: Page) {
     let id = page.routeData.values.id;
     console.assert(id);
-
-
-
-    home.news(id).then(news => {
+    station.news(id).then(news => {
         let vm = new Vue({
             el: page.dataView,
             data: {
                 news
             },
             render(h) {
-                let news: home.News = this.news;
+                let news: station.News = this.news;
                 return (
                     <section class="main container">
                         <h2>{news.Title}</h2>
