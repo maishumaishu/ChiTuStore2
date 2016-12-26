@@ -22,7 +22,7 @@ export default function (page: Page) {
         el: page.dataView,
         methods: {
             newsListLoad(pageIndex: number, reslove: Function, reject: Function) {
-                services.home.newsList(pageIndex)
+                services.station.newsList(pageIndex)
                     .then(items => {
                         if (pageIndex == 0)
                             page.loadingView.style.display = 'none';
