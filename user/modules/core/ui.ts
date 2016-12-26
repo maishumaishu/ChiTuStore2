@@ -1,4 +1,5 @@
-
+import BezierEasing = require('bezier-easing');
+let easing = BezierEasing(0.25, 0.1, 0.25, 1);
 
 let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 
@@ -70,8 +71,8 @@ export class PageViewGesture {
 
     switchDistances = {
         left: 150,
-        top: 60,
-        bottom: 60,
+        top: 50,
+        bottom: 20,
         right: 150
     }
 
@@ -167,8 +168,8 @@ export class PageViewGesture {
 
 
     private enableGesture(viewNode: PageViewNode) {
-        let startY, currentY;
-        let startX, currentX;
+        let startY: number, currentY: number, stepY: number;
+        let startX: number, currentX: number;
         let moving: 'horizontal' | 'vertical';
 
         let status: 'init' | 'ready';
@@ -177,6 +178,7 @@ export class PageViewGesture {
 
         let horizontal_swipe_angle = 35;
         let vertical_pull_angle = 65;
+        let elementCurrentTop: number = this.elementTop;
 
         viewNode.element.addEventListener('touchstart', function (event: TouchEvent) {
             startY = event.touches[0].pageY;
@@ -184,6 +186,8 @@ export class PageViewGesture {
         })
 
         viewNode.element.addEventListener('touchmove', (event: TouchEvent) => {
+            stepY = currentY == null ? event.targetTouches[0].pageY - startY : event.targetTouches[0].pageY - currentY;
+
             currentX = event.targetTouches[0].pageX;
             currentY = event.targetTouches[0].pageY;
             //========================================
@@ -196,6 +200,7 @@ export class PageViewGesture {
             if (angle < horizontal_swipe_angle && moving != 'vertical') {
                 moving = 'horizontal';
                 moveHorizontal(event, currentX - startX);
+                event.stopPropagation();                
             }
             else if (angle > vertical_pull_angle && moving != 'horizontal') {
                 moving = 'vertical';
@@ -204,7 +209,6 @@ export class PageViewGesture {
 
             if (action != null) {
                 event.preventDefault();
-                event.stopPropagation();
             }
         })
 
@@ -251,8 +255,10 @@ export class PageViewGesture {
                     readyElement = <HTMLElement>indicator.querySelector('.ready');
                     initElement = <HTMLElement>indicator.querySelector('.init');
                 }
-                transform(currentElement, { left: this.elementLeft, top: this.elementTop + deltaY / 2 }, '0s');
-                status = Math.abs(deltaY) <= this.switchDistances.top ? 'init' : 'ready';
+
+                elementCurrentTop = elementCurrentTop + east(stepY, deltaY);
+                transform(currentElement, { left: this.elementLeft, top: elementCurrentTop }, '0s');
+                status = Math.abs(elementCurrentTop - this.elementTop) <= this.switchDistances.top ? 'init' : 'ready';
                 action = 'pullDown';
             }
             else if (scrollTop + currentElement.clientHeight >= scrollHeight && deltaY < 0) {
@@ -261,8 +267,10 @@ export class PageViewGesture {
                     readyElement = <HTMLElement>indicator.querySelector('.ready');
                     initElement = <HTMLElement>indicator.querySelector('.init');
                 }
-                transform(currentElement, { left: this.elementLeft, top: this.elementTop + deltaY / 2 }, '0s');
-                status = Math.abs(deltaY) <= this.switchDistances.bottom ? 'init' : 'ready';
+
+                elementCurrentTop = elementCurrentTop + east(stepY, deltaY);
+                transform(currentElement, { left: this.elementLeft, top: elementCurrentTop }, '0s');
+                status = Math.abs(elementCurrentTop - this.elementTop) <= this.switchDistances.bottom ? 'init' : 'ready';
                 action = 'pullUp';
             }
 
@@ -333,6 +341,18 @@ export class PageViewGesture {
             moving = null;
             action = null;
             status = null;
+            elementCurrentTop = null;
+        }
+
+        function east(step, deltaY) {
+            let MAX_Y = 300;
+            if (deltaY >= MAX_Y)
+                return 0;
+
+            let r = easing(Math.abs(deltaY) / MAX_Y);
+            let result = r * step;
+            console.log(`radio ${r}`);
+            return result;
         }
 
         viewNode.element.addEventListener('touchcancel', (event) => end(event));

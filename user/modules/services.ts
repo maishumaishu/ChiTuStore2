@@ -1,3 +1,4 @@
+import Vuex = require('vuex');
 
 const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
 let config = {
@@ -40,7 +41,7 @@ function userToken(value?: string) {
         return config.userToken;
     }
     //==========================
-    
+
     if (value !== undefined) {
         localStorage.setItem('userToken', value);
         return;
@@ -113,7 +114,7 @@ function get<T>(url: string, data?: any) {
     return ajax<T>(url, options);
 }
 
-type ContentType = 'json' | 'urlencoded';
+type ContentType = 'json' | 'default';
 function post<T>(url: string, contentType: ContentType, data?: any) {
 
     console.assert(userToken() != null);
@@ -123,20 +124,22 @@ function post<T>(url: string, contentType: ContentType, data?: any) {
     let headers = {
         'application-token': config.appToken,
         'user-token': userToken(),
-        'content-type': 'application/json'
     };
 
-    let body: string = '';
+    if (contentType == 'json') {
+        headers['content-type'] = 'application/json';
+    }
+
+    let body: any;
     if (contentType == 'json') {
         body = JSON.stringify(data);
     }
     else {
+        let form = new FormData();
         for (let key in data) {
-            if (body != '')
-                body = body + '&';
-
-            body = body + `${key}=${data[key]}`;
+            form.append(key, data[key]);
         }
+        body = form;
     }
 
     let options = {
@@ -145,22 +148,6 @@ function post<T>(url: string, contentType: ContentType, data?: any) {
         method: 'post'
     }
     return ajax<T>(url, options);
-}
-
-export function imageUrl(path: string) {
-    if (path.startsWith('http://localhost')) {
-        path = path.substr('http://localhost'.length);
-    }
-    const imageBasePath = 'http://service.alinq.cn:2800/AdminServices/Shop';
-    let url: string;
-    if (!path.startsWith('http')) {
-        url = imageBasePath + path;
-    }
-    else {
-        url = path;
-    }
-    url = url + `?application-token=${config.appToken}&storeId=${config.storeId}`;
-    return url;
 }
 
 function parseDate(value: string): Date {
@@ -176,6 +163,24 @@ function parseDate(value: string): Date {
 
     throw new Error('not implment.');
 
+}
+
+//========================================================================================
+
+export function imageUrl(path: string) {
+    if (path.startsWith('http://localhost')) {
+        path = path.substr('http://localhost'.length);
+    }
+    const imageBasePath = 'http://service.alinq.cn:2800/AdminServices/Shop';
+    let url: string;
+    if (!path.startsWith('http')) {
+        url = imageBasePath + path;
+    }
+    else {
+        url = path;
+    }
+    url = url + `?application-token=${config.appToken}&storeId=${config.storeId}`;
+    return url;
 }
 
 export module home {
@@ -242,7 +247,6 @@ export module home {
         });
     }
 
-    //type KeyWord = { Text: string };
     export function searchKeywords() {
         let url = config.service.site + 'Home/GetSearchKeywords';
         return get<Array<string>>(url);
@@ -267,14 +271,55 @@ export module shop {
         Id: string, Amount: number, Count: number, ImageUrl: string,
         Price: number, ProductId: string, Selected: boolean, Name: string,
         IsGiven: boolean
-    };
-    export class shoppingCart {
-        static getItems() {
-            let url = config.service.shop + `ShoppingCart/GetItems`;
-            return get<ShoppingCartItem[]>(url, {}).then(items => {
-                items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
-                return items;
-            });
+    }
+}
+
+export module shoppingCart {
+    type StateType = {
+        itemsCount: number
+    }
+
+    let state: StateType = { itemsCount: 0 };
+    export let store = new Vuex.Store({
+        state,
+        mutations: {
+            setItemsCount(state: StateType, value) {
+                state.itemsCount = value;
+            }
         }
+    })
+
+    export type Item = ShoppingCartItem;
+    type ShoppingCartItem = {
+        Id: string,
+        Amount: number,
+        Count: number,
+        ImageUrl: string,
+        IsGiven: boolean,
+        Name: string,
+        ProductId: string,
+        Remark: string,
+        Score: number,
+        Selected: boolean,
+        Unit: number,
+        Price: number,
+    }
+
+    export function addItem(productId: string, count?: number) {
+        count = count || 1;
+        let url = `${config.service.shop}ShoppingCart/AddItem?storeId=${config.storeId}'`;
+        return post<ShoppingCartItem[]>(url, 'json', { productId, count }).then((result) => {
+            let sum = 0;
+            result.forEach(o => sum = sum + o.Count);
+            store.commit('setItemsCount', sum);
+        });
+    }
+
+    export function getItems() {
+        let url = config.service.shop + `ShoppingCart/GetItems`;
+        return get<ShoppingCartItem[]>(url, {}).then(items => {
+            items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
+            return items;
+        });
     }
 }

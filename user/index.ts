@@ -48,11 +48,15 @@ requirejs.config({
         vue: {
             exports: 'Vue'
         },
+        vuex: {
+            deps: ['vue']
+        },
         site: {
             deps: app_deps
         }
     },
     paths: {
+        'bezier-easing': 'js/bezier-easing',
         chitu: chituPath,
         css: 'js/css',
         fetch: 'js/fetch',
@@ -60,6 +64,7 @@ requirejs.config({
         text: 'js/text',
         move: 'js/move',
         vue: 'js/vue',
+        vuex: 'js/vuex',
         controls: modulesPath + '/controls',
         core: modulesPath + '/core',
         services: modulesPath + '/services',
