@@ -1,22 +1,22 @@
 import { Page } from 'chitu.mobile';
 import Vue = require('vue');
-import { shop } from 'services';
+import { shoppingCart } from 'services';
 import 'controls/imageBox';
 
 export default function (page: Page) {
 
     let data = {
-        items: Array<shop.ShoppingCartItem>()
+        items: Array<shoppingCart.Item>()
     };
 
     let methods = {
-        decreaseCount: function (item: shop.ShoppingCartItem) {
+        decreaseCount: function (item: shoppingCart.Item) {
             item.Count = item.Count - 1;
         },
-        increaseCount: function (item: shop.ShoppingCartItem) {
+        increaseCount: function (item: shoppingCart.Item) {
             item.Count = item.Count + 1;
         },
-        selectItem: function (item: shop.ShoppingCartItem) {
+        selectItem: function (item: shoppingCart.Item) {
             item.Selected = !item.Selected;
         }
     };
@@ -28,7 +28,7 @@ export default function (page: Page) {
         methods
     });
 
-    shop.shoppingCart.getItems().then(items => {
+    shoppingCart.getItems().then(items => {
         vm.items = items;
         page.loadingView.style.display = 'none';
     });

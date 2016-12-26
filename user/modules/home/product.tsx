@@ -3,7 +3,8 @@ import { Page } from 'chitu.mobile';
 import * as services from 'services';
 import * as site from 'site'
 import { PageViewGesture, imageDelayLoad } from 'core/ui'
-import Hammer = require('hammer');
+import { mapGetters } from 'vuex';
+
 import 'controls/imageBox';
 
 export default async function (page: Page) {
@@ -14,13 +15,12 @@ export default async function (page: Page) {
     let product = result[1];
 
     page.dataView.innerHTML = html;
-
-    //let node = page.dataView;
     let vm = new Vue({
         el: page.dataView,
         data: {
             product
         },
+        store: services.shoppingCart.store,
         computed: {
             productSelectedText
         },
@@ -42,9 +42,6 @@ export default async function (page: Page) {
         str = str + product.Count + '件';
         return str;
     }
-    //})
-
-
 
     async function mounted() {
 
@@ -61,12 +58,10 @@ export default async function (page: Page) {
         page.loadingView.style.display = 'none';
     }
 
-    // vm.$nextTick(() => {
-    //     page.loadingView.style.display = 'none';
-    // });
-
-    createHeader(page);
-    createFooter(page);
+    vm.$nextTick(function () {
+        createHeader(page);
+        createFooter(page);
+    });
 }
 
 function createIntroduceView(page: Page) {
@@ -139,21 +134,29 @@ function createFooter(page: Page) {
     let data = {
         productStock: 0
     }
-    new Vue({
+
+    page.footer.innerHTML = `
+<nav name="bottom_bar" class="">
+    <span name="btn_shopping_cart" class="pull-left">
+        <i class="icon-shopping-cart"></i>
+        <span class="badge bg-primary">{{itemsCount}}</span>
+    </span>
+    <button name="btn_add" class="btn btn-primary pull-right" @click="addToShoppingCart">加入购物车</button>
+</nav>`;
+
+    let productId = page.routeData.values.id;
+    let state = services.shoppingCart.store.state;
+    let vm = new Vue({
         el: page.footer,
-        render(h) {
-            return (
-                <footer>
-                    <nav name="bottom_bar" class="">
-                        <span name="btn_shopping_cart" class="pull-left">
-                            <i class="icon-shopping-cart"></i>
-                            <span class="badge bg-primary">6</span>
-                        </span>
-                        <button name="btn_add" class="btn btn-primary pull-right">加入购物车</button>
-                    </nav>
-                </footer>
-            );
+        computed: {
+            itemsCount: () => state.itemsCount
+        },
+        methods: {
+            addToShoppingCart() {
+                services.shoppingCart.addItem(productId);
+            }
         }
     })
+
     return data;
 }
