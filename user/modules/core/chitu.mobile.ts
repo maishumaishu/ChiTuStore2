@@ -233,10 +233,11 @@ class PageDisplayImplement implements chitu.PageDisplayer {
 
     show(page: Page): Promise<any> {
 
-        if (!(<any>page).gestured && page.allowSwipeBack) {
-            this.enableGesture(page);
-            this.disableOffset(page);
+        if (!(<any>page).gestured) {
+            //this.disableOffset(page);
             (<any>page).gestured = true;
+            if (page.allowSwipeBack)
+                this.enableGesture(page);
         }
 
         let maxZIndex = 1;
@@ -285,14 +286,6 @@ class PageDisplayImplement implements chitu.PageDisplayer {
                 reslove();
             }, 500)
         });
-    }
-
-    disableOffset(page: Page) {
-        page.element.addEventListener('touchmove', (event: TouchEvent) => {
-            if (window.pageYOffset < 0) {
-                event.preventDefault();
-            }
-        })
     }
 
     hide(page: Page) {

@@ -75,7 +75,7 @@ export default async function (page: Page) {
                         product.IsFavored = false;
                     })
                 }
-                
+
                 return services.home.favorProduct(product.Id).then(() => {
                     product.IsFavored = true;
                 });
@@ -160,26 +160,45 @@ function createFooter(page: Page) {
         productStock: 0
     }
 
-    page.footer.innerHTML = `
-<nav name="bottom_bar" class="">
-    <span name="btn_shopping_cart" class="pull-left">
-        <i class="icon-shopping-cart"></i>
-        <span class="badge bg-primary">{{itemsCount}}</span>
-    </span>
-    <button name="btn_add" class="btn btn-primary pull-right" @click="addToShoppingCart">加入购物车</button>
-</nav>`;
-
     let productId = page.routeData.values.id;
     let state = services.shoppingCart.store.state;
+
+    type ModelComputed = {
+        itemsCount: () => number
+    }
+
+    type ModelMethods = {
+        addToShoppingCart: Function
+    }
+
+    let computed: ModelComputed = {
+        itemsCount: () => state.itemsCount
+    }
+
+    let methods: ModelMethods = {
+        addToShoppingCart: ui.buttonOnClick(function (event) {
+            return services.shoppingCart.addItem(productId);
+        })
+    }
+    
     let vm = new Vue({
         el: page.footer,
-        computed: {
-            itemsCount: () => state.itemsCount
-        },
-        methods: {
-            addToShoppingCart: ui.buttonOnClick(function (event) {
-                return services.shoppingCart.addItem(productId);
-            })
+        computed,
+        methods,
+        render(h) {
+            let model = this as (ModelComputed & ModelMethods);
+            return (
+                <footer>
+                    <nav name="bottom_bar" class="">
+                        <span name="btn_shopping_cart" class="pull-left">
+                            <i class="icon-shopping-cart"></i>
+                            <span class="badge bg-primary" style={{ display: model.itemsCount ? 'block' : 'none' }}>{model.itemsCount}</span>
+                        </span>
+                        <button name="btn_add" class="btn btn-primary pull-right" on-click={model.addToShoppingCart}>加入购物车</button>
+                    </nav>
+                </footer >
+            );
+
         }
     })
 

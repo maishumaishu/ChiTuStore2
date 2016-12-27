@@ -207,9 +207,11 @@ export class PageViewGesture {
                 moveVertical(event, currentY - startY);
             }
 
-            if (action != null) {
+            let {scrollTop, scrollHeight, clientHeight} = viewNode.element;
+            if ((currentY - startY >= 0 && scrollTop <= 0) || (currentY - startY <= 0 && scrollTop >= scrollHeight - clientHeight) || action != null) {
                 event.preventDefault();
             }
+
         })
 
         var calculateAngle = (x, y) => {

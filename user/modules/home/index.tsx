@@ -1,4 +1,5 @@
 import { Page } from 'chitu.mobile';
+import { app } from 'site';
 import * as services from 'services';
 import * as ui from 'core/ui';
 import Carousel = require('carousel');
@@ -21,10 +22,15 @@ export default function (page: Page) {
         showDefaultView() {
             searchViewData.visible = false;
         },
-        clearHistoryKeywords: function () {
+        clearHistoryKeywords() {
 
         }
     }
+
+    page.shown.add(() => {
+        debugger;
+        searchViewData.visible = false
+    });
 
     let pageIndex = 0;
     let q = services.station.advertItems().then(items => {
@@ -51,6 +57,8 @@ export default function (page: Page) {
             }
         });
     })
+
+
 
     createHeader(page);
 

@@ -42,11 +42,11 @@ export default function (page: Page) {
                             <div class="pull-left icon">
                                 <i on-click={() => methods.selectItem(o)} class={o.Selected ? 'icon-ok-sign' : 'icon-circle-blank'}></i>
                             </div>
-                            <div class="pull-left pic">
+                            <a href={"#home_product?id="+o.ProductId} class="pull-left pic">
                                 <image-box src={o.ImageUrl} class="img-responsive" />
-                            </div>
+                            </a>
                             <div style="margin-left:110px;">
-                                <div>{o.Name}</div>
+                                <a href={"#home_product?id="+o.ProductId} >{o.Name}</a>
                                 <div>
                                     <div class="price pull-left" style="margin-top:10px;">￥{o.Price.toFixed(2)}</div>
                                     <div class="pull-right">
