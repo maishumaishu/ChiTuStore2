@@ -150,11 +150,13 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         this.previousPageStartX = 0 - this.windowWidth / 3;
     }
 
+
     private enableGesture(page: Page) {
         let startY, currentY;
         let startX, currentX;
         let moved = false;
-
+        let SIDE_WIDTH = 10;
+        let enable = false;
 
         let horizontal_swipe_angle = 35;
         let vertical_pull_angle = 65;
@@ -163,14 +165,15 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         page.element.addEventListener('touchstart', function (event: TouchEvent) {
             startY = event.touches[0].pageY;
             startX = event.touches[0].pageX;
+            enable = startX <= SIDE_WIDTH
         })
 
         page.element.addEventListener('touchmove', (event: TouchEvent) => {
             currentX = event.targetTouches[0].pageX;
             currentY = event.targetTouches[0].pageY;
             //========================================
-            // currentX 表示 IOS 侧划
-            if (isiOS && currentX < 0) {
+            // currentX < 0 表示 IOS 侧划
+            if (isiOS && currentX < 0 || !enable) {
                 return;
             }
 

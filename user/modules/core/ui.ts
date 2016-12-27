@@ -200,7 +200,8 @@ export class PageViewGesture {
             if (angle < horizontal_swipe_angle && moving != 'vertical') {
                 moving = 'horizontal';
                 moveHorizontal(event, currentX - startX);
-                event.stopPropagation();
+                if (action)
+                    event.stopPropagation();
             }
             else if (angle > vertical_pull_angle && moving != 'horizontal') {
                 moving = 'vertical';
