@@ -312,7 +312,7 @@ export module shop {
         Price: number, ProductId: string, Selected: boolean, Name: string,
         IsGiven: boolean
     }
-    type FavorProduct = {
+   export type FavorProduct = {
         ProductId: string,
         ProductName: string,
         ImageUrl: string
