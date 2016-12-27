@@ -312,6 +312,20 @@ export module shop {
         Price: number, ProductId: string, Selected: boolean, Name: string,
         IsGiven: boolean
     }
+    type FavorProduct = {
+        ProductId: string,
+        ProductName: string,
+        ImageUrl: string
+    }
+    export function favorProducts() {
+        return get<FavorProduct[]>(url('Product/GetFavorProducts')).then(items => {
+            items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl))
+            return items;
+        });
+    }
+    export function unfavorProduct(productId: string) {
+        return post(url('Product/UnFavorProduct'), { productId });
+    }
 }
 
 export module shoppingCart {

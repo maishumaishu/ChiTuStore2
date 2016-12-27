@@ -51,7 +51,7 @@ export default function (page: Page) {
                         <hr class="row" />
 
                         <div style={{ display: data.historyKeywords.length > 0 ? 'block' : 'none' }}>
-                            <div class="button">
+                   ProductId         <div class="button">
                                 <button on-click={methods.clearHistoryKeywords} class="btn btn-default btn-block">清除历史搜索记录</button>
                             </div>
                         </div>

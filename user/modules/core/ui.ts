@@ -501,11 +501,11 @@ export function imageDelayLoad(element: HTMLImageElement, imageText: string) {
 }
 
 
-export function buttonOnClick(callback: (event: Event) => Promise<any>) {
-    return function (event: Event) {
+export function buttonOnClick(callback: (event: Event, ...args: any[]) => Promise<any>) {
+    return function (event: Event, ...args: any[]) {
         let button = (event.target as HTMLButtonElement);
         button.setAttribute('disabled', '');
-        let p = callback(event);
+        let p = callback(event, ...args);
         p.then(() => button.removeAttribute('disabled'))
             .catch(() => button.removeAttribute('disabled'));
     }

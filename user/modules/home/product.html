@@ -14,16 +14,11 @@
             <div name="productName" class="pull-left" style="width:100%;margin-left:-20px;">
                 <h4 class="text-left" style="font-weight:bold;padding-left:20px;">{{product.Name}}</h4>
             </div>
-            <div class="pull-right">
-                <h4 name="productNameChevron">
-                    <i class="icon-chevron-right"></i>
-                </h4>
-            </div>
         </a>
     </div>
     <div class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
         <span>类别：</span>
-        <a data-bind="href: ['#Home_ProductList_category_{0}', product.ProductCategoryId]" style="color: blue" href="#Home_ProductList_category_1abe2836-9c26-4472-8c3a-c840bb29ea6a">{{product.ProductCategoryName}}</a>
+        <a data-bind="href: ['#Home_ProductList_category_{0}', product.ProductCategoryId]" href="#Home_ProductList_category_1abe2836-9c26-4472-8c3a-c840bb29ea6a">{{product.ProductCategoryName}}</a>
     </div>
 
     <div class="col-xs-12 box" style="padding: 10px 0px 10px 0px;">
