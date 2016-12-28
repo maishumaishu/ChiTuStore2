@@ -110,7 +110,8 @@ function get<T>(url: string, data?: any) {
     }
 
     // if (url.indexOf('?') < 0)
-    url = url.indexOf('?') < 0 ? url + '?' + urlParams : url + '&' + urlParams;
+    if (urlParams)
+        url = url.indexOf('?') < 0 ? url + '?' + urlParams : url + '&' + urlParams;
     // else
     //url = url + '&' + urlParams;
 
@@ -192,6 +193,26 @@ export function imageUrl(path: string) {
     }
     url = url + `?application-token=${config.appToken}&storeId=${storeId()}`;
     return url;
+}
+
+//========================================================================================
+
+let state = { itemsCount: 0 };
+let store = new Vuex.Store({
+    state,
+    mutations: {
+        setItemsCount(context, value) {
+            state.itemsCount = value;
+        }
+    }
+})
+function storeCommit(name: 'setItemsCount', value) {
+    store.commit(name, value);
+}
+//========================================================================================
+
+function serviceUrl(baseUrl, path) {
+    return `${baseUrl}${path}?storeId=${storeId()}`;;
 }
 
 export module station {
@@ -312,7 +333,7 @@ export module shop {
         Price: number, ProductId: string, Selected: boolean, Name: string,
         IsGiven: boolean
     }
-   export type FavorProduct = {
+    export type FavorProduct = {
         ProductId: string,
         ProductName: string,
         ImageUrl: string
@@ -329,19 +350,9 @@ export module shop {
 }
 
 export module shoppingCart {
-    type StateType = {
-        itemsCount: number
+    function url(path: string) {
+        return `${config.service.shop}${path}?storeId=${storeId()}`;
     }
-
-    let state: StateType = { itemsCount: 0 };
-    export let store = new Vuex.Store({
-        state,
-        mutations: {
-            setItemsCount(state: StateType, value) {
-                state.itemsCount = value;
-            }
-        }
-    })
 
     export type Item = ShoppingCartItem;
     type ShoppingCartItem = {
@@ -361,19 +372,66 @@ export module shoppingCart {
 
     export function addItem(productId: string, count?: number) {
         count = count || 1;
-        let url = shop.url('ShoppingCart/AddItem');
-        return post<ShoppingCartItem[]>(url, { productId, count }).then((result) => {
+        return post<ShoppingCartItem[]>(url('ShoppingCart/AddItem'), { productId, count }).then((result) => {
             let sum = 0;
             result.forEach(o => sum = sum + o.Count);
             store.commit('setItemsCount', sum);
         });
     }
 
-    export function getItems() {
-        let url = shop.url('ShoppingCart/GetItems');
-        return get<ShoppingCartItem[]>(url, {}).then(items => {
+    export function items() {
+        return get<ShoppingCartItem[]>(url('ShoppingCart/GetItems')).then(items => {
             items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
             return items;
+        });
+    }
+
+    export function productsCount(): number {
+        return store.state.itemsCount;
+    }
+
+    let _userToken = userToken();
+    if (_userToken) {
+        get<number>(url('ShoppingCart/GetProductsCount')).then(result => {
+            storeCommit('setItemsCount', result);
+        })
+    }
+
+    function userInfo() {
+
+    }
+}
+
+export module member {
+    export function url(path: string) {
+        return `${config.service.member}${path}?storeId=${storeId()}`;
+    }
+    type UserInfo1 = {
+        Id: string,
+        Email: string,
+        Mobile: string,
+        OpenId: string,
+        PasswordSetted: boolean,
+        PaymentPasswordSetted: boolean,
+        UserName: string,
+        HeadImageUrl: string,
+    }
+
+    type UserInfo2 = {
+        Balance: number,
+        NotPaidCount: number,
+        Score: number,
+        SendCount: number,
+        ShoppingCartItemsCount: number,
+        NickName: string,
+        ToEvaluateCount: number,
+    }
+    export function userInfo() {
+        let url1 = url('Member/GetMember');
+        let url2 = serviceUrl(config.service.shop, 'User/GetUserInfo');
+        return Promise.all([get<UserInfo1>(url1), get<UserInfo2>(url2)]).then(result => {
+            let userInfo = Object.assign(result[0], result[1]);
+            return userInfo;
         });
     }
 }

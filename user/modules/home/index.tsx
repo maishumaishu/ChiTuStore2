@@ -16,7 +16,7 @@ export default function (page: Page) {
 
     let methods = {
         showSearchView() {
-            app.showPage('home_search');
+            app.redirect('home_search');
         }
     }
 

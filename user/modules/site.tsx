@@ -84,9 +84,9 @@ class MyApplication extends Application {
     buildHeader(page: Page, height: number) {
         let h = createElement;
         let defaultHeader = (
-            <div class="spin">
-                <i class="icon-spinner"></i>
-            </div>
+            <nav class="bg-primary" style="width:100%;">
+                <h4>&nbsp;</h4>
+            </nav>
         );
         let defaultHeaderWithBack = (
             <nav class="bg-primary" style="width:100%;">
@@ -127,7 +127,7 @@ class MyApplication extends Application {
         let vm = new Vue({
             el: footerElement,
             computed: ({
-                itemsCount: () => services.shoppingCart.store.state.itemsCount
+                itemsCount: services.shoppingCart.productsCount
             } as ModelComputed),
             mounted() {
                 let self = this as VueInstance<any>;

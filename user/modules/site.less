@@ -103,10 +103,8 @@ header {
     button {
       border: none;
       background-color:transparent;
-      &:focus,
-      &.focus {
-        border: none;
-        border-color: transparent;
+      &:focus {
+        outline:none;
       }
     }
 
@@ -181,8 +179,11 @@ footer {
       display: block;
       font-size: 10px;
     }
+    
+  }
+}
 
-    .sub {
+.sub {
       font-size: 10px;
       color: #fff;
       background: @brand-primary;
@@ -200,8 +201,6 @@ footer {
       box-sizing: border-box;
       text-align: center;
     }
-  }
-}
 
 .data-loading {
     text-align: center;

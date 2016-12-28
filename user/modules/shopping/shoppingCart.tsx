@@ -28,7 +28,7 @@ export default function (page: Page) {
         methods
     });
 
-    shoppingCart.getItems().then(items => {
+    shoppingCart.items().then(items => {
         vm.items = items;
         page.loadingView.style.display = 'none';
     });

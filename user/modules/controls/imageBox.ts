@@ -82,8 +82,7 @@ function processImageElement(element: HTMLImageElement) {
 
 
 
-
-Vue.component(`image-box`, {
+let imageBox = {
     template: '<img v-bind:src="src"/>',
     props: ['src'],
     data: function () {
@@ -98,5 +97,6 @@ Vue.component(`image-box`, {
         let self = this as VueInstance<any>;
         processImageElement(self.$el as HTMLImageElement);
     }
-});
-
+}
+Vue.component(`image-box`, imageBox);
+Vue.component(`imageBox`, imageBox);

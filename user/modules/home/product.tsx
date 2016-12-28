@@ -21,7 +21,6 @@ export default async function (page: Page) {
         data: {
             product
         },
-        store: services.shoppingCart.store,
         computed: {
             productSelectedText
         },
@@ -161,7 +160,7 @@ function createFooter(page: Page) {
     }
 
     let productId = page.routeData.values.id;
-    let state = services.shoppingCart.store.state;
+    //let state = services.shoppingCart.store.state;
 
     type ModelComputed = {
         itemsCount: () => number
@@ -172,7 +171,7 @@ function createFooter(page: Page) {
     }
 
     let computed: ModelComputed = {
-        itemsCount: () => state.itemsCount
+        itemsCount: services.shoppingCart.productsCount
     }
 
     let methods: ModelMethods = {
@@ -180,7 +179,7 @@ function createFooter(page: Page) {
             return services.shoppingCart.addItem(productId);
         })
     }
-    
+
     let vm = new Vue({
         el: page.footer,
         computed,
