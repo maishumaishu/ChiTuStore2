@@ -255,26 +255,30 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         page.element.style.zIndex = `${maxZIndex + 1}`;
         page.element.style.display = 'block';
         if (page.displayStatic) {
+            page.element.style.transform = `translate(0px,0px)`;
             return Promise.resolve();
         }
 
-        page.element.style.transform = `translate(100%,0px)`;
-        if (page.previous) {
-            page.previous.element.style.transform = `translate(0px,0px)`;
-        }
-        //=======================================================
-        // 必须 setTimeout 才有效果，哪怕延迟时间为 0
-        window.setTimeout(() => {
-            page.element.style.transform = `translate(0px,0px)`;
-            page.element.style.transition = '0.4s';
-
+        return new Promise(reslove => {
+            page.element.style.transform = `translate(100%,0px)`;
             if (page.previous) {
-                page.previous.element.style.transform = `translate(${this.previousPageStartX}px,0px)`;
-                page.previous.element.style.transition = '0.4s';
+                page.previous.element.style.transform = `translate(0px,0px)`;
             }
+            //=======================================================
+            // 必须 setTimeout 才有效果，哪怕延迟时间为 0
+            window.setTimeout(() => {
+                page.element.style.transform = `translate(0px,0px)`;
+                page.element.style.transition = '0.4s';
 
-        }, 100)
-        //=======================================================
+                if (page.previous) {
+                    page.previous.element.style.transform = `translate(${this.previousPageStartX}px,0px)`;
+                    page.previous.element.style.transition = '0.4s';
+                }
+
+            }, 100)
+            //=======================================================
+            window.setTimeout(reslove, 1000);
+        })
     }
 
     hide(page: Page) {
