@@ -5,7 +5,6 @@
         "LICENSE": true,
         //"README.md": true,
         "/**/.baseDir.*": true,
-        ".tscache": true,
-        "user/build": true
+        ".tscache": true
     }
 }

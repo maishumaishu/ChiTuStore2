@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
 
-    var src_user_root = '.';
-    var dest_user_root = '../build/user';
+    var src_user_root = 'src';
+    var dest_user_root = 'www';
 
     var ts_options = {
         module: 'amd',
@@ -13,7 +13,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         shell: {
             ts_user: {
-                command: 'tsc -p .',
+                command: 'tsc -p src',
                 options: {
                     failOnError: false
                 }
@@ -58,7 +58,7 @@ module.exports = function (grunt) {
             user: {
                 files: [{
                     expand: true,
-                    cwd: `modules`,
+                    cwd: src_user_root + `/modules`,
                     src: ['**/*.less'],
                     dest: `${dest_user_root}/content/app`,
                     ext: '.css'
