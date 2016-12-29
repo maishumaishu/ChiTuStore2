@@ -5,3 +5,4 @@ build
 release
 .baseDir.ts
 TODO.txt
+.log
