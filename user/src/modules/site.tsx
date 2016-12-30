@@ -18,13 +18,13 @@ var isCordovaApp = location.protocol === 'file:';
 let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 
 class MyApplication extends Application {
-    private _cachePages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
-    private topLevelPages: Array<string>;
+    //private _cachePages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
+    private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
 
     constructor() {
         super();
         this.pageType = Page;
-        this.topLevelPages = this._cachePages;
+        //this.topLevelPages = this._cachePages;
     }
 
     protected parseRouteString(routeString: string) {
@@ -58,7 +58,7 @@ class MyApplication extends Application {
 
         let className = routeData.pageName.split('.').join('-');
         page.element.className = 'page ' + className;
-        page.allowCache = this._cachePages.indexOf(page.name) >= 0;
+        //page.allowCache = this._cachePages.indexOf(page.name) >= 0;
         page.displayStatic = this.topLevelPages.indexOf(page.name) >= 0 || page.name == 'home.search';
         //=========================================
         // 在 shown 加入转动，而不是一开始加，避免闪烁
