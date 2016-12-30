@@ -106,9 +106,9 @@ class MyApplication extends Application {
                     <nav class="bg-primary" style={headerStyle}>
                         {isTopPage ?
                             <span></span> :
-                            <a name="back-button" href="javascript:app.back()" class="leftButton">
+                            <button name="back-button" onclick="app.back()" class="leftButton">
                                 <i class="icon-chevron-left"></i>
-                            </a>
+                            </button>
                         }
                         <h4>&nbsp;</h4>
                     </nav>

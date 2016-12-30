@@ -88,9 +88,9 @@ export default async function (page: Page) {
                 return (
                     <header>
                         <nav class="bg-primary" style="width:100%;">
-                            <a name="back-button" href="javascript:app.back()" class="leftButton">
+                            <button name="back-button" onclick="app.back()" class="leftButton">
                                 <i class="icon-chevron-left"></i>
-                            </a>
+                            </button>
                             <h4>商品信息</h4>
                             <button class="rightButton" on-click={model.favor}>
                                 <i class="icon-heart-empty" style={{ fontWeight: `800`, fontSize: `20px`, display: product.IsFavored ? 'none' : 'block' }} ></i>
