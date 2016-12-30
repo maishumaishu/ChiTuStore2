@@ -91,9 +91,9 @@ class MyApplication extends Application {
     buildHeader(page: Page, height: number) {
         let h = createElement;
 
-        let navStyle = {} as CSSStyleDeclaration;
+        let headerStyle = {} as CSSStyleDeclaration;
         if (page.routeData.pageName == 'home.search') {
-            navStyle.backgroundColor = '#fff';
+            headerStyle.backgroundColor = '#fff';
         }
 
 
@@ -101,9 +101,9 @@ class MyApplication extends Application {
         let topLevelPages = this.topLevelPages;
         let noneHeaderPages = ['user.index'];
         let headerElement: HTMLElement = (
-            <header>
+            <header style={headerStyle}>
                 {
-                    <nav class="bg-primary" style={navStyle}>
+                    <nav class="bg-primary" style={headerStyle}>
                         {isTopPage ?
                             <span></span> :
                             <a name="back-button" href="javascript:app.back()" class="leftButton">
