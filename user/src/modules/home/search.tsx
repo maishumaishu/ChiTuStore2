@@ -51,7 +51,7 @@ export default function (page: Page) {
                         <hr class="row" />
 
                         <div style={{ display: data.historyKeywords.length > 0 ? 'block' : 'none' }}>
-                   ProductId         <div class="button">
+                            ProductId         <div class="button">
                                 <button on-click={methods.clearHistoryKeywords} class="btn btn-default btn-block">清除历史搜索记录</button>
                             </div>
                         </div>
@@ -82,19 +82,20 @@ export default function (page: Page) {
                 let input = vm.$el.querySelector('input');
             },
             render: function (h) {
-                return (<header style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc' }}>
-                    <nav style="">
-                        <span style="">
-                            <a on-click={() => window['app'].back()} class="pull-left left-button" style="padding: 14px 12px 10px 12px;">
-                                <i class="icon-chevron-left"></i>
-                            </a>
-                        </span>
-                        <form action="" class="input-group" style="padding: 8px 10px 0 0;display: table;">
-                            <input type="search" class="form-control" />
-                            <span class="input-group-btn"><button type="button" class="btn btn-default">搜索</button></span>
-                        </form>
-                    </nav>
-                </header>
+                return (
+                    <header>
+                        <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc', padding:'8px 10px 0 0' }}>
+                            <span>
+                                <a on-click={() => window['app'].back()} class="pull-left left-button" style="padding: 8px 12px 10px 12px;">
+                                    <i class="icon-chevron-left"></i>
+                                </a>
+                            </span>
+                            <form action="" class="input-group" style="display: table;">
+                                <input type="search" class="form-control" />
+                                <span class="input-group-btn"><button type="button" class="btn btn-default">搜索</button></span>
+                            </form>
+                        </nav>
+                    </header>
                 );
             }
         });

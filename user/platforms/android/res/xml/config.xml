@@ -4,7 +4,7 @@
         <param name="android-package" value="org.apache.cordova.whitelist.WhitelistPlugin" />
         <param name="onload" value="true" />
     </feature>
-    <name>ChiTu Store</name>
+    <name>ChiTuStore</name>
     <description>
     </description>
     <author email="ansiboy@163.com" href="http://cordova.io">

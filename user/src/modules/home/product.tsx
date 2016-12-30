@@ -88,7 +88,7 @@ export default async function (page: Page) {
                 return (
                     <header>
                         <nav class="bg-primary" style="width:100%;">
-                            <a name="back-button" href="javascript:app.back()" class="leftButton" style="padding-right:20px;padding-left:20px;margin-left:-20px;">
+                            <a name="back-button" href="javascript:app.back()" class="leftButton">
                                 <i class="icon-chevron-left"></i>
                             </a>
                             <h4>商品信息</h4>

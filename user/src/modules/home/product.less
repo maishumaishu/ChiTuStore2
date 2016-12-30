@@ -5,12 +5,12 @@
 .home-product {
 
     section {
-        padding-top: @header-height;
+        padding-top: @nav-height;
         padding-bottom: @footer-height;
     }
 
     .pull-down-indicator {
-        height:  @header-height;
+        height:  @nav-height;
     }
  
     .container {
@@ -147,25 +147,16 @@
     nav {
         background-color: @brand-primary;
         color: white;
-        height: @header-height;
+        height: @nav-height;
         font-size: @topbar-font-size;
         position: absolute;
         width: 100%;
-        height: @header-height;
+        height: @nav-height;
         
         .nav-tabs {
             border-bottom: none;
             width: 100%;
             position: absolute;
         }
-    }
-}
-
-.Home-ProductDetail {
-    .scrollViewTopPadding(@header-height);
-    img {
-            height: auto;
-            display: block;
-            width: 100%;
     }
 }

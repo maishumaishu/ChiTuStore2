@@ -4,6 +4,16 @@ import { config as imageBoxConfig } from 'controls/imageBox';
 import * as chitu from 'chitu';
 import Vue = require('vue');
 
+/** 是否为 APP */
+var isCordovaApp = location.protocol === 'file:';
+/** 是否为安卓系统 */
+let isAndroid = navigator.userAgent.indexOf('Android') > -1;
+/** 是否允浸入式头 */
+let allowImmersionHeader = false;
+if (isCordovaApp && !isAndroid) {
+    allowImmersionHeader = true;
+}
+
 export let config = {
     get imageText() {
         return imageBoxConfig.imageDisaplyText;
@@ -14,17 +24,14 @@ export let config = {
     defaultUrl: 'home_index'
 }
 
-var isCordovaApp = location.protocol === 'file:';
-let isAndroid = navigator.userAgent.indexOf('Android') > -1;
+
 
 class MyApplication extends Application {
-    //private _cachePages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
     private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
 
     constructor() {
         super();
         this.pageType = Page;
-        //this.topLevelPages = this._cachePages;
     }
 
     protected parseRouteString(routeString: string) {
@@ -57,9 +64,9 @@ class MyApplication extends Application {
         requirejs([cssPath]);
 
         let className = routeData.pageName.split('.').join('-');
-        page.element.className = 'page ' + className;
-        //page.allowCache = this._cachePages.indexOf(page.name) >= 0;
+        page.element.className = (allowImmersionHeader ? 'page immersion ' : 'page ') + className;
         page.displayStatic = this.topLevelPages.indexOf(page.name) >= 0 || page.name == 'home.search';
+
         //=========================================
         // 在 shown 加入转动，而不是一开始加，避免闪烁
         page.shown.add((sender: Page) => {
@@ -83,37 +90,35 @@ class MyApplication extends Application {
 
     buildHeader(page: Page, height: number) {
         let h = createElement;
-        let defaultHeader = (
-            <nav class="bg-primary" style="width:100%;">
-                <h4>&nbsp;</h4>
-            </nav>
-        );
-        let defaultHeaderWithBack = (
-            <nav class="bg-primary" style="width:100%;">
-                <a name="back-button" href="javascript:app.back()" class="leftButton">
-                    <i class="icon-chevron-left"></i>
-                </a>
-                <h4>&nbsp;</h4>
-            </nav>
-        );
-        let backColor: string;
+
+        let navStyle = {} as CSSStyleDeclaration;
         if (page.routeData.pageName == 'home.search') {
-            backColor = '#fff';
+            navStyle.backgroundColor = '#fff';
         }
-        let style = `height:${height}px`;
-        if (backColor) {
-            style = style + `background-color:${backColor}`;
-        }
+
+
+        let isTopPage = this.topLevelPages.indexOf(page.routeData.pageName) >= 0;
+        let topLevelPages = this.topLevelPages;
+        let noneHeaderPages = ['user.index'];
         let headerElement: HTMLElement = (
-            <header style={style}>
+            <header>
                 {
-                    this.topLevelPages.indexOf(page.routeData.pageName) >= 0 ?
-                        defaultHeader :
-                        defaultHeaderWithBack
+                    <nav class="bg-primary" style={navStyle}>
+                        {isTopPage ?
+                            <span></span> :
+                            <a name="back-button" href="javascript:app.back()" class="leftButton">
+                                <i class="icon-chevron-left"></i>
+                            </a>
+                        }
+                        <h4>&nbsp;</h4>
+                    </nav>
                 }
             </header>
         );
-        page.element.appendChild(headerElement);
+
+        if (noneHeaderPages.indexOf(page.routeData.pageName) < 0) {
+            page.element.appendChild(headerElement);
+        }
     }
 
     createMenu(page: Page) {
@@ -184,16 +189,31 @@ class MyApplication extends Application {
 function createElement(tagName: string, props, children: Array<HTMLElement | string>): HTMLElement {
     props = props || {};
     children = children || [];
-    let element = document.createElement(tagName);
+    let element = document.createElement(tagName) as HTMLElement;
     for (let key in props) {
-        if (key != 'attrs') {
-            element.setAttribute(key, props[key]);
-        }
-        else {
-            let attrs = props['attrs'];
-            for (let name in attrs) {
-                element.setAttribute(name, attrs[name]);
-            }
+        switch (key) {
+            case 'attrs':
+                let attrs = props['attrs'];
+                for (let name in attrs) {
+                    element.setAttribute(name, attrs[name]);
+                }
+                break;
+            case 'style':
+                let styleValue = props[key];
+                if (typeof (styleValue) == 'string') {
+                    element.setAttribute('style', styleValue);
+                }
+                else {
+                    let names = Object.getOwnPropertyNames(styleValue)
+                    for (let i = 0; i < names.length; i++) {
+                        let name = names[i];
+                        element.style[name] = styleValue[name];
+                    }
+                }
+                break;
+            default:
+                element.setAttribute(key, props[key]);
+                break;
         }
 
     }

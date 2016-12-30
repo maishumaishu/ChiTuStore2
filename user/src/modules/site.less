@@ -56,6 +56,9 @@ a {
   .norecords {
       padding-top: @norecords-padding-top + @immersion-height;
   }
+  header {
+      padding-top: @immersion-height;
+  }
 }
 
 /* 页面样式 开始*/
@@ -89,12 +92,10 @@ a {
 }
 
 header {
-    @nav-height:50px;
     padding: 0;
     margin: 0;
     border: 0;
     width: 100%;
-    height: @header-height;
     position: absolute;
     background-color: @brand-primary; 
     z-index: @zindex-navbar-fixed;
@@ -113,22 +114,7 @@ header {
       }
     }
 
-    .rightButton {
-        position: absolute;
-        font-size: 18px;
-        top: 8px;
-        right: 12px;
-    }
-    .leftButton {
-        position: absolute;
-        font-size: 18px;
-        top: 8px;
-        left: 12px;
-        padding-right:20px;
-        padding-left:20px;
-        margin-left:-20px;
-    }
-    .defaultHeader();
+    .defaultNav();
 }
 
 footer {
