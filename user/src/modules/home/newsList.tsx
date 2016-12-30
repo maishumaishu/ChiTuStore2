@@ -6,8 +6,8 @@ import 'controls/imageBox';
 
 export default function (page: Page) {
 
-    page.dataView.innerHTML =
-        `<div class="container">
+    page.dataView.innerHTML = `
+<div class="container">
     <data-list ref="newsList" v-on:load="newsListLoad">
         <template scope="props">
             <a class="item" :href="'#home_news?id=' + props.item.Id">
@@ -27,6 +27,7 @@ export default function (page: Page) {
                         if (pageIndex == 0)
                             page.loadingView.style.display = 'none';
 
+                        pageIndex = pageIndex + 1;
                         reslove(items)
                     })
                     .catch(err => reject(err));

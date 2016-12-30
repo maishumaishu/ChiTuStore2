@@ -80,7 +80,7 @@
         }
     }
     chitu.RouteData = RouteData;
-    var PAGE_STACK_MAX_SIZE = 50;
+    var PAGE_STACK_MAX_SIZE = 20;
     var ACTION_LOCATION_FORMATER = '{controller}/{action}';
     var VIEW_LOCATION_FORMATER = '{controller}/{action}';
     class Application {
@@ -118,8 +118,8 @@
                 app: this,
                 previous: previous_page,
                 routeData: routeData,
-                displayer,
-                element
+                displayer: displayer,
+                element: element
             });
             this.on_pageCreated(page);
             return page;
@@ -193,7 +193,8 @@
             this.page_stack.push(page);
             if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
                 let c = this.page_stack.shift();
-                c.close();
+                if (this.cachePages[routeData.pageName])
+                    c.close();
             }
             page.previous = previous;
             page.show();
@@ -334,22 +335,16 @@ var chitu;
 (function (chitu) {
     class Callback {
         constructor() {
-            this.event_name = 'chitu-event';
-            this.event = document.createEvent('CustomEvent');
-            this.element = document.createElement('div');
+            this.funcs = new Array();
         }
         add(func) {
-            this.element.addEventListener(this.event_name, (event) => {
-                let { sender, args } = event.detail;
-                func(sender, args);
-            });
+            this.funcs.push(func);
         }
         remove(func) {
-            this.element.removeEventListener(this.event_name, func);
+            this.funcs = this.funcs.filter(o => o != func);
         }
         fire(sender, args) {
-            this.event.initCustomEvent(this.event_name, true, false, { sender, args });
-            this.element.dispatchEvent(this.event);
+            this.funcs.forEach(o => o(sender, args));
         }
     }
     chitu.Callback = Callback;
@@ -363,6 +358,14 @@ var chitu;
     chitu.fireCallback = fireCallback;
 })(chitu || (chitu = {}));
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 var chitu;
 (function (chitu) {
     class Page {
@@ -453,35 +456,27 @@ var chitu;
             });
         }
         loadPageAction(routeData) {
-            var action_deferred = new Promise((reslove, reject) => {
-                this.createActionDeferred(routeData).then((actionResult) => {
-                    if (!actionResult)
-                        throw chitu.Errors.exportsCanntNull(routeData.pageName);
-                    let actionName = 'default';
-                    let action = actionResult[actionName];
-                    if (action == null) {
-                        throw chitu.Errors.canntFindAction(routeData.pageName);
-                    }
-                    if (typeof action == 'function') {
-                        if (action['prototype'] != null)
-                            new action(this);
-                        else
-                            action(this);
-                        reslove();
-                    }
-                    else {
-                        reject();
-                        throw chitu.Errors.actionTypeError(routeData.pageName);
-                    }
-                }).catch((err) => {
-                    reject(err);
-                });
-            });
-            let result = action_deferred.then((data) => {
+            return __awaiter(this, void 0, void 0, function* () {
+                let actionResult = yield this.createActionDeferred(routeData);
+                if (!actionResult)
+                    throw chitu.Errors.exportsCanntNull(routeData.pageName);
+                let actionName = 'default';
+                let action = actionResult[actionName];
+                if (action == null) {
+                    throw chitu.Errors.canntFindAction(routeData.pageName);
+                }
+                if (typeof action == 'function') {
+                    if (action['prototype'] != null)
+                        new action(this);
+                    else
+                        action(this);
+                }
+                else {
+                    throw chitu.Errors.actionTypeError(routeData.pageName);
+                }
                 let args = {};
                 this.on_load(args);
             });
-            return result;
         }
     }
     Page.tagName = 'div';

@@ -9,7 +9,7 @@ var isCordovaApp = location.protocol === 'file:';
 /** 是否为安卓系统 */
 let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 /** 是否允浸入式头 */
-let allowImmersionHeader = false;
+let allowImmersionHeader = true;
 if (isCordovaApp && !isAndroid) {
     allowImmersionHeader = true;
 }
@@ -28,7 +28,7 @@ export let config = {
 
 class MyApplication extends Application {
     private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
-
+    //private cachePageNames = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
     constructor() {
         super();
         this.pageType = Page;
@@ -41,6 +41,7 @@ class MyApplication extends Application {
 
     protected createPage(routeData: chitu.RouteData) {
         let page = super.createPage(routeData) as Page;
+        //page.allowCache = this.cachePageNames.indexOf(routeData.pageName) >= 0;
 
         this.buildHeader(page, 50);
         if (this.topLevelPages.indexOf(routeData.pageName) >= 0) {
