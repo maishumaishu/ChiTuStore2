@@ -118,8 +118,8 @@
                 app: this,
                 previous: previous_page,
                 routeData: routeData,
-                displayer: displayer,
-                element: element
+                displayer,
+                element
             });
             this.on_pageCreated(page);
             return page;
@@ -193,7 +193,7 @@
             this.page_stack.push(page);
             if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
                 let c = this.page_stack.shift();
-                if (this.cachePages[routeData.pageName])
+                if (!this.cachePages[routeData.pageName])
                     c.close();
             }
             page.previous = previous;
@@ -361,7 +361,7 @@ var chitu;
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
@@ -384,7 +384,7 @@ var chitu;
             this._app = params.app;
             this._routeData = params.routeData;
             this._displayer = params.displayer;
-            this.loadPageAction(params.routeData);
+            this.loadPageAction();
         }
         on_load(args) {
             return chitu.fireCallback(this.load, this, args);
@@ -441,23 +441,12 @@ var chitu;
         get name() {
             return this.routeData.pageName;
         }
-        createActionDeferred(routeData) {
-            return new Promise((resolve, reject) => {
-                var url = routeData.actionPath;
-                requirejs([url], (obj) => {
-                    if (!obj) {
-                        let msg = `Load action '${routeData.pageName}' fail.`;
-                        let err = new Error(msg);
-                        reject(err);
-                        return;
-                    }
-                    resolve(obj);
-                }, (err) => reject(err));
-            });
-        }
-        loadPageAction(routeData) {
+        loadPageAction() {
             return __awaiter(this, void 0, void 0, function* () {
-                let actionResult = yield this.createActionDeferred(routeData);
+                console.assert(this._routeData != null);
+                let routeData = this._routeData;
+                var url = routeData.actionPath;
+                let actionResult = yield chitu.loadjs(url);
                 if (!actionResult)
                     throw chitu.Errors.exportsCanntNull(routeData.pageName);
                 let actionName = 'default';

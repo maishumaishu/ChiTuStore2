@@ -192,7 +192,7 @@ class PageDisplayImplement implements chitu.PageDisplayer {
                 page.element.style.transform = `translate(${deltaX}px, 0px)`;
                 page.element.style.transition = '0s';
 
-                if (page.previous != null) {
+                if (page.previous != null && isiOS) {
                     page.previous.element.style.transform = `translate(${this.previousPageStartX + deltaX / 3}px, 0px)`;
                     page.previous.element.style.transition = '0s';
                 }
@@ -245,7 +245,6 @@ class PageDisplayImplement implements chitu.PageDisplayer {
     show(page: Page): Promise<any> {
 
         if (!(<any>page).gestured) {
-            //this.disableOffset(page);
             (<any>page).gestured = true;
             if (page.allowSwipeBack)
                 this.enableGesture(page);
@@ -267,25 +266,50 @@ class PageDisplayImplement implements chitu.PageDisplayer {
             return Promise.resolve();
         }
 
+        if (isiOS) {
+            return this.iosShow(page);
+        }
+
+        return this.androidShow(page);
+    }
+
+    private iosShow(page: Page) {
+        page.element.style.transform = `translate(100%,0px)`;
+        if (page.previous) {
+            page.previous.element.style.transform = `translate(0px,0px)`;
+        }
+
         return new Promise(reslove => {
-            page.element.style.transform = `translate(100%,0px)`;
-            if (page.previous) {
-                page.previous.element.style.transform = `translate(0px,0px)`;
-            }
-            //=======================================================
-            // 必须 setTimeout 才有效果，哪怕延迟时间为 0
+            const playTime = 400;
+            let delay = 100;
             window.setTimeout(() => {
                 page.element.style.transform = `translate(0px,0px)`;
-                page.element.style.transition = '0.4s';
+                page.element.style.transition = `${playTime / 1000}s`;
 
                 if (page.previous) {
                     page.previous.element.style.transform = `translate(${this.previousPageStartX}px,0px)`;
-                    page.previous.element.style.transition = '0.4s';
+                    //==================================================================
+                    // 由于距离短，时间可以延迟
+                    page.previous.element.style.transition = `${(playTime + 200) / 1000}s`;
                 }
 
-            }, 100)
-            //=======================================================
-            window.setTimeout(reslove, 1000);
+            }, delay);
+
+            window.setTimeout(reslove, delay + playTime)
+        })
+    }
+
+    private androidShow(page: Page) {
+        page.element.style.transform = `translate(100%,0px)`;
+        return new Promise(reslove => {
+            const playTime = 500;
+            let delay = 50;
+            window.setTimeout(() => {
+                page.element.style.transform = `translate(0px,0px)`;
+                page.element.style.transition = `${playTime / 1000}s`;
+            }, delay);
+
+            window.setTimeout(reslove, delay + playTime)
         })
     }
 
@@ -319,12 +343,8 @@ class PageDisplayImplement implements chitu.PageDisplayer {
                 page.element.style.removeProperty('transform');
                 page.element.style.removeProperty('transition');
 
-                // if (page.previous) {
-                //     page.previous.element.style.removeProperty('transform');
-                //     page.previous.element.style.removeProperty('transition');
-                // }
-
                 reslove();
+
             }, 500)
         });
     }

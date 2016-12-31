@@ -236,7 +236,7 @@ var chitu;
                 this.page_stack.push(page);
                 if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
                     var c = this.page_stack.shift();
-                    if (this.cachePages[routeData.pageName]) c.close();
+                    if (!this.cachePages[routeData.pageName]) c.close();
                 }
                 page.previous = previous;
                 page.show();
@@ -522,7 +522,7 @@ var __awaiter = undefined && undefined.__awaiter || function (thisArg, _argument
         }
         function rejected(value) {
             try {
-                step(generator.throw(value));
+                step(generator["throw"](value));
             } catch (e) {
                 reject(e);
             }
@@ -555,7 +555,7 @@ var chitu;
             this._app = params.app;
             this._routeData = params.routeData;
             this._displayer = params.displayer;
-            this.loadPageAction(params.routeData);
+            this.loadPageAction();
         }
 
         _createClass(Page, [{
@@ -625,75 +625,60 @@ var chitu;
                 });
             }
         }, {
-            key: 'createActionDeferred',
-            value: function createActionDeferred(routeData) {
-                return new Promise(function (resolve, reject) {
-                    var url = routeData.actionPath;
-                    requirejs([url], function (obj) {
-                        if (!obj) {
-                            var msg = 'Load action \'' + routeData.pageName + '\' fail.';
-                            var err = new Error(msg);
-                            reject(err);
-                            return;
-                        }
-                        resolve(obj);
-                    }, function (err) {
-                        return reject(err);
-                    });
-                });
-            }
-        }, {
             key: 'loadPageAction',
-            value: function loadPageAction(routeData) {
+            value: function loadPageAction() {
                 return __awaiter(this, void 0, void 0, regeneratorRuntime.mark(function _callee() {
-                    var actionResult, actionName, action, args;
+                    var routeData, url, actionResult, actionName, action, args;
                     return regeneratorRuntime.wrap(function _callee$(_context) {
                         while (1) {
                             switch (_context.prev = _context.next) {
                                 case 0:
-                                    _context.next = 2;
-                                    return this.createActionDeferred(routeData);
+                                    console.assert(this._routeData != null);
+                                    routeData = this._routeData;
+                                    url = routeData.actionPath;
+                                    _context.next = 5;
+                                    return chitu.loadjs(url);
 
-                                case 2:
+                                case 5:
                                     actionResult = _context.sent;
 
                                     if (actionResult) {
-                                        _context.next = 5;
+                                        _context.next = 8;
                                         break;
                                     }
 
                                     throw chitu.Errors.exportsCanntNull(routeData.pageName);
 
-                                case 5:
+                                case 8:
                                     actionName = 'default';
                                     action = actionResult[actionName];
 
                                     if (!(action == null)) {
-                                        _context.next = 9;
+                                        _context.next = 12;
                                         break;
                                     }
 
                                     throw chitu.Errors.canntFindAction(routeData.pageName);
 
-                                case 9:
+                                case 12:
                                     if (!(typeof action == 'function')) {
-                                        _context.next = 13;
+                                        _context.next = 16;
                                         break;
                                     }
 
                                     if (action['prototype'] != null) new action(this);else action(this);
-                                    _context.next = 14;
+                                    _context.next = 17;
                                     break;
 
-                                case 13:
+                                case 16:
                                     throw chitu.Errors.actionTypeError(routeData.pageName);
 
-                                case 14:
+                                case 17:
                                     args = {};
 
                                     this.on_load(args);
 
-                                case 16:
+                                case 19:
                                 case 'end':
                                     return _context.stop();
                             }
