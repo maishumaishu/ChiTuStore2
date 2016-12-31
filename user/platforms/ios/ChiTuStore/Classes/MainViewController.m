@@ -84,6 +84,10 @@
     // e.g. self.myOutlet = nil;
 }
 
+-(UIStatusBarStyle)preferredStatusBarStyle{
+    return UIStatusBarStyleLightContent;
+}
+
 /* Comment out the block below to over-ride */
 
 /*

@@ -7,7 +7,7 @@ import Vue = require('vue');
 import 'controls/dataList';
 import 'controls/imageBox';
 
-export default function (page: Page) {
+export default async function (page: Page) {
 
     let searchKeyWords: Array<string> = [];
     let data = {
@@ -20,7 +20,6 @@ export default function (page: Page) {
         }
     }
 
-
     let pageIndex = 0;
     let q = services.station.advertItems().then(items => {
         data.advertItems = items;
@@ -28,29 +27,39 @@ export default function (page: Page) {
         pageIndex = pageIndex + 1;
     })
 
-    requirejs(['text!pages/home/index.html'], function (html) {
-        page.dataView.innerHTML = html;
-
-        new Vue({
-            el: page.dataView,
-            data,
-            mounted() {
-                q.then(() => {
-                    let c = new Carousel(page.dataView.querySelector('[name="ad-swiper"]') as HTMLElement);
-                })
-            },
-            methods: {
-                loadProducts(pageIndex: number, reslove: Function) {
-                    services.home.proudcts(pageIndex).then(items => reslove(items));
-                }
-            }
-        });
-    })
-
-
-
     createHeader(page);
 
+    let result = await Promise.all([services.station.advertItems(), chitu.loadjs('text!pages/home/index.html')]);
+    //.then(result => {
+    data.advertItems = result[0];
+    page.loadingView.style.display = 'none';
+    pageIndex = pageIndex + 1;
+
+    page.dataView.innerHTML = result[1];
+    let vm = new Vue({
+        el: page.dataView,
+        data,
+        mounted() {
+        },
+        methods: {
+            loadProducts(pageIndex: number, reslove: Function) {
+                services.home.proudcts(pageIndex).then(items => reslove(items));
+            }
+        }
+    })
+
+    vm.$nextTick(function () {
+        let element = page.dataView.querySelector('[name="ad-swiper"]') as HTMLElement;
+        let c = new Carousel(element);
+        app.pageShown.add((sender, page) => {
+            if (page.name != 'home.index') {
+                c.stop();
+            }
+            else {
+                c.play();
+            }
+        })
+    })
 
     function createHeader(page: Page) {
         let vm = new Vue({

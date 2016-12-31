@@ -35,6 +35,7 @@ export class Page extends chitu.Page {
     private headerHeight = 0;
     private footerHeight = 0;
     private resize = chitu.Callbacks<Page, { headerHeight: number, footerHeight: number }>();
+
     private _viewCompleted: boolean = false;
     public displayStatic: boolean = false;
     public allowSwipeBack = false;
@@ -120,10 +121,17 @@ export class Page extends chitu.Page {
 }
 
 export class Application extends chitu.Application {
+    public pageShown = chitu.Callbacks<Application, { page: chitu.Page }>()
+
     constructor() {
         super();
         this.pageDisplayType = PageDisplayImplement;
+        this.pageCreated.add((sender, page) => {
+            this.pageShown.fire(this, { page });
+        })
     }
+
+
 
 }
 

@@ -33,7 +33,14 @@
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
     self.viewController = [[MainViewController alloc] init];
-    return [super application:application didFinishLaunchingWithOptions:launchOptions];
+    //self.viewController.preferredStatusBarStyle(NS_AVAILABLE_IOS(7_0));
+    BOOL result =[super application:application didFinishLaunchingWithOptions:launchOptions];
+    //====================================================
+    // 用于禁止 WebView 向下滚动，出自：
+    // http://stackoverflow.com/questions/18799517/how-to-stop-uiwebview-bouncing-vertically-in-phonegap-3-0/18799560#18799560
+    self.viewController.webView.scrollView.bounces = NO;
+    //====================================================
+    return result;
 }
 
 @end

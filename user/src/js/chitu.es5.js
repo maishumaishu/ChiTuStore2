@@ -114,7 +114,7 @@ var chitu;
     }();
 
     chitu.RouteData = RouteData;
-    var PAGE_STACK_MAX_SIZE = 50;
+    var PAGE_STACK_MAX_SIZE = 20;
     var ACTION_LOCATION_FORMATER = '{controller}/{action}';
     var VIEW_LOCATION_FORMATER = '{controller}/{action}';
 
@@ -236,7 +236,7 @@ var chitu;
                 this.page_stack.push(page);
                 if (this.page_stack.length > PAGE_STACK_MAX_SIZE) {
                     var c = this.page_stack.shift();
-                    c.close();
+                    if (this.cachePages[routeData.pageName]) c.close();
                 }
                 page.previous = previous;
                 page.show();
@@ -454,7 +454,7 @@ var chitu;
 })(chitu || (chitu = {}));
 //# sourceMappingURL=Errors.js.map
 
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -466,32 +466,27 @@ var chitu;
         function Callback() {
             _classCallCheck(this, Callback);
 
-            this.event_name = 'chitu-event';
-            this.event = document.createEvent('CustomEvent');
-            this.element = document.createElement('div');
+            this.funcs = new Array();
         }
 
         _createClass(Callback, [{
-            key: 'add',
+            key: "add",
             value: function add(func) {
-                this.element.addEventListener(this.event_name, function (event) {
-                    var _event$detail = event.detail,
-                        sender = _event$detail.sender,
-                        args = _event$detail.args;
-
-                    func(sender, args);
+                this.funcs.push(func);
+            }
+        }, {
+            key: "remove",
+            value: function remove(func) {
+                this.funcs = this.funcs.filter(function (o) {
+                    return o != func;
                 });
             }
         }, {
-            key: 'remove',
-            value: function remove(func) {
-                this.element.removeEventListener(this.event_name, func);
-            }
-        }, {
-            key: 'fire',
+            key: "fire",
             value: function fire(sender, args) {
-                this.event.initCustomEvent(this.event_name, true, false, { sender: sender, args: args });
-                this.element.dispatchEvent(this.event);
+                this.funcs.forEach(function (o) {
+                    return o(sender, args);
+                });
             }
         }]);
 
@@ -516,6 +511,30 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator.throw(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 var chitu;
 (function (chitu) {
     var Page = function () {
@@ -626,32 +645,61 @@ var chitu;
         }, {
             key: 'loadPageAction',
             value: function loadPageAction(routeData) {
-                var _this4 = this;
+                return __awaiter(this, void 0, void 0, regeneratorRuntime.mark(function _callee() {
+                    var actionResult, actionName, action, args;
+                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                        while (1) {
+                            switch (_context.prev = _context.next) {
+                                case 0:
+                                    _context.next = 2;
+                                    return this.createActionDeferred(routeData);
 
-                var action_deferred = new Promise(function (reslove, reject) {
-                    _this4.createActionDeferred(routeData).then(function (actionResult) {
-                        if (!actionResult) throw chitu.Errors.exportsCanntNull(routeData.pageName);
-                        var actionName = 'default';
-                        var action = actionResult[actionName];
-                        if (action == null) {
-                            throw chitu.Errors.canntFindAction(routeData.pageName);
+                                case 2:
+                                    actionResult = _context.sent;
+
+                                    if (actionResult) {
+                                        _context.next = 5;
+                                        break;
+                                    }
+
+                                    throw chitu.Errors.exportsCanntNull(routeData.pageName);
+
+                                case 5:
+                                    actionName = 'default';
+                                    action = actionResult[actionName];
+
+                                    if (!(action == null)) {
+                                        _context.next = 9;
+                                        break;
+                                    }
+
+                                    throw chitu.Errors.canntFindAction(routeData.pageName);
+
+                                case 9:
+                                    if (!(typeof action == 'function')) {
+                                        _context.next = 13;
+                                        break;
+                                    }
+
+                                    if (action['prototype'] != null) new action(this);else action(this);
+                                    _context.next = 14;
+                                    break;
+
+                                case 13:
+                                    throw chitu.Errors.actionTypeError(routeData.pageName);
+
+                                case 14:
+                                    args = {};
+
+                                    this.on_load(args);
+
+                                case 16:
+                                case 'end':
+                                    return _context.stop();
+                            }
                         }
-                        if (typeof action == 'function') {
-                            if (action['prototype'] != null) new action(_this4);else action(_this4);
-                            reslove();
-                        } else {
-                            reject();
-                            throw chitu.Errors.actionTypeError(routeData.pageName);
-                        }
-                    }).catch(function (err) {
-                        reject(err);
-                    });
-                });
-                var result = action_deferred.then(function (data) {
-                    var args = {};
-                    _this4.on_load(args);
-                });
-                return result;
+                    }, _callee, this);
+                }));
             }
         }, {
             key: 'element',

@@ -62,10 +62,6 @@ class Carousel {
         let startX, currentX;
         let moving: 'horizontal' | 'vertical';
 
-        //let status: 'init' | 'ready';
-        //let action: 'pullDown' | 'pullUp' | 'swipeLeft' | 'swipeRight';
-
-
         let horizontal_swipe_angle = 35;
         let vertical_pull_angle = 65;
 
@@ -83,9 +79,6 @@ class Carousel {
                 moving = 'horizontal';
                 this.panmove(event, currentX - startX);
             }
-            // else if (angle > vertical_pull_angle && moving != 'horizontal') {
-            //     moving = 'vertical';
-            // }
 
             if (moving != null) {
                 event.preventDefault();
@@ -130,17 +123,17 @@ class Carousel {
 
         if (percent_position < 0) {
             this.nextItem().className = 'item next';
-            this.move(this.nextItem(),this.window_width + deltaX,0);
+            this.move(this.nextItem(), this.window_width + deltaX, 0);
         }
         else if (percent_position > 0) {
             this.prevItem().className = 'item prev';
-            this.move(this.prevItem(),deltaX - this.window_width,0);
+            this.move(this.prevItem(), deltaX - this.window_width, 0);
         }
     }
 
     private move(element: HTMLElement, deltaX: number, time: number) {
         element.style.transform = `translate(${deltaX}px, 0px)`;
-        element.style.transition = `${time/1000}s`;
+        element.style.transition = `${time / 1000}s`;
     }
 
     private panend(e: TouchEvent, deltaX: number) {
@@ -288,10 +281,6 @@ class Carousel {
             return;
 
         this.playing = true;
-        // $active_item = $carousel.find('.item.active');
-        // if ($active_item.length == 0)
-        //     return;
-
         //==================================================
         // 加入 next 样式式，使得该 item 在 active item 右边。
         addClassName(this.prevItem(), 'prev');
@@ -327,7 +316,7 @@ class Carousel {
         indicator.className = className;
     }
 
-    private stop() {
+    public stop() {
         if (this.playTimeId == 0) {
             return;
         }
@@ -337,16 +326,16 @@ class Carousel {
         this.playTimeId = 0;
     }
 
-    get pause(): boolean {
+    private get pause(): boolean {
         return this.is_pause;
     }
-    set pause(value: boolean) {
+    private set pause(value: boolean) {
         this.is_pause = value;
         if (this.is_pause == true)
             this.stop();
     }
 
-    private play() {
+    public play() {
         if (this.playTimeId != 0)
             return;
 

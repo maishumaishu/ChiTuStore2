@@ -48,21 +48,26 @@
     }
 }
 
-
-.topbarTop(@top){
-    top-bar {
-        top: @top;
+.padding-top(@padding-top: 0px){
+    section {
+        padding-top: @nav-height + @padding-top;
     }
+
     &.immersion {
-        top-bar {
-            top: @top + @immersion-height;
+        section {
+            padding-top: @nav-height + @immersion-height + @padding-top;
+        }
+        header {
+            padding-top: @immersion-height;
+        }
+        .norecords {
+            padding-top: @norecords-padding-top + @immersion-height;
         }
     }
 }
 
-// .pull-down-bar {
-//     height: @header-height;
-//     &.immersion {
-//         height: @header-height + @immersion-height;
-//     }
-// }
+.padding-bottom(){
+    section {
+        padding-bottom: @menu-height;
+    }
+}
