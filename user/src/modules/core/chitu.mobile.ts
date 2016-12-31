@@ -121,13 +121,13 @@ export class Page extends chitu.Page {
 }
 
 export class Application extends chitu.Application {
-    public pageShown = chitu.Callbacks<Application, { page: chitu.Page }>()
+    public pageShown = chitu.Callbacks<Application, chitu.Page>()
 
     constructor() {
         super();
         this.pageDisplayType = PageDisplayImplement;
         this.pageCreated.add((sender, page) => {
-            this.pageShown.fire(this, { page });
+            this.pageShown.fire(this, page);
         })
     }
 
