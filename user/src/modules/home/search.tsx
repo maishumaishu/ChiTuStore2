@@ -86,9 +86,9 @@ export default function (page: Page) {
                     <header>
                         <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc', padding:'8px 10px 0 0' }}>
                             <span>
-                                <a on-click={() => window['app'].back()} class="pull-left left-button" style="padding: 8px 12px 10px 12px;">
+                                <button on-click={() => window['app'].back()} class="pull-left left-button" style="padding: 8px 12px 10px 12px;">
                                     <i class="icon-chevron-left"></i>
-                                </a>
+                                </button>
                             </span>
                             <form action="" class="input-group" style="display: table;">
                                 <input type="search" class="form-control" />

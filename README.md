@@ -37,7 +37,7 @@ nodejs + .NET
 
 ## 服务端部署
 
-Linux + nginx
+Linux + nginx, WIN + IIS
 
 ## 目录结构
 

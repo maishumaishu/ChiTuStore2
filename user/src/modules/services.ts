@@ -63,9 +63,8 @@ async function ajax<T>(url: string, options: FetchOptions): Promise<T> {
     }
 
     try {
-
         let response = await fetch(url, options);
-        if (response.status > 200) {
+        if (response.status >= 300) {
             let err = new Error(response.statusText);
             err.name = `${response.status}`;
             throw err

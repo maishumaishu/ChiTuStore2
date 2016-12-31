@@ -9,7 +9,7 @@ var isCordovaApp = location.protocol === 'file:';
 /** 是否为安卓系统 */
 let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 /** 是否允浸入式头 */
-let allowImmersionHeader = true;
+let allowImmersionHeader = false;
 if (isCordovaApp && !isAndroid) {
     allowImmersionHeader = true;
 }
@@ -28,7 +28,6 @@ export let config = {
 
 class MyApplication extends Application {
     private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
-    //private cachePageNames = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
     constructor() {
         super();
         this.pageType = Page;
@@ -48,12 +47,10 @@ class MyApplication extends Application {
             this.createMenu(page);
         }
 
-        //if (this.topLevelPages.indexOf(routeData.pageName) >= 0) {
         //===================================================
         // IOS WEB 浏览器自带滑动返回
         page.allowSwipeBack = (isCordovaApp || isAndroid) && this.topLevelPages.indexOf(routeData.pageName) < 0;
         //===================================================
-        //}
 
         this.buildLoadingView(page);
         if (routeData.pageName == 'home.product') {
@@ -107,9 +104,9 @@ class MyApplication extends Application {
                     <nav class="bg-primary" style={headerStyle}>
                         {isTopPage ?
                             <span></span> :
-                            <a name="back-button" href="javascript:app.back()" class="leftButton">
+                            <button name="back-button" onclick="app.back()" class="leftButton">
                                 <i class="icon-chevron-left"></i>
-                            </a>
+                            </button>
                         }
                         <h4>&nbsp;</h4>
                     </nav>

@@ -55,6 +55,9 @@ module.exports = function (grunt) {
             },
             ios: {
                 files: [{ expand: true, cwd: '.', src: 'www/**/*.*', dest: 'platforms/ios' }]
+            },
+            android: {
+                files: [{ expand: true, cwd: '.', src: 'www/**/*.*', dest: 'platforms/android/assets' }]
             }
         },
         less: {

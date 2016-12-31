@@ -50,9 +50,9 @@ function createHeader(page: Page) {
             return (
                 <header>
                     <nav class="bg-primary" style="width:100%;">
-                        <a name="back-button" href="javascript:app.back()" class="leftButton" style="padding-right:20px;padding-left:20px;margin-left:-20px;">
+                        <button onclick="app.back()" class="leftButton">
                             <i class="icon-chevron-left"></i>
-                        </a>
+                        </button>
                         <h4>资讯详情</h4>
                     </nav>
                 </header>
