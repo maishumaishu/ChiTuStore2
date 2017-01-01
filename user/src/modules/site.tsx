@@ -30,7 +30,6 @@ class MyApplication extends Application {
     private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
     constructor() {
         super();
-        this.pageType = Page;
     }
 
     protected parseRouteString(routeString: string) {
@@ -50,6 +49,7 @@ class MyApplication extends Application {
         //===================================================
         // IOS WEB 浏览器自带滑动返回
         page.allowSwipeBack = (isCordovaApp || isAndroid) && this.topLevelPages.indexOf(routeData.pageName) < 0;
+        page.allowSwipeBack = this.topLevelPages.indexOf(routeData.pageName) < 0;//TEST
         //===================================================
 
         this.buildLoadingView(page);
