@@ -6,3 +6,4 @@ release
 .baseDir.ts
 TODO.txt
 .log
+*.xcuserstate
