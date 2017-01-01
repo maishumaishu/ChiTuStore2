@@ -38,7 +38,7 @@
     //====================================================
     // 用于禁止 WebView 向下滚动，出自：
     // http://stackoverflow.com/questions/18799517/how-to-stop-uiwebview-bouncing-vertically-in-phonegap-3-0/18799560#18799560
-    self.viewController.webView.scrollView.bounces = NO;
+    //self.viewController.webView.scrollView.bounces = NO;
     //====================================================
     return result;
 }

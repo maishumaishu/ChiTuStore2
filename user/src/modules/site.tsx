@@ -28,6 +28,7 @@ export let config = {
 
 class MyApplication extends Application {
     private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
+    //private cachePageNames = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
     constructor() {
         super();
     }

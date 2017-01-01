@@ -216,6 +216,7 @@ export class Application extends chitu.Application {
 
     constructor() {
         super();
+
         this.pageType = Page;
 
         if (isiOS)
