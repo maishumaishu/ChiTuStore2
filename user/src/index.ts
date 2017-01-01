@@ -1,4 +1,6 @@
 
+/** 是否为 APP */
+var isCordovaApp = location.protocol === 'file:';
 var es5 = true;
 
 var browser = function () {
@@ -22,7 +24,7 @@ var browser = function () {
 } ();
 
 // 通浏览器版本设定是否使用 es5
-if (browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
+if (isCordovaApp || browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
     es5 = false;
 }
 
@@ -67,6 +69,7 @@ requirejs.config({
         vuex: 'js/vuex',
         controls: modulesPath + '/controls',
         core: modulesPath + '/core',
+        device: modulesPath + '/device',
         services: modulesPath + '/services',
         site: modulesPath + '/site',
         'chitu.mobile': modulesPath + '/core/chitu.mobile',
@@ -76,7 +79,14 @@ requirejs.config({
     }
 });
 
-requirejs(['site', 'vue'], function (site, vue) {
+
+let modules = ['site', 'vue'];
+if (isCordovaApp) {
+    modules.push('cordova');
+    modules.push('device');
+}
+
+requirejs(modules, function (site, vue) {
     window['Vue'] = vue;
     site.config.imageText = '零食有约';
 });
