@@ -51,8 +51,8 @@ export default async function (page: Page) {
     vm.$nextTick(function () {
         let element = page.dataView.querySelector('[name="ad-swiper"]') as HTMLElement;
         let c = new Carousel(element);
-        app.pageShown.add((sender, page) => {
-            if (page.name != 'home.index') {
+        app.pageShown.add((sender, args) => {
+            if (args.page.name != 'home.index') {
                 c.stop();
             }
             else {
