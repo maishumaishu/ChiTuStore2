@@ -39,6 +39,10 @@
                         {
                             "xml": "<preference name=\"android-minSdkVersion\" value=\"16\" />",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
+                            "count": 1
                         }
                     ]
                 }
@@ -70,12 +74,26 @@
             "XWALK_MODE": "embedded",
             "XWALK_MULTIPLEAPK": "true",
             "PACKAGE_NAME": "chitu.store2"
+        },
+        "cordova-plugin-inappbrowser": {
+            "PACKAGE_NAME": "chitu.store2"
         }
     },
     "dependent_plugins": {},
-    "modules": [],
+    "modules": [
+        {
+            "file": "plugins/cordova-plugin-inappbrowser/www/inappbrowser.js",
+            "id": "cordova-plugin-inappbrowser.inappbrowser",
+            "pluginId": "cordova-plugin-inappbrowser",
+            "clobbers": [
+                "cordova.InAppBrowser.open",
+                "window.open"
+            ]
+        }
+    ],
     "plugin_metadata": {
         "cordova-plugin-whitelist": "1.3.1",
-        "cordova-plugin-crosswalk-webview": "2.2.0"
+        "cordova-plugin-crosswalk-webview": "2.2.0",
+        "cordova-plugin-inappbrowser": "1.6.1"
     }
 }

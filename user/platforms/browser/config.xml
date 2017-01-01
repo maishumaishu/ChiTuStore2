@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="chitu.store2" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>ChiTu Store</name>
+    <name>ChiTuStore</name>
     <description>
     </description>
     <author email="ansiboy@163.com" href="http://cordova.io">
