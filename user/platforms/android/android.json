@@ -82,8 +82,8 @@
     "dependent_plugins": {},
     "modules": [
         {
-            "file": "plugins/cordova-plugin-inappbrowser/www/inappbrowser.js",
             "id": "cordova-plugin-inappbrowser.inappbrowser",
+            "file": "plugins/cordova-plugin-inappbrowser/www/inappbrowser.js",
             "pluginId": "cordova-plugin-inappbrowser",
             "clobbers": [
                 "cordova.InAppBrowser.open",

@@ -1,6 +1,6 @@
 import Vue = require('vue');
 import { Page } from 'chitu.mobile';
-import * as services from 'services';
+import { shop, imageUrl, shoppingCart } from 'services';
 import * as site from 'site'
 import { PageViewGesture, imageDelayLoad } from 'core/ui'
 import { mapGetters } from 'vuex';
@@ -11,7 +11,7 @@ import 'controls/imageBox';
 export default async function (page: Page) {
     let { id } = page.routeData.values
 
-    let result = await Promise.all([chitu.loadjs(`text!pages/home/product.html`), services.home.getProduct(id)]);//.then(function (result) {
+    let result = await Promise.all([chitu.loadjs(`text!pages/home/product.html`), shop.product(id)]);//.then(function (result) {
     let html = result[0];
     let product = result[1];
 
@@ -70,12 +70,12 @@ export default async function (page: Page) {
         let methods: ModelMethods = {
             favor: ui.buttonOnClick(function (event) {
                 if (product.IsFavored) {
-                    return services.home.unfavor(product.Id).then(() => {
+                    return shop.unfavorProduct(product.Id).then(() => {
                         product.IsFavored = false;
                     })
                 }
 
-                return services.home.favorProduct(product.Id).then(() => {
+                return shop.favorProduct(product.Id).then(() => {
                     product.IsFavored = true;
                 });
             })
@@ -111,7 +111,7 @@ function createIntroduceView(page: Page) {
     introduceView.style.paddingTop = '0px';
 
     let { id } = page.routeData.values
-    let loadIntroduce = services.shop.productIntroduce(id);
+    let loadIntroduce = shop.productIntroduce(id);
 
     chitu.loadjs('text!pages/home/product/introduce.html').then(html => {
         introduceView.innerHTML = html;
@@ -121,7 +121,7 @@ function createIntroduceView(page: Page) {
             let imgs = introduceElement.querySelectorAll('img');
             for (let i = 0; i < imgs.length; i++) {
                 let img = imgs.item(i) as HTMLImageElement;
-                img.src = services.imageUrl(img.src);
+                img.src = imageUrl(img.src);
                 imageDelayLoad(img, site.config.imageText);
             }
         });
@@ -138,14 +138,14 @@ function createHorizontalIntroduceView(page: Page) {
     introduceView.appendChild(introduceContent);
 
     let { id } = page.routeData.values
-    let loadIntroduce = services.shop.productIntroduce(id);
+    let loadIntroduce = shop.productIntroduce(id);
 
     loadIntroduce.then(o => {
         introduceContent.innerHTML = o;
         let imgs = introduceContent.querySelectorAll('img');
         for (let i = 0; i < imgs.length; i++) {
             let img = imgs.item(i) as HTMLImageElement;
-            img.src = services.imageUrl(img.src);
+            img.src = imageUrl(img.src);
             imageDelayLoad(img, site.config.imageText);
         }
     });
@@ -171,12 +171,12 @@ function createFooter(page: Page) {
     }
 
     let computed: ModelComputed = {
-        itemsCount: services.shoppingCart.productsCount
+        itemsCount: shoppingCart.productsCount
     }
 
     let methods: ModelMethods = {
         addToShoppingCart: ui.buttonOnClick(function (event) {
-            return services.shoppingCart.addItem(productId);
+            return shoppingCart.addItem(productId);
         })
     }
 

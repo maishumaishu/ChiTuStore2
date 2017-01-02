@@ -1,22 +1,22 @@
 import { Page } from 'chitu.mobile';
 import Vue = require('vue');
-import { shoppingCart } from 'services';
+import { shoppingCart, ShoppingCartItem } from 'services';
 import 'controls/imageBox';
 
 export default function (page: Page) {
 
     let data = {
-        items: Array<shoppingCart.Item>()
+        items: Array<ShoppingCartItem>()
     };
 
     let methods = {
-        decreaseCount: function (item: shoppingCart.Item) {
+        decreaseCount: function (item: ShoppingCartItem) {
             item.Count = item.Count - 1;
         },
-        increaseCount: function (item: shoppingCart.Item) {
+        increaseCount: function (item: ShoppingCartItem) {
             item.Count = item.Count + 1;
         },
-        selectItem: function (item: shoppingCart.Item) {
+        selectItem: function (item: ShoppingCartItem) {
             item.Selected = !item.Selected;
         }
     };
@@ -42,11 +42,11 @@ export default function (page: Page) {
                             <div class="pull-left icon">
                                 <i on-click={() => methods.selectItem(o)} class={o.Selected ? 'icon-ok-sign' : 'icon-circle-blank'}></i>
                             </div>
-                            <a href={"#home_product?id="+o.ProductId} class="pull-left pic">
+                            <a href={"#home_product?id=" + o.ProductId} class="pull-left pic">
                                 <image-box src={o.ImageUrl} class="img-responsive" />
                             </a>
                             <div style="margin-left:110px;">
-                                <a href={"#home_product?id="+o.ProductId} >{o.Name}</a>
+                                <a href={"#home_product?id=" + o.ProductId} >{o.Name}</a>
                                 <div>
                                     <div class="price pull-left" style="margin-top:10px;">￥{o.Price.toFixed(2)}</div>
                                     <div class="pull-right">

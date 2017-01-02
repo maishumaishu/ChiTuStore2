@@ -1,5 +1,5 @@
 import { Page } from 'chitu.mobile';
-import { station, imageUrl } from 'services';
+import { station, imageUrl, News } from 'services';
 import * as ui from 'core/ui';
 import * as site from 'site';
 
@@ -15,7 +15,7 @@ export default function (page: Page) {
                 news
             },
             render(h) {
-                let news: station.News = this.news;
+                let news: News = this.news;
                 return (
                     <section class="main container">
                         <h2>{news.Title}</h2>

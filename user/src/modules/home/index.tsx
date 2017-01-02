@@ -1,6 +1,6 @@
-import { Page } from 'chitu.mobile';
-import { app } from 'site';
-import * as services from 'services';
+// import { Page } from 'chitu.mobile';
+import { app, Page } from 'site';
+import { ShopService, StationService } from 'services';
 import * as ui from 'core/ui';
 import Carousel = require('carousel');
 import Vue = require('vue');
@@ -8,6 +8,9 @@ import 'controls/dataList';
 import 'controls/imageBox';
 
 export default async function (page: Page) {
+
+    let station = page.createService(StationService);
+    let shop = page.createService(ShopService);
 
     let searchKeyWords: Array<string> = [];
     let data = {
@@ -21,7 +24,7 @@ export default async function (page: Page) {
     }
 
     let pageIndex = 0;
-    let q = services.station.advertItems().then(items => {
+    let q = station.advertItems().then(items => {
         data.advertItems = items;
         page.loadingView.style.display = 'none';
         pageIndex = pageIndex + 1;
@@ -29,7 +32,7 @@ export default async function (page: Page) {
 
     createHeader(page);
 
-    let result = await Promise.all([services.station.advertItems(), chitu.loadjs('text!pages/home/index.html')]);
+    let result = await Promise.all([station.advertItems(), chitu.loadjs('text!pages/home/index.html')]);
     //.then(result => {
     data.advertItems = result[0];
     page.loadingView.style.display = 'none';
@@ -43,7 +46,7 @@ export default async function (page: Page) {
         },
         methods: {
             loadProducts(pageIndex: number, reslove: Function) {
-                services.home.proudcts(pageIndex).then(items => reslove(items));
+                station.proudcts(pageIndex).then(items => reslove(items));
             }
         }
     })
