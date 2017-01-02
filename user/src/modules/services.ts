@@ -1,6 +1,6 @@
 import Vue = require('vue');
 import Vuex = require('vuex');
-
+import chitu = require('chitu');
 Vue.use(Vuex)
 
 const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';

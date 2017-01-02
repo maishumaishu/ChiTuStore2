@@ -151,7 +151,7 @@ window.addEventListener('touchmove', function (e) {
     touch_move_time = Date.now();
 })
 
-var isiOS = navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+var isiOS = (navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) || []).filter(o => o).length > 0; //ios终端
 
 function calculateAngle(x, y) {
     let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
@@ -316,11 +316,15 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         //============================================
         // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过滑屏返回，
         // 通过滑屏返回，是不需要有返回效果的。
-        if (isiOS && Date.now() - touch_move_time < 500 || page.displayStatic) {
+        let now = Date.now();
+        if (isiOS && now - touch_move_time < 500 || page.displayStatic) {
             page.element.style.display = 'none';
             if (page.previous) {
-                page.previous.element.style.removeProperty('transform');
-                page.previous.element.style.removeProperty('transition');
+                page.previous.element.style.display = 'block';
+                page.previous.element.style.transition = '0s';
+                page.previous.element.style.transform = 'translate(0,0)';
+                // page.previous.element.style.removeProperty('transform');
+                // page.previous.element.style.removeProperty('transition');
             }
             return Promise.resolve();
         }
@@ -376,6 +380,9 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
             startY = event.touches[0].pageY;
             startX = event.touches[0].pageX;
             enable = startX <= SIDE_WIDTH
+            if (page.previous) {
+                page.previous.element.style.display = 'block';
+            }
         })
 
         page.element.addEventListener('touchmove', (event: TouchEvent) => {
@@ -414,7 +421,18 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
             else {
                 page.element.style.transform = `translate(0px, 0px)`;
                 page.element.style.transition = '0.4s';
+                setTimeout(() => {
+                    if (page.previous) {
+                        page.previous.element.style.display = 'none';
+                    }
+                }, 500);
             }
+
+            setTimeout(() => {
+                page.element.style.removeProperty('transform');
+                page.element.style.removeProperty('transition');
+
+            }, 500);
 
             moved = false;
         }
@@ -454,7 +472,6 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
         page.element.style.zIndex = `${maxZIndex + 1}`;
         page.element.style.display = 'block';
         if (page.displayStatic) {
-            page.element.style.transform = `translate(0px,0px)`;
             return Promise.resolve();
         }
 
@@ -468,6 +485,12 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
             }, delay);
 
             window.setTimeout(reslove, delay + playTime)
+        }).then(() => {
+            page.element.style.removeProperty('transform');
+            page.element.style.removeProperty('transition');
+            if (page.previous) {
+                page.previous.element.style.display = 'none';
+            }
         })
     }
 
@@ -490,9 +513,10 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
 
         if (page.previous) {
             //window.setTimeout(function () {
-            page.previous.element.style.transform = `translate(0px, 0px)`;
-            page.previous.element.style.transition = '0.4s';
+            // page.previous.element.style.transform = `translate(0px, 0px)`;
+            // page.previous.element.style.transition = '0.4s';
             //}, 100);
+            page.previous.element.style.display = 'block';
         }
 
         return new Promise<any>(reslove => {
