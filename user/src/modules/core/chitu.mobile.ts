@@ -37,7 +37,7 @@ export class Page extends chitu.Page {
 
     private _viewCompleted: boolean = false;
     public displayStatic: boolean = false;
-    public allowSwipeBack = false;
+    public allowSwipeBackGestrue = false;
     public app: Application;
 
     constructor(params: chitu.PageParams) {
@@ -236,6 +236,11 @@ class PageDisplayImplement implements chitu.PageDisplayer {
                     page.previous.element.style.transition = `0.4s`;
                     window.setTimeout(function () {
                         page.previous.element.style.display = 'none';
+                        page.previous.element.style.removeProperty('transform');
+                        page.previous.element.style.removeProperty('transition');
+                        page.element.style.removeProperty('transform');
+                        page.element.style.removeProperty('transition');
+
                     }, 400);
 
                 }
@@ -264,7 +269,7 @@ class PageDisplayImplement implements chitu.PageDisplayer {
     show(page: Page): Promise<any> {
         if (!(<any>page).gestured) {
             (<any>page).gestured = true;
-            if (page.allowSwipeBack)
+            if (page.allowSwipeBackGestrue)
                 this.enableGesture(page);
         }
 
@@ -280,13 +285,14 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         page.element.style.zIndex = `${maxZIndex + 1}`;
         page.element.style.display = 'block';
         if (page.displayStatic) {
-            page.element.style.transform = `translate(0px,0px)`;
+            //page.element.style.transform = `translate(0px,0px)`;
             return Promise.resolve();
         }
 
         page.element.style.transform = `translate(100%,0px)`;
         if (page.previous) {
             page.previous.element.style.transform = `translate(0px,0px)`;
+            page.previous.element.style.transition = `${this.animationTime / 1000}s`;
         }
 
         return new Promise(reslove => {
@@ -306,48 +312,58 @@ class PageDisplayImplement implements chitu.PageDisplayer {
 
             window.setTimeout(reslove, delay + this.animationTime)
         }).then(() => {
+            page.element.style.removeProperty('transform');
+            page.element.style.removeProperty('transition');
             if (page.previous) {
                 page.previous.element.style.display = 'none';
+                page.previous.element.style.removeProperty('transform');
+                page.previous.element.style.removeProperty('transition');
             }
         })
     }
 
     hide(page: Page) {
-        //============================================
-        // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过滑屏返回，
-        // 通过滑屏返回，是不需要有返回效果的。
-        let now = Date.now();
-        if (isiOS && now - touch_move_time < 500 || page.displayStatic) {
-            page.element.style.display = 'none';
+        return new Promise<any>(reslove => {
+            //============================================
+            // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过滑屏返回，
+            // 通过滑屏返回，是不需要有返回效果的。
+            // let now = Date.now();
+            if (!page.allowSwipeBackGestrue) {//(isiOS && now - touch_move_time < 500 || page.displayStatic) {
+                page.element.style.display = 'none';
+                if (page.previous) {
+                    page.previous.element.style.display = 'block';
+                    page.previous.element.style.transition = `0s`;
+                    page.previous.element.style.transform = 'translate(0,0)';
+                }
+                reslove();
+                return;
+            }
+            //============================================
+
+            page.element.style.transform = `translate(100%,0px)`;
+            page.element.style.transition = `${this.animationTime / 1000}s`;
+
             if (page.previous) {
                 page.previous.element.style.display = 'block';
-                page.previous.element.style.transition = '0s';
-                page.previous.element.style.transform = 'translate(0,0)';
-                // page.previous.element.style.removeProperty('transform');
-                // page.previous.element.style.removeProperty('transition');
+                let delay = 0;
+                if (!page.previous.element.style.transform) {
+                    page.previous.element.style.transform = `translate(${this.previousPageStartX}px, 0px)`;
+                    delay = 50;
+                }
+
+                window.setTimeout(() => {
+                    page.previous.element.style.transform = `translate(0px, 0px)`;
+                    page.previous.element.style.transition = `${(this.animationTime - delay) / 1000}s`;
+                }, delay);
             }
-            return Promise.resolve();
-        }
-        //============================================
-
-        page.element.style.transform = `translate(100%,0px)`;
-        page.element.style.transition = `${this.animationTime / 1000}s`;
-
-        if (page.previous) {
-            page.previous.element.style.display = 'block';
-            let delay = 50;
-            window.setTimeout(() => {
-                page.previous.element.style.transform = `translate(0px, 0px)`;
-                page.previous.element.style.transition = `${(this.animationTime - delay) / 1000}s`;
-            }, delay);
-        }
-
-        return new Promise<any>(reslove => {
             window.setTimeout(() => {
                 page.element.style.display = 'none';
                 page.element.style.removeProperty('transform');
                 page.element.style.removeProperty('transition');
-
+                if (page.previous) {
+                    page.previous.element.style.removeProperty('transform');
+                    page.previous.element.style.removeProperty('transition');
+                }
                 reslove();
 
             }, 500)
@@ -456,7 +472,7 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
     show(page: Page): Promise<any> {
         if (!(<any>page).gestured) {
             (<any>page).gestured = true;
-            if (page.allowSwipeBack)
+            if (page.allowSwipeBackGestrue)
                 this.enableGesture(page);
         }
 
