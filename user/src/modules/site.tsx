@@ -54,7 +54,7 @@ export class Application extends BaseApplication {
 
         //===================================================
         // IOS WEB 浏览器自带滑动返回
-        page.allowSwipeBack = (isCordovaApp || isAndroid) && this.topLevelPages.indexOf(routeData.pageName) < 0;
+        page.allowSwipeBackGestrue = (isCordovaApp || isAndroid) && this.topLevelPages.indexOf(routeData.pageName) < 0;
         //===================================================
 
         this.buildLoadingView(page);
