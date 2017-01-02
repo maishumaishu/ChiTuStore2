@@ -1,6 +1,6 @@
 import Vue = require('vue');
 import Vuex = require('vuex');
-
+import chitu = require('chitu');
 Vue.use(Vuex)
 
 const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
@@ -13,8 +13,9 @@ let config = {
         account: `http://${SERVICE_HOST}/Account/`,
     },
     appToken: '58424776034ff82470d06d3d',
-    //storeId: '58401d1906c02a2b8877bd13',
-    userToken: '584cfabb4918e4186a77ff1e'
+    userToken: '584cfabb4918e4186a77ff1e',
+    /** 调用服务接口超时时间，单位为秒 */
+    ajaxTimeout: 5,
 }
 
 function isError(data: any): Error {
@@ -35,7 +36,7 @@ function isError(data: any): Error {
     return null;
 }
 
-let error = chitu.Callbacks();
+
 let token = '';
 
 function userToken(value?: string) {
@@ -56,115 +57,7 @@ function storeId() {
     return '58401d1906c02a2b8877bd13';
 }
 
-async function ajax<T>(url: string, options: FetchOptions): Promise<T> {
-    let user_token = userToken();
-    if (user_token) {
-        options.headers['user-token'] = user_token;
-    }
 
-    try {
-        let response = await fetch(url, options);
-        if (response.status >= 300) {
-            let err = new Error(response.statusText);
-            err.name = `${response.status}`;
-            throw err
-        }
-        let responseText = response.text();
-        let p: Promise<string>;
-        if (typeof responseText == 'string') {
-            p = new Promise<string>((reslove, reject) => {
-                reslove(responseText);
-            })
-        }
-        else {
-            p = responseText as Promise<string>;
-        }
-
-        let text = await responseText;
-        let textObject = JSON.parse(text);
-
-        if (isError(textObject))
-            throw textObject
-
-        return textObject;
-    }
-    catch (err) {
-        error.fire(this, err);
-        throw err;
-    }
-}
-
-function get<T>(url: string, data?: any) {
-
-    // console.assert(userToken() != null);
-    console.assert(storeId() != null);
-
-    data = data || {};
-    let headers = {
-        'application-token': config.appToken,
-    };
-
-    if (userToken()) {
-        headers['user-token'] = userToken();
-    }
-
-    let urlParams = '';//`storeId=${storeId()}`;
-    for (let key in data) {
-        urlParams = urlParams + `&${key}=${data[key]}`;
-    }
-
-    // if (url.indexOf('?') < 0)
-    if (urlParams)
-        url = url.indexOf('?') < 0 ? url + '?' + urlParams : url + '&' + urlParams;
-    // else
-    //url = url + '&' + urlParams;
-
-    let options = {
-        headers,
-        method: 'get',
-    }
-    return ajax<T>(url, options);
-}
-
-type ContentType = 'json' | 'default';
-
-function post<T>(url: string, data?: Object) {
-
-    console.assert(userToken() != null);
-    console.assert(storeId() != null);
-
-
-
-    data = data || {};
-    let headers = {
-        'application-token': config.appToken,
-        'user-token': userToken(),
-    };
-
-    let contentType = 'json';
-    if (contentType == 'json') {
-        headers['content-type'] = 'application/json';
-    }
-
-    let body: any;
-    if (contentType == 'json') {
-        body = JSON.stringify(data);
-    }
-    else {
-        let form = new FormData();
-        for (let key in data) {
-            form.append(key, data[key]);
-        }
-        body = form;
-    }
-
-    let options = {
-        headers,
-        body,
-        method: 'post'
-    }
-    return ajax<T>(url, options);
-}
 
 function parseDate(value: string): Date {
     const prefix = '/Date(';
@@ -219,77 +112,202 @@ function serviceUrl(baseUrl, path) {
     return `${baseUrl}${path}?storeId=${storeId()}`;;
 }
 
-export module station {
-    export function url(path) {
+export type News = { Id: string, Title: string, ImgUrl: string, Date: string, Content: string };
+
+export abstract class Service {
+    error = chitu.Callbacks();
+    ajax<T>(url: string, options: FetchOptions): Promise<T> {
+        return new Promise<T>((reslove, reject) => {
+            let timeId = setTimeout(() => {
+                let err = new Error('Ajax timeout')
+                err.name = 'timeout';
+                reject(err);
+                clearTimeout(timeId);
+
+            }, config.ajaxTimeout * 1000)
+
+            this._ajax<T>(url, options)
+                .then(data => {
+                    reslove(data);
+                    clearTimeout(timeId);
+                })
+                .catch(err => {
+                    reject(err);
+                    clearTimeout(timeId);
+                });
+
+        })
+    }
+
+    async _ajax<T>(url: string, options: FetchOptions): Promise<T> {
+        let user_token = userToken();
+        if (user_token) {
+            options.headers['user-token'] = user_token;
+        }
+
+        try {
+            let response = await fetch(url, options);
+            if (response.status >= 300) {
+                let err = new Error(response.statusText);
+                err.name = `${response.status}`;
+                throw err
+            }
+            let responseText = response.text();
+            let p: Promise<string>;
+            if (typeof responseText == 'string') {
+                p = new Promise<string>((reslove, reject) => {
+                    reslove(responseText);
+                })
+            }
+            else {
+                p = responseText as Promise<string>;
+            }
+
+            let text = await responseText;
+            let textObject = JSON.parse(text);
+
+            if (isError(textObject))
+                throw textObject
+
+            return textObject;
+        }
+        catch (err) {
+            this.error.fire(this, err);
+            throw err;
+        }
+    }
+
+    get<T>(url: string, data?: any) {
+
+        console.assert(storeId() != null);
+
+        data = data || {};
+        let headers = {
+            'application-token': config.appToken,
+        };
+
+        if (userToken()) {
+            headers['user-token'] = userToken();
+        }
+
+        let urlParams = '';
+        for (let key in data) {
+            urlParams = urlParams + `&${key}=${data[key]}`;
+        }
+
+        if (urlParams)
+            url = url.indexOf('?') < 0 ? url + '?' + urlParams : url + '&' + urlParams;
+
+        let options = {
+            headers,
+            method: 'get',
+        }
+        return this.ajax<T>(url, options);
+    }
+
+    post<T>(url: string, data?: Object) {
+
+        console.assert(userToken() != null);
+        console.assert(storeId() != null);
+
+        data = data || {};
+        let headers = {
+            'application-token': config.appToken,
+            'user-token': userToken(),
+        };
+
+        headers['content-type'] = 'application/json';
+
+        let body: any;
+        body = JSON.stringify(data);
+        let options = {
+            headers,
+            body,
+            method: 'post'
+        }
+        return this.ajax<T>(url, options);
+    }
+}
+
+export class StationService extends Service {
+    constructor() {
+        super();
+    }
+
+    static url(path) {
         return `${config.service.site}${path}?storeId=${storeId()}`;
     }
-    export type News = { Id: string, Title: string, ImgUrl: string, Date: string, Content: string };
-    export function newsList(pageIndex: number) {
-        let url = station.url('Info/GetNewsList');
-        return get<News[]>(url, { pageIndex }).then(items => {
+
+    newsList(pageIndex: number) {
+        let url = StationService.url('Info/GetNewsList');
+        return this.get<News[]>(url, { pageIndex }).then(items => {
             items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
             return items;
         });
     }
 
-    export function news(newsId: string) {
-        let url = station.url('Info/GetNews');
-        return get<News>(url, { newsId }).then(item => {
+    news(newsId: string) {
+        let url = StationService.url('Info/GetNews');
+        return this.get<News>(url, { newsId }).then(item => {
             item.ImgUrl = imageUrl(item.ImgUrl);
             item.Date = parseDate(item.Date).toLocaleDateString();
             return item;
         });
     }
 
-    export function searchKeywords() {
-        return get<Array<string>>(url('Home/GetSearchKeywords'));
+    searchKeywords() {
+        return this.get<Array<string>>(StationService.url('Home/GetSearchKeywords'));
     }
 
-    export function historySearchWords() {
-        return get<Array<string>>(url('Home/HistorySearchWords'));
+    historySearchWords() {
+        return this.get<Array<string>>(StationService.url('Home/HistorySearchWords'));
     }
 
-    export function advertItems(): Promise<{ ImgUrl: string }[]> {
-        return get<{ ImgUrl: string }[]>(url('Home/GetAdvertItems')).then(items => {
+    advertItems(): Promise<{ ImgUrl: string }[]> {
+        return this.get<{ ImgUrl: string }[]>(StationService.url('Home/GetAdvertItems')).then(items => {
             items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
             return items;
         });
     }
-}
 
-export module home {
-    type HomeProduct = { Id: string, Name: string, ImagePath: string };
-    export function url() {
-
-    }
-    export function proudcts(pageIndex?: number): Promise<HomeProduct[]> {
+    proudcts(pageIndex?: number): Promise<HomeProduct[]> {
         pageIndex = pageIndex === undefined ? 0 : pageIndex;
-        let url = station.url('Home/GetHomeProducts');
-        return get<HomeProduct[]>(url, { pageIndex }).then((products) => {
+        let url = StationService.url('Home/GetHomeProducts');
+        return this.get<HomeProduct[]>(url, { pageIndex }).then((products) => {
             for (let product of products) {
-                product.ImagePath = imageUrl(product.ImagePath); //imageBasePath + product.ImagePath;
+                product.ImagePath = imageUrl(product.ImagePath);
             }
             return products;
         });
     }
-    export function brands(): Promise<any> {
-        let url = config.service.shop + 'Product/GetBrands';
-        return get(url);
-    }
+}
 
-    export type Product = {
-        Id: string, Arguments: Array<{ key: string, value: string }>,
-        BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
-        GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
-        ProductCategoryId: string, Count: number, Name: string, IsFavored?: boolean
-        CustomProperties: Array<{
-            Name: string,
-            Options: Array<{ Name: string, Selected: boolean, Value: string }>
-        }>
-    };
-    export function getProduct(productId): Promise<Product> {
-        let url = shop.url('Product/GetProduct');
-        return get<Product>(url, { productId }).then(product => {
+type HomeProduct = { Id: string, Name: string, ImagePath: string };
+type Product = {
+    Id: string, Arguments: Array<{ key: string, value: string }>,
+    BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
+    GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
+    ProductCategoryId: string, Count: number, Name: string, IsFavored?: boolean
+    CustomProperties: Array<{
+        Name: string,
+        Options: Array<{ Name: string, Selected: boolean, Value: string }>
+    }>
+};
+export type FavorProduct = {
+    ProductId: string,
+    ProductName: string,
+    ImageUrl: string
+}
+export class ShopService extends Service {
+    constructor() {
+        super();
+    }
+    static url(path: string) {
+        return `${config.service.shop}${path}?storeId=${storeId()}`;
+    }
+    product(productId): Promise<Product> {
+        let url = ShopService.url('Product/GetProduct');
+        return this.get<Product>(url, { productId }).then(product => {
             product.Count = 1;
             if (!product.ImageUrls && product.ImageUrl != null)
                 product.ImageUrls = (<string>product.ImageUrl).split(',').map(o => imageUrl(o));
@@ -297,145 +315,133 @@ export module home {
             product.ImageUrl = product.ImageUrls[0];
             product.IsFavored = null;
 
-            isFavored(productId).then((result) => {
+            this.isFavored(productId).then((result) => {
                 product.IsFavored = result;
             })
             return product;
         });
     }
+    productIntroduce(productId: string): Promise<string> {
+        let url = ShopService.url('Product/GetProductIntroduce');
+        return this.get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
+    }
+    cateories() {
+        let url = ShopService.url('Product/GetCategories');
+        return this.get<{ Id: string, Name: string }[]>(url);
+    }
     //=====================================================================
     // 收藏夹
-    export function isFavored(productId: string) {
-        return get<boolean>(shop.url('Product/IsFavored'), { productId });
-    }
-    export function favorProduct(productId) {
-        return post(shop.url('Product/FavorProduct'), { productId });
-    }
-    export function unfavor(productId: string) {
-        return post(shop.url('Product/UnFavorProduct'), { productId });
-    }
-    //=====================================================================
-
-
-
-}
-
-export module shop {
-    export function url(path: string) {
-        return `${config.service.shop}${path}?storeId=${storeId()}`;
-    }
-    export function productIntroduce(productId: string): Promise<string> {
-        let url = shop.url('Product/GetProductIntroduce');
-        return get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
-    }
-    export function cateories() {
-        let url = shop.url('Product/GetCategories');
-        return get<{ Id: string, Name: string }[]>(url);
-    }
-    export type ShoppingCartItem = {
-        Id: string, Amount: number, Count: number, ImageUrl: string,
-        Price: number, ProductId: string, Selected: boolean, Name: string,
-        IsGiven: boolean
-    }
-    export type FavorProduct = {
-        ProductId: string,
-        ProductName: string,
-        ImageUrl: string
-    }
-    export function favorProducts() {
-        return get<FavorProduct[]>(url('Product/GetFavorProducts')).then(items => {
+    favorProducts() {
+        return this.get<FavorProduct[]>(ShopService.url('Product/GetFavorProducts')).then(items => {
             items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl))
             return items;
         });
     }
-    export function unfavorProduct(productId: string) {
-        return post(url('Product/UnFavorProduct'), { productId });
+    unfavorProduct(productId: string) {
+        return this.post(ShopService.url('Product/UnFavorProduct'), { productId });
     }
+    isFavored(productId: string) {
+        return this.get<boolean>(ShopService.url('Product/IsFavored'), { productId });
+    }
+    favorProduct(productId) {
+        return this.post(ShopService.url('Product/FavorProduct'), { productId });
+    }
+    //=====================================================================
 }
 
-export module shoppingCart {
-    function url(path: string) {
+export type ShoppingCartItem = {
+    Id: string,
+    Amount: number,
+    Count: number,
+    ImageUrl: string,
+    IsGiven: boolean,
+    Name: string,
+    ProductId: string,
+    Remark: string,
+    Score: number,
+    Selected: boolean,
+    Unit: number,
+    Price: number,
+}
+
+export class ShoppingCartService extends Service {
+    constructor() {
+        super();
+        let _userToken = userToken();
+        if (_userToken) {
+            this.get<number>(this.url('ShoppingCart/GetProductsCount')).then(result => {
+                storeCommit('setItemsCount', result);
+            })
+        }
+    }
+    private url(path: string) {
         return `${config.service.shop}${path}?storeId=${storeId()}`;
     }
 
-    export type Item = ShoppingCartItem;
-    type ShoppingCartItem = {
-        Id: string,
-        Amount: number,
-        Count: number,
-        ImageUrl: string,
-        IsGiven: boolean,
-        Name: string,
-        ProductId: string,
-        Remark: string,
-        Score: number,
-        Selected: boolean,
-        Unit: number,
-        Price: number,
-    }
-
-    export function addItem(productId: string, count?: number) {
+    addItem(productId: string, count?: number) {
         count = count || 1;
-        return post<ShoppingCartItem[]>(url('ShoppingCart/AddItem'), { productId, count }).then((result) => {
+        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/AddItem'), { productId, count }).then((result) => {
             let sum = 0;
             result.forEach(o => sum = sum + o.Count);
             store.commit('setItemsCount', sum);
         });
     }
 
-    export function items() {
-        return get<ShoppingCartItem[]>(url('ShoppingCart/GetItems')).then(items => {
+    items() {
+        return this.get<ShoppingCartItem[]>(this.url('ShoppingCart/GetItems')).then(items => {
             items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
             return items;
         });
     }
 
-    export function productsCount(): number {
+    productsCount(): number {
         return store.state.itemsCount;
-    }
-
-    let _userToken = userToken();
-    if (_userToken) {
-        get<number>(url('ShoppingCart/GetProductsCount')).then(result => {
-            storeCommit('setItemsCount', result);
-        })
-    }
-
-    function userInfo() {
-
     }
 }
 
-export module member {
-    export function url(path: string) {
-        return `${config.service.member}${path}?storeId=${storeId()}`;
-    }
-    type UserInfo1 = {
-        Id: string,
-        Email: string,
-        Mobile: string,
-        OpenId: string,
-        PasswordSetted: boolean,
-        PaymentPasswordSetted: boolean,
-        UserName: string,
-        HeadImageUrl: string,
+type UserInfo1 = {
+    Id: string,
+    Email: string,
+    Mobile: string,
+    OpenId: string,
+    PasswordSetted: boolean,
+    PaymentPasswordSetted: boolean,
+    UserName: string,
+    HeadImageUrl: string,
+}
+
+type UserInfo2 = {
+    Balance: number,
+    NotPaidCount: number,
+    Score: number,
+    SendCount: number,
+    ShoppingCartItemsCount: number,
+    NickName: string,
+    ToEvaluateCount: number,
+}
+
+export class MemberService extends Service {
+    constructor() {
+        super();
     }
 
-    type UserInfo2 = {
-        Balance: number,
-        NotPaidCount: number,
-        Score: number,
-        SendCount: number,
-        ShoppingCartItemsCount: number,
-        NickName: string,
-        ToEvaluateCount: number,
+    private url(path: string) {
+        return `${config.service.member}${path}?storeId=${storeId()}`;
     }
-    export function userInfo() {
-        let url1 = url('Member/GetMember');
+
+    userInfo() {
+        let url1 = this.url('Member/GetMember');
         let url2 = serviceUrl(config.service.shop, 'User/GetUserInfo');
-        return Promise.all([get<UserInfo1>(url1), get<UserInfo2>(url2)]).then(result => {
+        return Promise.all([this.get<UserInfo1>(url1), this.get<UserInfo2>(url2)]).then(result => {
             let userInfo = Object.assign(result[0], result[1]);
             return userInfo;
         });
     }
+
 }
+
+export let station = new StationService();
+export let shop = new ShopService();
+export let shoppingCart = new ShoppingCartService();
+export let member = new MemberService();
+

@@ -1,5 +1,5 @@
-import * as services from 'services';
-import { Application, Page } from 'chitu.mobile';
+import { Service, shoppingCart } from 'services';
+import { Application as BaseApplication, Page as BasePage } from 'chitu.mobile';
 import { config as imageBoxConfig } from 'controls/imageBox';
 import * as chitu from 'chitu';
 import Vue = require('vue');
@@ -24,13 +24,18 @@ export let config = {
     defaultUrl: 'home_index'
 }
 
+export class Page extends BasePage {
+    createService<T extends Service>(serviceType: { new (): T }):T {
+       let result = new serviceType();
+       return result;
+    }
+}
 
-
-class MyApplication extends Application {
+export class Application extends BaseApplication {
     private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
-    //private cachePageNames = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
     constructor() {
         super();
+        this.pageType = Page;
     }
 
     protected parseRouteString(routeString: string) {
@@ -50,7 +55,6 @@ class MyApplication extends Application {
         //===================================================
         // IOS WEB 浏览器自带滑动返回
         page.allowSwipeBack = (isCordovaApp || isAndroid) && this.topLevelPages.indexOf(routeData.pageName) < 0;
-        page.allowSwipeBack = this.topLevelPages.indexOf(routeData.pageName) < 0;//TEST
         //===================================================
 
         this.buildLoadingView(page);
@@ -131,7 +135,7 @@ class MyApplication extends Application {
         let vm = new Vue({
             el: footerElement,
             computed: ({
-                itemsCount: services.shoppingCart.productsCount
+                itemsCount: shoppingCart.productsCount
             } as ModelComputed),
             mounted() {
                 let self = this as VueInstance<any>;
@@ -227,7 +231,7 @@ function createElement(tagName: string, props, children: Array<HTMLElement | str
     return element;
 }
 
-export let app = window['app'] = new MyApplication();
+export let app = window['app'] = new Application();
 app.run();
 app.backFail.add(() => {
     app.redirect(config.defaultUrl);

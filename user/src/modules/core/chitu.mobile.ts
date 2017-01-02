@@ -54,99 +54,9 @@ export class Page extends chitu.Page {
             if (args.viewHTML)
                 this.view('main').innerHTML = args.viewHTML || '';
         });
-
-        this.enableGesture(this);
     }
 
-    private enableGesture(page: Page) {
-        let startY, currentY;
-        let startX, currentX;
-        let moved = false;
-        let SIDE_WIDTH = 20;
-        let enable = false;
 
-        let horizontal_swipe_angle = 35;
-        let vertical_pull_angle = 65;
-        let colse_position = window.innerWidth / 2;
-        let previousPageStartX = 0 - window.innerWidth / 3;
-
-        page.element.addEventListener('touchstart', function (event: TouchEvent) {
-            startY = event.touches[0].pageY;
-            startX = event.touches[0].pageX;
-            enable = startX <= SIDE_WIDTH
-        })
-
-        page.element.addEventListener('touchmove', (event: TouchEvent) => {
-            currentX = event.targetTouches[0].pageX;
-            currentY = event.targetTouches[0].pageY;
-            //========================================
-            // currentX < 0 表示 IOS 侧划
-            if (isiOS && currentX < 0 || !enable) {
-                return;
-            }
-
-            //========================================
-            let deltaX = currentX - startX;
-            let angle = calculateAngle(deltaX, currentY - startY);
-            if (angle < horizontal_swipe_angle && deltaX > 0) {
-                page.element.style.transform = `translate(${deltaX}px, 0px)`;
-                page.element.style.transition = '0s';
-
-                if (page.previous != null) {
-                    page.previous.element.style.transform = `translate(${previousPageStartX + deltaX / 3}px, 0px)`;
-                    page.previous.element.style.transition = '0s';
-                    page.previous.element.style.display = 'block';
-                }
-
-                disableNativeScroll(page.element);
-                moved = true;
-                event.preventDefault();
-                console.log('preventDefault gestured');
-            }
-        })
-
-
-        let end = (event: TouchEvent) => {
-            if (!moved)
-                return;
-
-            let deltaX = currentX - startX;
-            if (deltaX > colse_position) {
-                console.assert(this.app != null);
-                this.app.back();
-            }
-            else {
-                page.element.style.transform = `translate(0px, 0px)`;
-                page.element.style.transition = '0.4s';
-
-                if (page.previous) {
-                    page.previous.element.style.transform = `translate(${previousPageStartX}px,0px)`;
-                    page.previous.element.style.transition = `0.4s`;
-                    window.setTimeout(function () {
-                        page.previous.element.style.display = 'none';
-                    }, 400);
-
-                }
-            }
-
-
-            moved = false;
-        }
-
-        page.element.addEventListener('touchcancel', (event) => end(event));
-        page.element.addEventListener('touchend', (event) => end(event));
-
-        /** 禁用原生的滚动 */
-        function disableNativeScroll(element: HTMLElement) {
-            element.style.overflowY = 'hidden';
-        }
-
-        /** 启用原生的滚动 */
-        function enableNativeScroll(element: HTMLElement) {
-            element.style.overflowY = 'scroll';
-        }
-
-    }
 
     private createView(className: string) {
         let childElement = document.createElement(viewTagName);
@@ -241,7 +151,7 @@ window.addEventListener('touchmove', function (e) {
     touch_move_time = Date.now();
 })
 
-var isiOS = navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+var isiOS = (navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) || []).filter(o => o).length > 0; //ios终端
 
 function calculateAngle(x, y) {
     let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
@@ -260,8 +170,103 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         this.previousPageStartX = 0 - this.windowWidth / 3;
     }
 
+    private enableGesture(page: Page) {
+        let startY, currentY;
+        let startX, currentX;
+        let moved = false;
+        let SIDE_WIDTH = 20;
+        let enable = false;
+
+        let horizontal_swipe_angle = 35;
+        let vertical_pull_angle = 65;
+        let colse_position = window.innerWidth / 2;
+        let previousPageStartX = 0 - window.innerWidth / 3;
+
+        page.element.addEventListener('touchstart', function (event: TouchEvent) {
+            startY = event.touches[0].pageY;
+            startX = event.touches[0].pageX;
+            enable = startX <= SIDE_WIDTH
+        })
+
+        page.element.addEventListener('touchmove', (event: TouchEvent) => {
+            currentX = event.targetTouches[0].pageX;
+            currentY = event.targetTouches[0].pageY;
+            //========================================
+            // currentX < 0 表示 IOS 侧划
+            if (isiOS && currentX < 0 || !enable) {
+                return;
+            }
+
+            //========================================
+            let deltaX = currentX - startX;
+            let angle = calculateAngle(deltaX, currentY - startY);
+            if (angle < horizontal_swipe_angle && deltaX > 0) {
+                page.element.style.transform = `translate(${deltaX}px, 0px)`;
+                page.element.style.transition = '0s';
+
+                if (page.previous != null) {
+                    page.previous.element.style.transform = `translate(${previousPageStartX + deltaX / 3}px, 0px)`;
+                    page.previous.element.style.transition = '0s';
+                    page.previous.element.style.display = 'block';
+                }
+
+                disableNativeScroll(page.element);
+                moved = true;
+                event.preventDefault();
+                console.log('preventDefault gestured');
+            }
+        })
+
+
+        let end = (event: TouchEvent) => {
+            if (!moved)
+                return;
+
+            let deltaX = currentX - startX;
+            if (deltaX > colse_position) {
+                console.assert(this.app != null);
+                this.app.back();
+            }
+            else {
+                page.element.style.transform = `translate(0px, 0px)`;
+                page.element.style.transition = '0.4s';
+
+                if (page.previous) {
+                    page.previous.element.style.transform = `translate(${previousPageStartX}px,0px)`;
+                    page.previous.element.style.transition = `0.4s`;
+                    window.setTimeout(function () {
+                        page.previous.element.style.display = 'none';
+                    }, 400);
+
+                }
+            }
+
+
+            moved = false;
+        }
+
+        page.element.addEventListener('touchcancel', (event) => end(event));
+        page.element.addEventListener('touchend', (event) => end(event));
+
+        /** 禁用原生的滚动 */
+        function disableNativeScroll(element: HTMLElement) {
+            element.style.overflowY = 'hidden';
+        }
+
+        /** 启用原生的滚动 */
+        function enableNativeScroll(element: HTMLElement) {
+            element.style.overflowY = 'scroll';
+        }
+
+    }
+
 
     show(page: Page): Promise<any> {
+        if (!(<any>page).gestured) {
+            (<any>page).gestured = true;
+            if (page.allowSwipeBack)
+                this.enableGesture(page);
+        }
 
         let maxZIndex = 1;
         let pageElements = document.getElementsByClassName('page');
@@ -311,11 +316,15 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         //============================================
         // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过滑屏返回，
         // 通过滑屏返回，是不需要有返回效果的。
-        if (isiOS && Date.now() - touch_move_time < 500 || page.displayStatic) {
+        let now = Date.now();
+        if (isiOS && now - touch_move_time < 500 || page.displayStatic) {
             page.element.style.display = 'none';
             if (page.previous) {
-                page.previous.element.style.removeProperty('transform');
-                page.previous.element.style.removeProperty('transition');
+                page.previous.element.style.display = 'block';
+                page.previous.element.style.transition = '0s';
+                page.previous.element.style.transform = 'translate(0,0)';
+                // page.previous.element.style.removeProperty('transform');
+                // page.previous.element.style.removeProperty('transition');
             }
             return Promise.resolve();
         }
@@ -355,7 +364,101 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
         this.windowWidth = window.innerWidth;
     }
 
+    private enableGesture(page: Page) {
+        let startY, currentY;
+        let startX, currentX;
+        let moved = false;
+        let SIDE_WIDTH = 20;
+        let enable = false;
+
+        let horizontal_swipe_angle = 35;
+        let vertical_pull_angle = 65;
+        let colse_position = window.innerWidth / 2;
+        let previousPageStartX = 0 - window.innerWidth / 3;
+
+        page.element.addEventListener('touchstart', function (event: TouchEvent) {
+            startY = event.touches[0].pageY;
+            startX = event.touches[0].pageX;
+            enable = startX <= SIDE_WIDTH
+            if (page.previous) {
+                page.previous.element.style.display = 'block';
+            }
+        })
+
+        page.element.addEventListener('touchmove', (event: TouchEvent) => {
+            currentX = event.targetTouches[0].pageX;
+            currentY = event.targetTouches[0].pageY;
+            //========================================
+            // currentX < 0 表示 IOS 侧划
+            if (isiOS && currentX < 0 || !enable) {
+                return;
+            }
+
+            //========================================
+            let deltaX = currentX - startX;
+            let angle = calculateAngle(deltaX, currentY - startY);
+            if (angle < horizontal_swipe_angle && deltaX > 0) {
+                page.element.style.transform = `translate(${deltaX}px, 0px)`;
+                page.element.style.transition = '0s';
+
+                disableNativeScroll(page.element);
+                moved = true;
+                event.preventDefault();
+                console.log('preventDefault gestured');
+            }
+        })
+
+
+        let end = (event: TouchEvent) => {
+            if (!moved)
+                return;
+
+            let deltaX = currentX - startX;
+            if (deltaX > colse_position) {
+                console.assert(this.app != null);
+                this.app.back();
+            }
+            else {
+                page.element.style.transform = `translate(0px, 0px)`;
+                page.element.style.transition = '0.4s';
+                setTimeout(() => {
+                    if (page.previous) {
+                        page.previous.element.style.display = 'none';
+                    }
+                }, 500);
+            }
+
+            setTimeout(() => {
+                page.element.style.removeProperty('transform');
+                page.element.style.removeProperty('transition');
+
+            }, 500);
+
+            moved = false;
+        }
+
+        page.element.addEventListener('touchcancel', (event) => end(event));
+        page.element.addEventListener('touchend', (event) => end(event));
+
+        /** 禁用原生的滚动 */
+        function disableNativeScroll(element: HTMLElement) {
+            element.style.overflowY = 'hidden';
+        }
+
+        /** 启用原生的滚动 */
+        function enableNativeScroll(element: HTMLElement) {
+            element.style.overflowY = 'scroll';
+        }
+
+    }
+
+
     show(page: Page): Promise<any> {
+        if (!(<any>page).gestured) {
+            (<any>page).gestured = true;
+            if (page.allowSwipeBack)
+                this.enableGesture(page);
+        }
 
         let maxZIndex = 1;
         let pageElements = document.getElementsByClassName('page');
@@ -369,7 +472,6 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
         page.element.style.zIndex = `${maxZIndex + 1}`;
         page.element.style.display = 'block';
         if (page.displayStatic) {
-            page.element.style.transform = `translate(0px,0px)`;
             return Promise.resolve();
         }
 
@@ -383,6 +485,12 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
             }, delay);
 
             window.setTimeout(reslove, delay + playTime)
+        }).then(() => {
+            page.element.style.removeProperty('transform');
+            page.element.style.removeProperty('transition');
+            if (page.previous) {
+                page.previous.element.style.display = 'none';
+            }
         })
     }
 
@@ -405,9 +513,10 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
 
         if (page.previous) {
             //window.setTimeout(function () {
-            page.previous.element.style.transform = `translate(0px, 0px)`;
-            page.previous.element.style.transition = '0.4s';
+            // page.previous.element.style.transform = `translate(0px, 0px)`;
+            // page.previous.element.style.transition = '0.4s';
             //}, 100);
+            page.previous.element.style.display = 'block';
         }
 
         return new Promise<any>(reslove => {

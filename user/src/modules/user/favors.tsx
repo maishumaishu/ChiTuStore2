@@ -1,6 +1,6 @@
 import { Page } from 'chitu.mobile';
 import Vue = require('vue');
-import { shop } from 'services';
+import { shop, FavorProduct } from 'services';
 import * as ui from 'core/ui';
 import 'controls/dataList';
 import 'controls/imageBox';
@@ -53,7 +53,7 @@ export default function (page: Page) {
             // unfavore: function (event, productId: string) {
             //     debugger;
             // }
-            unfavore: ui.buttonOnClick((event, item: shop.FavorProduct) => {
+            unfavore: ui.buttonOnClick((event, item: FavorProduct) => {
                 return shop.unfavorProduct(item.ProductId).then(() => {
                     item['Status'] = 'unfavor';
                 });
