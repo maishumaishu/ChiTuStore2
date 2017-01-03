@@ -10,6 +10,8 @@ var isCordovaApp = location.protocol === 'file:';
 let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 /** 是否允浸入式头 */
 let allowImmersionHeader = false;
+let topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
+
 if (isCordovaApp && !isAndroid) {
     allowImmersionHeader = true;
 }
@@ -25,6 +27,46 @@ export let config = {
 }
 
 export class Page extends BasePage {
+    constructor(params) {
+        super(params);
+
+        this.buildErrorView();
+        this.buildLoadingView();
+        this.buildHeader(50);
+        if (topLevelPages.indexOf(this.routeData.pageName) >= 0) {
+            this.createMenu();
+        }
+        if (this.routeData.pageName == 'home.product') {
+            this.createFooter(50);
+        }
+
+
+        let className = this.routeData.pageName.split('.').join('-');
+        this.element.className = (allowImmersionHeader ? 'page immersion ' : 'page ') + className;
+        this.displayStatic = topLevelPages.indexOf(this.name) >= 0 || this.name == 'home.search';
+
+        //=========================================
+        // 在 shown 加入转动，而不是一开始加，避免闪烁
+        this.shown.add((sender: Page, args) => {
+            let i = sender.loadingView.querySelector('i') as HTMLElement;
+            i.className = i.className + ' icon-spin';
+        })
+        //=========================================
+
+        //===================================================
+        // IOS WEB 浏览器自带滑动返回
+        this.allowSwipeBackGestrue = (isCordovaApp || isAndroid) && topLevelPages.indexOf(this.routeData.pageName) < 0;
+        //===================================================readonly
+
+    }
+
+    reload() {
+        this.errorView.style.display = 'none';
+        this.loadingView.style.display = 'block';
+        let result = super.reload();
+        return result;
+    }
+
     createService<T extends Service>(serviceType: { new (): T }): T {
         let result = new serviceType();
         result.error.add((sender, error) => {
@@ -32,98 +74,58 @@ export class Page extends BasePage {
         })
         return result;
     }
-}
 
-export class Application extends BaseApplication {
-    private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
-    constructor() {
-        super();
-        this.pageType = Page;
-    }
+    private showError(err: Error) {
+        let display = this.loadingView.style.display || 'block';
+        if (display == 'block') {
+            let element = this.view('error').querySelector('.text') as HTMLElement;
+            console.assert(element != null);
+            element.innerHTML = err.message;
 
-    protected parseRouteString(routeString: string) {
-        let routeData = new chitu.RouteData(this.fileBasePath, routeString, '_');
-        return routeData;
-    }
-
-    protected createPage(routeData: chitu.RouteData) {
-        let page = super.createPage(routeData) as Page;
-        //page.allowCache = this.cachePageNames.indexOf(routeData.pageName) >= 0;
-
-        this.buildHeader(page, 50);
-        if (this.topLevelPages.indexOf(routeData.pageName) >= 0) {
-            this.createMenu(page);
+            this.errorView.style.display = 'block'
         }
-
-        //===================================================
-        // IOS WEB 浏览器自带滑动返回
-        page.allowSwipeBackGestrue = (isCordovaApp || isAndroid) && this.topLevelPages.indexOf(routeData.pageName) < 0;
-        //===================================================
-
-        this.buildLoadingView(page);
-        this.buildErrorView(page);
-        if (routeData.pageName == 'home.product') {
-            page.createFooter(50);
+        else {
+            alert(err.message);
+            console.log(err);
         }
-
-        let path = routeData.actionPath.substr(routeData.basePath.length);
-        let cssPath = `css!content/app` + path;
-        requirejs([cssPath]);
-
-        let className = routeData.pageName.split('.').join('-');
-        page.element.className = (allowImmersionHeader ? 'page immersion ' : 'page ') + className;
-        page.displayStatic = this.topLevelPages.indexOf(page.name) >= 0 || page.name == 'home.search';
-
-        //=========================================
-        // 在 shown 加入转动，而不是一开始加，避免闪烁
-        page.shown.add((sender: Page) => {
-            let i = sender.loadingView.querySelector('i') as HTMLElement;
-            i.className = i.className + ' icon-spin';
-        })
-        //=========================================
-
-        return page;
     }
 
-    private reload(page: Page) {
-        alert('reload');
-    }
-
-    buildErrorView(page: Page) {
+    private buildErrorView() {
         let h = createElement;
+        let page = this;
         let element = (
             <div class="norecords">
                 <div class="icon">
                     <i class="icon-rss">
                     </i>
                 </div>
-                <h4 class="text">连接服务器错误</h4>
-                <button onclick={() => this.reload(page)} class="btn btn-default" style="margin-top:10px;">点击重新加载页面</button>
+                <h4 class="text"></h4>
+                <button onclick={() => this.reload()} class="btn btn-default" style="margin-top:10px;">点击重新加载页面</button>
             </div>
         );
+        this.errorView.appendChild(element);
     }
 
-    buildLoadingView(page: Page) {
+    private buildLoadingView() {
         let h = createElement;
         let element = (
             <div class="spin">
                 <i class="icon-spinner"></i>
             </div>
         );
-        page.loadingView.appendChild(element);
+        this.loadingView.appendChild(element);
     }
 
-    buildHeader(page: Page, height: number) {
+    private buildHeader(height: number) {
         let h = createElement;
 
         let headerStyle = {} as CSSStyleDeclaration;
-        if (page.routeData.pageName == 'home.search') {
+        if (this.routeData.pageName == 'home.search') {
             headerStyle.backgroundColor = '#fff';
         }
 
 
-        let isTopPage = this.topLevelPages.indexOf(page.routeData.pageName) >= 0;
-        let topLevelPages = this.topLevelPages;
+        let isTopPage = topLevelPages.indexOf(this.routeData.pageName) >= 0;
         let noneHeaderPages = ['user.index'];
         let headerElement: HTMLElement = (
             <header style={headerStyle}>
@@ -131,7 +133,7 @@ export class Application extends BaseApplication {
                     <nav class="bg-primary" style={headerStyle}>
                         {isTopPage ?
                             <span></span> :
-                            <button name="back-button" onclick="app.back()" class="leftButton">
+                            <button name="back-button" onclick={() => app.back()} class="leftButton">
                                 <i class="icon-chevron-left"></i>
                             </button>
                         }
@@ -141,12 +143,13 @@ export class Application extends BaseApplication {
             </header>
         );
 
-        if (noneHeaderPages.indexOf(page.routeData.pageName) < 0) {
-            page.element.appendChild(headerElement);
+        if (noneHeaderPages.indexOf(this.routeData.pageName) < 0) {
+            this.element.appendChild(headerElement);
         }
     }
 
-    createMenu(page: Page) {
+    private createMenu() {
+        let page = this;
         let shoppingCart = page.createService(ShoppingCartService);
         let routeData = page.routeData;
         let footerElement = page.createFooter(50);
@@ -210,6 +213,33 @@ export class Application extends BaseApplication {
             }
         })
     }
+
+}
+
+export class Application extends BaseApplication {
+    private topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
+    constructor() {
+        super();
+        this.pageType = Page;
+    }
+
+    protected parseRouteString(routeString: string) {
+        let routeData = new chitu.RouteData(this.fileBasePath, routeString, '_');
+        return routeData;
+    }
+
+    protected createPage(routeData: chitu.RouteData) {
+        let page = super.createPage(routeData) as Page;
+
+        let path = routeData.actionPath.substr(routeData.basePath.length);
+        let cssPath = `css!content/app` + path;
+        requirejs([cssPath]);
+
+        return page;
+    }
+
+
+
 }
 
 function createElement(tagName: string, props, children: Array<HTMLElement | string>): HTMLElement {
@@ -217,10 +247,18 @@ function createElement(tagName: string, props, children: Array<HTMLElement | str
     children = children || [];
     let element = document.createElement(tagName) as HTMLElement;
     for (let key in props) {
+        // if(key.startsWith('on')){
+        //     element[key] = props[key];
+        //     continue;
+        // }
         switch (key) {
             case 'attrs':
                 let attrs = props['attrs'];
                 for (let name in attrs) {
+                    if (name.startsWith('on')) {
+                        element[name] = attrs[name];
+                        continue;
+                    }
                     element.setAttribute(name, attrs[name]);
                 }
                 break;

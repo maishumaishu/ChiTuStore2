@@ -63,21 +63,6 @@ export class Page extends chitu.Page {
         return childElement;
     }
 
-    showError(err: Error) {
-        let display = this.loadingView.style.display || 'block';
-        if (display == 'block') {
-            let element = this.view('error');
-            console.assert(element != null);
-            element.innerHTML = `<span>${err.message}</span>`;
-            element.style.display = 'block';
-            this.loadingView.style.display = 'none';
-        }
-        else {
-            alert(err.message);
-            console.log(err);
-        }
-    }
-
     protected view(className: ViewClassName) {
         let element = this.element.querySelector(`.${className}`) as HTMLElement;
         return element;
@@ -85,6 +70,10 @@ export class Page extends chitu.Page {
 
     get dataView() {
         return this.view('main');
+    }
+
+    get errorView() {
+        return this.view('error');
     }
 
     get loadingView() {

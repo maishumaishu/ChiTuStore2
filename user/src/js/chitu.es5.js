@@ -687,6 +687,11 @@ var chitu;
                 }));
             }
         }, {
+            key: 'reload',
+            value: function reload() {
+                return this.loadPageAction();
+            }
+        }, {
             key: 'element',
             get: function get() {
                 return this._element;

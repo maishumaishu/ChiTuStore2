@@ -30,16 +30,15 @@ if (isCordovaApp || browser.chrome && browser.version >= 48 || browser.safari &&
 
 var modulesPath = 'modules';
 var chituPath = 'js/chitu';
-var app_deps = [];
+var services_deps = [];
 
 if (es5) {
     chituPath = 'js/chitu.es5';
     modulesPath = 'modules.es5';
-    //app_deps = ['js/polyfill']
 }
 
 if (!window['fetch']) {
-    app_deps.push('fetch');
+    services_deps.push('fetch');
 }
 
 requirejs.config({
@@ -50,11 +49,8 @@ requirejs.config({
         vue: {
             exports: 'Vue'
         },
-        // vuex: {
-        //     deps: ['vue']
-        // },
-        site: {
-            deps: app_deps
+        services: {
+            deps: services_deps
         }
     },
     paths: {

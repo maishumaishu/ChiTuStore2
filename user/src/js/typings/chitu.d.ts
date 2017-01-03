@@ -78,12 +78,10 @@ declare namespace chitu {
 
 declare namespace chitu {
     class Callback<S, A> {
-        private event;
-        private element;
-        private event_name;
+        private funcs;
         constructor();
         add(func: (sender: S, args: A) => any): void;
-        remove(func: EventListener): void;
+        remove(func: (sender: S, args: A) => any): void;
         fire(sender: S, args: A): void;
     }
     function Callbacks<S, A>(): Callback<S, A>;
@@ -121,13 +119,13 @@ declare namespace chitu {
         private _displayer;
         static tagName: string;
         allowCache: boolean;
-        load: Callback<Page, any>;
-        showing: Callback<Page, {}>;
-        shown: Callback<Page, {}>;
-        hiding: Callback<Page, {}>;
-        hidden: Callback<Page, {}>;
-        closing: Callback<Page, {}>;
-        closed: Callback<Page, {}>;
+        load: Callback<this, any>;
+        showing: Callback<this, {}>;
+        shown: Callback<this, {}>;
+        hiding: Callback<this, {}>;
+        hidden: Callback<this, {}>;
+        closing: Callback<this, {}>;
+        closed: Callback<this, {}>;
         constructor(params: PageParams);
         on_load(args: any): void;
         on_showing(): void;
@@ -143,8 +141,8 @@ declare namespace chitu {
         previous: Page;
          routeData: RouteData;
          name: string;
-        private createActionDeferred(routeData);
-        private loadPageAction(routeData);
+        private loadPageAction();
+        reload(): Promise<void>;
     }
     class PageDisplayerImplement implements PageDisplayer {
         show(page: Page): Promise<void>;

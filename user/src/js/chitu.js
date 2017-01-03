@@ -467,6 +467,9 @@ var chitu;
                 this.on_load(args);
             });
         }
+        reload() {
+            return this.loadPageAction();
+        }
     }
     Page.tagName = 'div';
     chitu.Page = Page;
