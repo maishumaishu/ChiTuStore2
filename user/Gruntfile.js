@@ -50,8 +50,7 @@ module.exports = function (grunt) {
                         src: ['js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'ui/**/*.*', 'index.html'],
                     },
                     { expand: true, cwd: src_user_root + '/modules', dest: dest_user_root + '/pages', src: ['**/*.html'] },
-                    { expand: true, cwd: 'build', dest: dest_user_root, src: ['**/*.js'] },
-                    { expand: true, cwd: '.', dest: dest_user_root, src: ['plugins/**/*.*'] },
+                    { expand: true, cwd: 'build', dest: dest_user_root, src: ['**/*.js'] }
                 ],
             },
             ios: {

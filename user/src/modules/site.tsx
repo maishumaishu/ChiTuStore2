@@ -1,4 +1,4 @@
-import { Service, shoppingCart } from 'services';
+import { Service, ShoppingCartService } from 'services';
 import { Application as BaseApplication, Page as BasePage } from 'chitu.mobile';
 import { config as imageBoxConfig } from 'controls/imageBox';
 import * as chitu from 'chitu';
@@ -25,9 +25,12 @@ export let config = {
 }
 
 export class Page extends BasePage {
-    createService<T extends Service>(serviceType: { new (): T }):T {
-       let result = new serviceType();
-       return result;
+    createService<T extends Service>(serviceType: { new (): T }): T {
+        let result = new serviceType();
+        result.error.add((sender, error) => {
+            this.showError(error);
+        })
+        return result;
     }
 }
 
@@ -58,6 +61,7 @@ export class Application extends BaseApplication {
         //===================================================
 
         this.buildLoadingView(page);
+        this.buildErrorView(page);
         if (routeData.pageName == 'home.product') {
             page.createFooter(50);
         }
@@ -79,6 +83,24 @@ export class Application extends BaseApplication {
         //=========================================
 
         return page;
+    }
+
+    private reload(page: Page) {
+        alert('reload');
+    }
+
+    buildErrorView(page: Page) {
+        let h = createElement;
+        let element = (
+            <div class="norecords">
+                <div class="icon">
+                    <i class="icon-rss">
+                    </i>
+                </div>
+                <h4 class="text">连接服务器错误</h4>
+                <button onclick={() => this.reload(page)} class="btn btn-default" style="margin-top:10px;">点击重新加载页面</button>
+            </div>
+        );
     }
 
     buildLoadingView(page: Page) {
@@ -125,6 +147,7 @@ export class Application extends BaseApplication {
     }
 
     createMenu(page: Page) {
+        let shoppingCart = page.createService(ShoppingCartService);
         let routeData = page.routeData;
         let footerElement = page.createFooter(50);
 

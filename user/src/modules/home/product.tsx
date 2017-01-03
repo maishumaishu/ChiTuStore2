@@ -1,7 +1,6 @@
 import Vue = require('vue');
-import { Page } from 'chitu.mobile';
-import { shop, imageUrl, shoppingCart } from 'services';
-import * as site from 'site'
+import { ShoppingCartService, imageUrl, ShopService } from 'services';
+import { Page, config } from 'site'
 import { PageViewGesture, imageDelayLoad } from 'core/ui'
 import { mapGetters } from 'vuex';
 import * as ui from 'core/ui';
@@ -9,8 +8,9 @@ import * as ui from 'core/ui';
 import 'controls/imageBox';
 
 export default async function (page: Page) {
+    let shop = page.createService(ShopService);
+    let shoppingCart = page.createService(ShoppingCartService);
     let { id } = page.routeData.values
-
     let result = await Promise.all([chitu.loadjs(`text!pages/home/product.html`), shop.product(id)]);//.then(function (result) {
     let html = result[0];
     let product = result[1];
@@ -103,103 +103,104 @@ export default async function (page: Page) {
         })
     }
 
-}
+    function createIntroduceView(page: Page) {
+        let introduceView = document.createElement('section');
+        introduceView.style.display = 'none';
+        introduceView.style.paddingTop = '0px';
 
-function createIntroduceView(page: Page) {
-    let introduceView = document.createElement('section');
-    introduceView.style.display = 'none';
-    introduceView.style.paddingTop = '0px';
+        let { id } = page.routeData.values
+        let loadIntroduce = shop.productIntroduce(id);
 
-    let { id } = page.routeData.values
-    let loadIntroduce = shop.productIntroduce(id);
+        chitu.loadjs('text!pages/home/product/introduce.html').then(html => {
+            introduceView.innerHTML = html;
+            loadIntroduce.then(o => {
+                let introduceElement = introduceView.querySelector('.container') as HTMLElement;
+                introduceElement.innerHTML = o;
+                let imgs = introduceElement.querySelectorAll('img');
+                for (let i = 0; i < imgs.length; i++) {
+                    let img = imgs.item(i) as HTMLImageElement;
+                    img.src = imageUrl(img.src);
+                    imageDelayLoad(img, config.imageText);
+                }
+            });
+        })
 
-    chitu.loadjs('text!pages/home/product/introduce.html').then(html => {
-        introduceView.innerHTML = html;
+        return introduceView;
+    }
+
+    function createHorizontalIntroduceView(page: Page) {
+        let introduceView = document.createElement('section');
+
+        let introduceContent = document.createElement('div');
+        introduceContent.className = 'container';
+        introduceView.appendChild(introduceContent);
+
+        let { id } = page.routeData.values
+        let loadIntroduce = shop.productIntroduce(id);
+
         loadIntroduce.then(o => {
-            let introduceElement = introduceView.querySelector('.container') as HTMLElement;
-            introduceElement.innerHTML = o;
-            let imgs = introduceElement.querySelectorAll('img');
+            introduceContent.innerHTML = o;
+            let imgs = introduceContent.querySelectorAll('img');
             for (let i = 0; i < imgs.length; i++) {
                 let img = imgs.item(i) as HTMLImageElement;
                 img.src = imageUrl(img.src);
-                imageDelayLoad(img, site.config.imageText);
+                imageDelayLoad(img, config.imageText);
             }
         });
-    })
 
-    return introduceView;
-}
+        return introduceView;
+    }
 
-function createHorizontalIntroduceView(page: Page) {
-    let introduceView = document.createElement('section');
 
-    let introduceContent = document.createElement('div');
-    introduceContent.className = 'container';
-    introduceView.appendChild(introduceContent);
-
-    let { id } = page.routeData.values
-    let loadIntroduce = shop.productIntroduce(id);
-
-    loadIntroduce.then(o => {
-        introduceContent.innerHTML = o;
-        let imgs = introduceContent.querySelectorAll('img');
-        for (let i = 0; i < imgs.length; i++) {
-            let img = imgs.item(i) as HTMLImageElement;
-            img.src = imageUrl(img.src);
-            imageDelayLoad(img, site.config.imageText);
+    function createFooter(page: Page) {
+        let data = {
+            productStock: 0
         }
-    });
 
-    return introduceView;
-}
+        let productId = page.routeData.values.id;
+        //let state = services.shoppingCart.store.state;
 
+        type ModelComputed = {
+            itemsCount: () => number
+        }
 
-function createFooter(page: Page) {
-    let data = {
-        productStock: 0
-    }
+        type ModelMethods = {
+            addToShoppingCart: Function
+        }
 
-    let productId = page.routeData.values.id;
-    //let state = services.shoppingCart.store.state;
+        let computed: ModelComputed = {
+            itemsCount: shoppingCart.productsCount
+        }
 
-    type ModelComputed = {
-        itemsCount: () => number
-    }
+        let methods: ModelMethods = {
+            addToShoppingCart: ui.buttonOnClick(function (event) {
+                return shoppingCart.addItem(productId);
+            })
+        }
 
-    type ModelMethods = {
-        addToShoppingCart: Function
-    }
+        let vm = new Vue({
+            el: page.footer,
+            computed,
+            methods,
+            render(h) {
+                let model = this as (ModelComputed & ModelMethods);
+                return (
+                    <footer>
+                        <nav name="bottom_bar" class="">
+                            <span name="btn_shopping_cart" class="pull-left">
+                                <i class="icon-shopping-cart"></i>
+                                <span class="badge bg-primary" style={{ display: model.itemsCount ? 'block' : 'none' }}>{model.itemsCount}</span>
+                            </span>
+                            <button name="btn_add" class="btn btn-primary pull-right" on-click={model.addToShoppingCart}>加入购物车</button>
+                        </nav>
+                    </footer >
+                );
 
-    let computed: ModelComputed = {
-        itemsCount: shoppingCart.productsCount
-    }
-
-    let methods: ModelMethods = {
-        addToShoppingCart: ui.buttonOnClick(function (event) {
-            return shoppingCart.addItem(productId);
+            }
         })
+
+        return data;
     }
 
-    let vm = new Vue({
-        el: page.footer,
-        computed,
-        methods,
-        render(h) {
-            let model = this as (ModelComputed & ModelMethods);
-            return (
-                <footer>
-                    <nav name="bottom_bar" class="">
-                        <span name="btn_shopping_cart" class="pull-left">
-                            <i class="icon-shopping-cart"></i>
-                            <span class="badge bg-primary" style={{ display: model.itemsCount ? 'block' : 'none' }}>{model.itemsCount}</span>
-                        </span>
-                        <button name="btn_add" class="btn btn-primary pull-right" on-click={model.addToShoppingCart}>加入购物车</button>
-                    </nav>
-                </footer >
-            );
-
-        }
-    })
-
-    return data;
 }
+

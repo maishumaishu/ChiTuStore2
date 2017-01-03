@@ -1,11 +1,13 @@
-import { Page } from 'chitu.mobile';
+import { Page } from 'site';
 import Vue = require('vue');
-import { shop, FavorProduct } from 'services';
+import { ShopService, FavorProduct } from 'services';
 import * as ui from 'core/ui';
 import 'controls/dataList';
 import 'controls/imageBox';
 
 export default function (page: Page) {
+    let shop = page.createService(ShopService);
+    
     page.dataView.innerHTML = `
     <div class="container">
         <data-list @load="loadFavorProducts">

@@ -35,7 +35,7 @@ var app_deps = [];
 if (es5) {
     chituPath = 'js/chitu.es5';
     modulesPath = 'modules.es5';
-    app_deps = ['js/polyfill']
+    //app_deps = ['js/polyfill']
 }
 
 if (!window['fetch']) {
@@ -80,17 +80,27 @@ requirejs.config({
 });
 
 
-let modules = ['site', 'vue'];
+var modules = ['site', 'vue'];
 if (isCordovaApp) {
     modules.push('cordova');
     modules.push('device');
 }
 
-requirejs(modules, function (site, vue) {
-    window['Vue'] = vue;
-    site.config.imageText = '零食有约';
-});
 
+if (es5) {
+    requirejs(['js/polyfill'], load)
+}
+else {
+    load();
+}
+
+function load() {
+    requirejs(modules, function (site, vue) {
+        window['Vue'] = vue;
+        site.config.imageText = '零食有约';
+    });
+
+}
 
 
 

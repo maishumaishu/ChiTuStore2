@@ -1,10 +1,11 @@
-import { Page } from 'chitu.mobile';
+import { Page } from 'site';
 import Vue = require('vue');
-import * as services from 'services';
+import { ShopService, StationService } from 'services';
 import 'controls/imageBox';
 
 export default function (page: Page) {
-    let cateoriesPromise = services.shop.cateories();
+    let shop = page.createService(ShopService);
+    let cateoriesPromise = shop.cateories();
     let vm = new Vue({
         el: page.dataView,
         data: {

@@ -56,8 +56,6 @@ export class Page extends chitu.Page {
         });
     }
 
-
-
     private createView(className: string) {
         let childElement = document.createElement(viewTagName);
         childElement.className = className;
@@ -66,10 +64,18 @@ export class Page extends chitu.Page {
     }
 
     showError(err: Error) {
-        let element = this.view('error');
-        console.assert(element != null);
-        element.innerHTML = `<span>${err.message}</span>`;
-        element.style.display = 'block';
+        let display = this.loadingView.style.display || 'block';
+        if (display == 'block') {
+            let element = this.view('error');
+            console.assert(element != null);
+            element.innerHTML = `<span>${err.message}</span>`;
+            element.style.display = 'block';
+            this.loadingView.style.display = 'none';
+        }
+        else {
+            alert(err.message);
+            console.log(err);
+        }
     }
 
     protected view(className: ViewClassName) {

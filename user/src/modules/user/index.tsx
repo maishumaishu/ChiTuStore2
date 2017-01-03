@@ -1,12 +1,12 @@
-import { Page } from 'chitu.mobile';
+import { Page } from 'site';
 import Vue = require('vue');
-import * as services from 'services';
+import { MemberService } from 'services';
 import 'controls/imageBox';
 
 
 export default async function (page: Page) {
-
-    let userInfo = await services.member.userInfo();
+    let member = page.createService(MemberService);
+    let userInfo = await member.userInfo();
     let data = {
         userInfo
     }

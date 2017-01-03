@@ -1,11 +1,11 @@
-import { Page } from 'chitu.mobile';
-import * as services from 'services';
+import { Page } from 'site';
+import { StationService } from 'services';
 import Vue = require('vue');
 import 'controls/dataList';
 import 'controls/imageBox';
 
 export default function (page: Page) {
-
+    let station = page.createService(StationService)
     page.dataView.innerHTML = `
 <div class="container">
     <data-list ref="newsList" v-on:load="newsListLoad">
@@ -22,7 +22,7 @@ export default function (page: Page) {
         el: page.dataView,
         methods: {
             newsListLoad(pageIndex: number, reslove: Function, reject: Function) {
-                services.station.newsList(pageIndex)
+                station.newsList(pageIndex)
                     .then(items => {
                         if (pageIndex == 0)
                             page.loadingView.style.display = 'none';

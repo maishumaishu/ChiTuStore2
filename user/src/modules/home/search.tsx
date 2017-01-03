@@ -1,8 +1,8 @@
-import { Page } from 'chitu.mobile';
-import * as services from 'services';
+import { Page } from 'site';
+import { StationService } from 'services';
 
 export default function (page: Page) {
-
+    let station = page.createService(StationService);
     let data = {
         historyKeywords: new Array<string>(),
         searchKeyWords: Array<string>(),
@@ -14,7 +14,7 @@ export default function (page: Page) {
         }
     }
 
-    services.station.searchKeywords().then(items => {
+    station.searchKeywords().then(items => {
         data.searchKeyWords = items;
         page.loadingView.style.display = 'none';
     });

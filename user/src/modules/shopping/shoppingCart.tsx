@@ -1,9 +1,10 @@
-import { Page } from 'chitu.mobile';
+import { Page } from 'site';
 import Vue = require('vue');
-import { shoppingCart, ShoppingCartItem } from 'services';
+import { ShoppingCartService, ShoppingCartItem } from 'services';
 import 'controls/imageBox';
 
 export default function (page: Page) {
+    let shoppingCart = page.createService(ShoppingCartService);
 
     let data = {
         items: Array<ShoppingCartItem>()

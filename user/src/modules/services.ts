@@ -15,7 +15,7 @@ let config = {
     appToken: '58424776034ff82470d06d3d',
     userToken: '584cfabb4918e4186a77ff1e',
     /** 调用服务接口超时时间，单位为秒 */
-    ajaxTimeout: 5,
+    ajaxTimeout: 20,
 }
 
 function isError(data: any): Error {
@@ -115,13 +115,14 @@ function serviceUrl(baseUrl, path) {
 export type News = { Id: string, Title: string, ImgUrl: string, Date: string, Content: string };
 
 export abstract class Service {
-    error = chitu.Callbacks();
+    error = chitu.Callbacks<Service, Error>();
     ajax<T>(url: string, options: FetchOptions): Promise<T> {
         return new Promise<T>((reslove, reject) => {
             let timeId = setTimeout(() => {
-                let err = new Error('Ajax timeout')
+                let err = new Error(`Ajax timeout.url:${url}`);
                 err.name = 'timeout';
                 reject(err);
+                this.error.fire(this, err);
                 clearTimeout(timeId);
 
             }, config.ajaxTimeout * 1000)
@@ -133,13 +134,14 @@ export abstract class Service {
                 })
                 .catch(err => {
                     reject(err);
+                    this.error.fire(this, err);
                     clearTimeout(timeId);
                 });
 
         })
     }
 
-    async _ajax<T>(url: string, options: FetchOptions): Promise<T> {
+    private async _ajax<T>(url: string, options: FetchOptions): Promise<T> {
         let user_token = userToken();
         if (user_token) {
             options.headers['user-token'] = user_token;
@@ -439,9 +441,4 @@ export class MemberService extends Service {
     }
 
 }
-
-export let station = new StationService();
-export let shop = new ShopService();
-export let shoppingCart = new ShoppingCartService();
-export let member = new MemberService();
 

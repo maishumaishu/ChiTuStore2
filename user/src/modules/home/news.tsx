@@ -1,11 +1,12 @@
-import { Page } from 'chitu.mobile';
-import { station, imageUrl, News } from 'services';
+import { Page } from 'site';
+import { StationService, imageUrl, News } from 'services';
 import * as ui from 'core/ui';
 import * as site from 'site';
 
 import Vue = require('vue');
 
 export default function (page: Page) {
+    let station = page.createService(StationService);
     let id = page.routeData.values.id;
     console.assert(id);
     station.news(id).then(news => {
