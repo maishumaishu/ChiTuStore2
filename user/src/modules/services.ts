@@ -179,9 +179,9 @@ export abstract class Service {
 
             let text = await responseText;
             let textObject = JSON.parse(text);
-
-            if (isError(textObject))
-                throw textObject
+            let err = isError(textObject);
+            if (err)
+                throw err;
 
             return textObject;
         }
@@ -296,6 +296,13 @@ export class StationService extends Service {
     }
 }
 
+interface DataSourceSelectResult<T> {
+    DataItems: T[],
+    MaximumRows?: number,
+    StartRowIndex?: number,
+    TotalRowCount: number
+}
+
 type HomeProduct = { Id: string, Name: string, ImagePath: string };
 type Product = {
     Id: string, Arguments: Array<{ key: string, value: string }>,
@@ -338,6 +345,18 @@ export class ShopService extends Service {
     productIntroduce(productId: string): Promise<string> {
         let url = ShopService.url('Product/GetProductIntroduce');
         return this.get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
+    }
+    products(categoryId: string, pageIndex: number) {
+        let url = ShopService.url('Product/GetProducts');
+        return this.get<{ Products: Array<Product> }>(url, {
+            filter: `CategoryId=Guid.Parse('${categoryId}')`,
+            startRowIndex: pageIndex * 20
+        }).then(o => {
+            o.Products.forEach(o => {
+                o.ImageUrl = imageUrl(o.ImageUrl);
+            });
+            return o.Products;
+        });
     }
     cateories() {
         let url = ShopService.url('Product/GetCategories');

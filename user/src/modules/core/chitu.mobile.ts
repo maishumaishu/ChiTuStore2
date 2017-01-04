@@ -526,10 +526,6 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
         page.element.style.transition = '0.4s';
 
         if (page.previous) {
-            //window.setTimeout(function () {
-            // page.previous.element.style.transform = `translate(0px, 0px)`;
-            // page.previous.element.style.transition = '0.4s';
-            //}, 100);
             page.previous.element.style.display = 'block';
         }
 
