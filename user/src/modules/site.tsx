@@ -322,3 +322,15 @@ if (!location.hash) {
 //================================================================================
 
 
+export function defaultTitleBar(h: Function, title?: string) {
+    title = title || '&nbsp';
+    return (
+        <nav class="bg-primary">
+            <button name="back-button" onclick={() => app.back()} class="leftButton">
+                <i class="icon-chevron-left"></i>
+            </button>
+            <h4 domProps-innerHTML={title}></h4>
+        </nav>
+    );
+}
+

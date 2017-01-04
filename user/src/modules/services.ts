@@ -308,7 +308,8 @@ type Product = {
     Id: string, Arguments: Array<{ key: string, value: string }>,
     BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
     GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
-    ProductCategoryId: string, Count: number, Name: string, IsFavored?: boolean
+    ProductCategoryId: string, Count: number, Name: string, IsFavored?: boolean,
+    ProductCategoryName: string,
     CustomProperties: Array<{
         Name: string,
         Options: Array<{ Name: string, Selected: boolean, Value: string }>
@@ -349,7 +350,7 @@ export class ShopService extends Service {
     products(categoryId: string, pageIndex: number) {
         let url = ShopService.url('Product/GetProducts');
         return this.get<{ Products: Array<Product> }>(url, {
-            filter: `CategoryId=Guid.Parse('${categoryId}')`,
+            filter: `ProductCategoryId=Guid.Parse('${categoryId}')`,
             startRowIndex: pageIndex * 20
         }).then(o => {
             o.Products.forEach(o => {

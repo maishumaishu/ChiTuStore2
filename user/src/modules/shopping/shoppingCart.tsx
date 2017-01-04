@@ -82,7 +82,7 @@ function createHeader(page: Page) {
         render(h) {
             return (
                 <header>
-                    <nav class="bg-primary" style="width:100%;">
+                    <nav class="bg-primary">
                         <h4>购物车</h4>
                     </nav>
                 </header>

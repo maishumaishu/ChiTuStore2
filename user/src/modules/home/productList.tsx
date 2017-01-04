@@ -1,4 +1,4 @@
-import { Page } from 'site';
+import { Page, defaultTitleBar } from 'site';
 import { ShopService } from 'services';
 import Vue = require('vue');
 import 'controls/dataList';
@@ -31,12 +31,44 @@ export default function (page: Page) {
         methods: {
             loadProducts(pageIndex, reslove) {
                 shop.products(categoryId, pageIndex).then(items => {
-                    if (pageIndex == 0)
+                    if (pageIndex == 0) {
                         page.loadingView.style.display = 'none';
+                        buildHeader(items[0].ProductCategoryName);
 
+                    }
                     reslove(items);
                 })
             }
         }
-    })
+    });
+
+
+    function buildHeader(title) {
+        let vm = new Vue({
+            el: page.header,
+            render(h) {
+                return (
+                    <header>
+                        { defaultTitleBar(h, title) }
+                        <ul class="tabs" style="margin: 0px;">
+                            <li>
+                                <a data-bind="click:sort,tap:sort, attr:{class: queryArguments.sort() ? '' : 'active'}" data-type="Default" class="active">综合</a>
+                            </li>
+                            <li>
+                                <a data-bind="click:sort,tap:sort, attr:{class: queryArguments.sort().substr(0, 'SalesNumber'.length) == 'SalesNumber' ? 'active' : ''}" data-type="SalesNumber" class="">销量</a>
+                            </li>
+                            <li>
+                                <a data-bind="click:sort, tap: sort, attr:{class: queryArguments.sort().substr(0, 'Price'.length) == 'Price' ? 'active' : ''}" data-type="Price" class="">
+                                    价格
+                                    <span data-bind="visible: queryArguments.sort().substr('Price'.length + 1) == 'asc'" class="glyphicon glyphicon-triangle-top" style="display: none;"></span>
+                                    <span data-bind="visible: queryArguments.sort().substr('Price'.length + 1) == 'desc'" class="glyphicon glyphicon-triangle-bottom" style="display: none;"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header>
+                );
+                //return defaultHeader(h, title);
+            }
+        })
+    }
 }
