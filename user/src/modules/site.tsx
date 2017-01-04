@@ -1,4 +1,4 @@
-import { Service, ShoppingCartService } from 'services';
+import { Service, ShoppingCartService, AjaxError } from 'services';
 import { Application as BaseApplication, Page as BasePage } from 'chitu.mobile';
 import { config as imageBoxConfig } from 'controls/imageBox';
 import * as chitu from 'chitu';
@@ -75,18 +75,34 @@ export class Page extends BasePage {
         return result;
     }
 
+    /** 判断主视图是否为活动状态 */
+    private dataViewIsActive() {
+
+        // 选取主视图后面的视图，如果有显示的，则说明为非活动状态
+        let views = this.element.querySelectorAll('section[class="main"] + section');
+        for (let i = 0; i < views.length; i++) {
+            let view = views[i] as HTMLElement;
+            let display = !view.style.display || view.style.display == 'block';
+            if (display)
+                return false;
+        }
+
+        return true;
+    }
+
     private showError(err: Error) {
+        let method: string;
         let display = this.loadingView.style.display || 'block';
-        if (display == 'block') {
+        if (this.dataViewIsActive()) {
+            alert(err.message);
+            console.log(err);
+        }
+        else {
             let element = this.view('error').querySelector('.text') as HTMLElement;
             console.assert(element != null);
             element.innerHTML = err.message;
 
             this.errorView.style.display = 'block'
-        }
-        else {
-            alert(err.message);
-            console.log(err);
         }
     }
 

@@ -33,7 +33,6 @@ export default async function (page: Page) {
     createHeader(page);
 
     let result = await Promise.all([station.advertItems(), chitu.loadjs('text!pages/home/index.html')]);
-    //.then(result => {
     data.advertItems = result[0];
     page.loadingView.style.display = 'none';
     pageIndex = pageIndex + 1;

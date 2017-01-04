@@ -1,4 +1,3 @@
-import fetch = require('fetch');
 import * as chitu from 'chitu';
 
 class Errors {
@@ -483,6 +482,9 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
         page.element.style.zIndex = `${maxZIndex + 1}`;
         page.element.style.display = 'block';
         if (page.displayStatic) {
+            if (page.previous) {
+                page.previous.element.style.display = 'none';
+            }
             return Promise.resolve();
         }
 
@@ -512,6 +514,7 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
         if (isiOS && Date.now() - touch_move_time < 500 || page.displayStatic) {
             page.element.style.display = 'none';
             if (page.previous) {
+                page.previous.element.style.display = 'block';
                 page.previous.element.style.removeProperty('transform');
                 page.previous.element.style.removeProperty('transition');
             }

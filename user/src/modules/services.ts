@@ -3,6 +3,19 @@ import Vuex = require('vuex');
 import chitu = require('chitu');
 Vue.use(Vuex)
 
+
+export class AjaxError implements Error {
+    name: string;
+    message: string;
+    method: 'get' | 'post';
+
+    constructor(method) {
+        this.name = 'ajaxError';
+        this.message = 'Ajax Error';
+        this.method = method;
+    }
+}
+
 const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
 let config = {
     service: {
@@ -56,8 +69,6 @@ function userToken(value?: string) {
 function storeId() {
     return '58401d1906c02a2b8877bd13';
 }
-
-
 
 function parseDate(value: string): Date {
     const prefix = '/Date(';
@@ -119,7 +130,7 @@ export abstract class Service {
     ajax<T>(url: string, options: FetchOptions): Promise<T> {
         return new Promise<T>((reslove, reject) => {
             let timeId = setTimeout(() => {
-                let err = new Error(`Ajax timeout.url:${url}`);
+                let err = new AjaxError(options.method);
                 err.name = 'timeout';
                 reject(err);
                 this.error.fire(this, err);
@@ -150,8 +161,9 @@ export abstract class Service {
         try {
             let response = await fetch(url, options);
             if (response.status >= 300) {
-                let err = new Error(response.statusText);
+                let err = new AjaxError(options.method);
                 err.name = `${response.status}`;
+                err.message = response.statusText;
                 throw err
             }
             let responseText = response.text();
