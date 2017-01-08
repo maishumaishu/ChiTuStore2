@@ -116,7 +116,7 @@ export class Page extends BasePage {
                     </i>
                 </div>
                 <h4 class="text"></h4>
-                <button onclick={() => this.reload()} class="btn btn-default" style="margin-top:10px;">点击重新加载页面</button>
+                <button on-click={() => this.reload()} class="btn btn-default" style="margin-top:10px;">点击重新加载页面</button>
             </div>
         );
         this.errorView.appendChild(element);
@@ -133,6 +133,11 @@ export class Page extends BasePage {
     }
 
     private buildHeader(height: number) {
+        let noneHeaderPages = ['user.index'];
+        if (noneHeaderPages.indexOf(this.routeData.pageName) >= 0) {
+            return;
+        }
+
         let h = createElement;
 
         let headerStyle = {} as CSSStyleDeclaration;
@@ -141,27 +146,23 @@ export class Page extends BasePage {
         }
 
 
-        let isTopPage = topLevelPages.indexOf(this.routeData.pageName) >= 0;
-        let noneHeaderPages = ['user.index'];
+        let titleBar;
+        switch (this.routeData.pageName) {
+            case 'home.product':
+                titleBar = productTitleBar(createElement);
+                break;
+            default:
+                let isTopPage = topLevelPages.indexOf(this.routeData.pageName) >= 0;
+                titleBar = defaultTitleBar(createElement, { showBackButton: !isTopPage });
+                break;
+        }
+
         let headerElement: HTMLElement = (
-            <header style={headerStyle}>
-                {
-                    <nav class="bg-primary" style={headerStyle}>
-                        {isTopPage ?
-                            <span></span> :
-                            <button name="back-button" onclick={() => app.back()} class="leftButton">
-                                <i class="icon-chevron-left"></i>
-                            </button>
-                        }
-                        <h4>&nbsp;</h4>
-                    </nav>
-                }
+            <header>
+                {titleBar}
             </header>
         );
-
-        if (noneHeaderPages.indexOf(this.routeData.pageName) < 0) {
-            this.element.appendChild(headerElement);
-        }
+        this.element.appendChild(headerElement);
     }
 
     private createMenu() {
@@ -263,11 +264,13 @@ function createElement(tagName: string, props, children: Array<HTMLElement | str
     children = children || [];
     let element = document.createElement(tagName) as HTMLElement;
     for (let key in props) {
-        // if(key.startsWith('on')){
-        //     element[key] = props[key];
-        //     continue;
-        // }
         switch (key) {
+            case 'on':
+                let names = Object.getOwnPropertyNames(props[key]);
+                for (let i = 0; i < names.length; i++) {
+                    element.addEventListener(names[i], props[key][names[i]]);
+                }
+                break;
             case 'attrs':
                 let attrs = props['attrs'];
                 for (let name in attrs) {
@@ -322,15 +325,35 @@ if (!location.hash) {
 //================================================================================
 
 
-export function defaultTitleBar(h: Function, title?: string) {
-    title = title || '&nbsp';
+export function defaultTitleBar(h: Function, options?: { title?: string, showBackButton?: boolean }) {
+    options = options || {};
+    let title = options.title || '&nbsp';
+    let showBackButton = options.showBackButton == null ? true : options.showBackButton;
+
     return (
         <nav class="bg-primary">
-            <button name="back-button" onclick={() => app.back()} class="leftButton">
-                <i class="icon-chevron-left"></i>
-            </button>
+            {showBackButton ?
+                <button name="back-button" on-click={() => app.back()} class="leftButton" style={{ opacity: "1" }}>
+                    <i class="icon-chevron-left"></i>
+                </button> :
+                <span></span>
+            }
             <h4 domProps-innerHTML={title}></h4>
         </nav>
     );
 }
 
+export function productTitleBar(h: Function) {
+    return (
+        <nav>
+            <button on-click={() => app.back()} class="leftButton">
+                <i class="icon-chevron-left"></i>
+            </button>
+        </nav>
+    );
+}
+
+//  <button class="rightButton" on-click={model.favor}>
+//                 <i class="icon-heart-empty" style={{ fontWeight: `800`, fontSize: `20px`, display: product.IsFavored ? 'none' : 'block' }} ></i>
+//                 <i class="icon-heart" style={{ display: product.IsFavored ? 'block' : 'none' }}></i>
+//             </button>

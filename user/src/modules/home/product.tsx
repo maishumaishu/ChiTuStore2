@@ -1,6 +1,6 @@
 import Vue = require('vue');
 import { ShoppingCartService, imageUrl, ShopService } from 'services';
-import { Page, config } from 'site'
+import { Page, config, app } from 'site'
 import { PageViewGesture, imageDelayLoad } from 'core/ui'
 import { mapGetters } from 'vuex';
 import * as ui from 'core/ui';
@@ -87,11 +87,11 @@ export default async function (page: Page) {
                 let model = this as ModelMethods;
                 return (
                     <header>
-                        <nav class="bg-primary" style="width:100%;">
-                            <button name="back-button" onclick="app.back()" class="leftButton">
+                        <nav>
+                            <h4></h4>
+                            <button on-click={() => app.back()} class="leftButton">
                                 <i class="icon-chevron-left"></i>
                             </button>
-                            <h4>商品信息</h4>
                             <button class="rightButton" on-click={model.favor}>
                                 <i class="icon-heart-empty" style={{ fontWeight: `800`, fontSize: `20px`, display: product.IsFavored ? 'none' : 'block' }} ></i>
                                 <i class="icon-heart" style={{ display: product.IsFavored ? 'block' : 'none' }}></i>
@@ -101,6 +101,27 @@ export default async function (page: Page) {
                 );
             }
         })
+
+
+        vm.$nextTick(() => {
+            let buttons = page.header.querySelectorAll('nav button');
+            let title = page.header.querySelector('nav h4') as HTMLElement;
+
+            page.dataView.addEventListener('scroll', function (event) {
+                let p = page.dataView.scrollTop / 100;
+                p = p > 1 ? 1 : p;
+
+                let buttonOpacity = 0.5 + p;
+                buttonOpacity = buttonOpacity > 1 ? 1 : buttonOpacity;
+
+                title.style.opacity = `${p}`;
+                for (let i = 0; i < buttons.length; i++) {
+                    (buttons[i] as HTMLElement).style.opacity = `${buttonOpacity}`;
+                }
+
+            });
+        });
+
     }
 
     function createIntroduceView(page: Page) {

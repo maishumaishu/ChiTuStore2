@@ -4,7 +4,7 @@
 
 .home-product {
 
-    .padding-top();
+    // .padding-top();
     .padding-bottom();
     .pull-down-indicator {
         height:  @nav-height;
@@ -65,99 +65,15 @@
         width: 100%;
     }
 
-    nav .rightButton{
-        top: 18px;
-    }
-}
-
-.product-panel {
-    position: fixed;
-    z-index: @zindex-modal;
-    background-color: white;
-    right: 0px;
-    bottom: 50px;
-
-    .cust-prop {
-        border: 1px solid @brand-primary;
-        margin-bottom: 8px;
-        margin-right: 10px;
-        border-radius: 4px;
-        padding: 4px 20px 4px 20px;
-        white-space: nowrap;
-        background-color: white;
-
-        &.selected {
-            background-color: @brand-primary;
-            color: white;
+    header nav {
+        h4 {
+            opacity: 0;
         }
-    }
-
-    .modal-content {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-
-        .modal-body {
-            padding: 50px 0px 60px 0px;
-        }
-
-        .modal-header {
-            position: fixed;
-            width: 100%;
-            padding: 0;
-            top: 0px;
-            right: 0px;
-            z-index: @zindex-modal;
-        }
-
-        .modal-footer {
-            position: fixed;
-            bottom: 0px;
-            right: 0px;
-            width: 100%;
-            background-color: white;
-            padding-bottom: @footer-holder-height+10;
-        }
-    }
-
-    .modal-dialog {
-        background-color: white;
-        margin: 0px;
-        top: 0px;
-        bottom: 0-@footer-holder-height;
-        right: 0;
-        position: fixed;
-        border: none;
-    }
-
-    .wrapper {
-        top: 0px;
-    }
-
-    .modal-backdrop.in {
-        opacity: @modal-backdrop-opacity;
-    }
-
-    .modal {
-        bottom: 0-@footer-holder-height;
-    }
-}
-
-
-.product-panel { 
-    nav {
-        background-color: @brand-primary;
-        color: white;
-        height: @nav-height;
-        font-size: @topbar-font-size;
-        position: absolute;
-        width: 100%;
-        height: @nav-height;
-        
-        .nav-tabs {
-            border-bottom: none;
-            width: 100%;
-            position: absolute;
+        button{
+            opacity: 0.5;
+            background-color:@brand-primary;
         }
     }
 }
+
+

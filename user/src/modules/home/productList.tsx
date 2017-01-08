@@ -49,25 +49,21 @@ export default function (page: Page) {
             render(h) {
                 return (
                     <header>
-                        { defaultTitleBar(h, title) }
+                        {defaultTitleBar(h, title)}
                         <ul class="tabs" style="margin: 0px;">
                             <li>
-                                <a data-bind="click:sort,tap:sort, attr:{class: queryArguments.sort() ? '' : 'active'}" data-type="Default" class="active">综合</a>
+                                <a class="active">综合</a>
                             </li>
                             <li>
-                                <a data-bind="click:sort,tap:sort, attr:{class: queryArguments.sort().substr(0, 'SalesNumber'.length) == 'SalesNumber' ? 'active' : ''}" data-type="SalesNumber" class="">销量</a>
+                                <a class="">销量</a>
                             </li>
                             <li>
-                                <a data-bind="click:sort, tap: sort, attr:{class: queryArguments.sort().substr(0, 'Price'.length) == 'Price' ? 'active' : ''}" data-type="Price" class="">
-                                    价格
-                                    <span data-bind="visible: queryArguments.sort().substr('Price'.length + 1) == 'asc'" class="glyphicon glyphicon-triangle-top" style="display: none;"></span>
-                                    <span data-bind="visible: queryArguments.sort().substr('Price'.length + 1) == 'desc'" class="glyphicon glyphicon-triangle-bottom" style="display: none;"></span>
-                                </a>
+                                <span>价格</span>
+                                <span class="icon-angle-up"></span>
                             </li>
                         </ul>
                     </header>
                 );
-                //return defaultHeader(h, title);
             }
         })
     }

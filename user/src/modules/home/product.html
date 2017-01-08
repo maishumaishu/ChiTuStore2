@@ -1,14 +1,14 @@
-<div class="container">
-    <div name="productImages" class="swiper-container">
-        <div v-for="imageUrl in product.ImageUrls" class="swiper-wrapper">
-            <div class="swiper-slide" style="text-align:center;">
-                <image-box v-bind:src="imageUrl" class="img-responsive-100 img-full">
-                </image-box>
-            </div>
+ <div name="productImages" class="swiper-container">
+    <div v-for="imageUrl in product.ImageUrls" class="swiper-wrapper">
+        <div class="swiper-slide" style="text-align:center;">
+            <image-box v-bind:src="imageUrl" class="img-responsive-100 img-full">
+            </image-box>
         </div>
-        <div v-if="product.ImageUrls.length > 1" name="productImages-pagination" class="swiper-pagination"></div>
     </div>
-
+    <div v-if="product.ImageUrls.length > 1" name="productImages-pagination" class="swiper-pagination"></div>
+</div>
+    
+<div class="container">
     <div>
         <a data-bind="click:showDetailView,tap:showDetailView">
             <div name="productName" class="pull-left" style="width:100%;margin-left:-20px;">
