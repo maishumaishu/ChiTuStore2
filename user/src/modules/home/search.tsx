@@ -84,7 +84,7 @@ export default function (page: Page) {
             render: function (h) {
                 return (
                     <header>
-                        <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc', padding:'8px 10px 0 0' }}>
+                        <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc', padding: '8px 10px 0 0' }}>
                             <span>
                                 <button on-click={() => window['app'].back()} class="pull-left left-button" style="padding: 8px 12px 10px 12px;">
                                     <i class="icon-chevron-left"></i>
@@ -100,6 +100,9 @@ export default function (page: Page) {
             }
         });
 
+        //======================================================
+        // 注：在 ios safari 下无效
         vm.$nextTick(() => (page.header.querySelector('input') as HTMLInputElement).focus());
+        //======================================================
     }
 }

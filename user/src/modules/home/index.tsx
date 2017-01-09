@@ -70,22 +70,19 @@ export default async function (page: Page) {
             render: function (h) {
                 let defaultHeader = (
                     <header>
-                        <nav class="bg-primary">
+                        <nav>
                             <img class="logo" src="images/logo_main.png" />
-                            <div class="search" on-click={() => methods.showSearchView()}>
-                                <div name="search_input" data-bind="value: name" type="text" class="form-control" style="border-width:0px;border-radius:4px;">
-                                    寻找商品、品牌、品类
-                            </div>
-                            </div>
-                            <div class="search-icon">
-                                <i class="icon-search" style=""></i>
-                            </div>
                             <a href="#User_Messages" style="" class="right-icon">
                                 <i class="icon-comments-alt">
                                 </i>
                                 <div style="">消息</div>
                             </a>
-                            <div class="clearfix"></div>
+                            <div class="search" on-click={() => methods.showSearchView()}>
+                                <div class="search-input form-control" data-bind="value: name">
+                                    <span>寻找商品、品牌、品类</span>
+                                    <i class="icon-search" style=""></i>
+                                </div>
+                            </div>
                         </nav>
                     </header>
                 );

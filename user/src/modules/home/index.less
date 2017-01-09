@@ -61,24 +61,28 @@
             left: 8px;
             height: 36px;
         }
+
         .search {
-            [name="search_input"] {
-                position: absolute;
-                top: 8px;
-                left: 46px;
-                right: 52px;
-                bottom: 2px;
-                width: auto;
-                background-color: white;
-                color: @gray-light;
-                text-align: left;
-            }
+            background-color: @brand-primary;
+            width: 100%;
+            height: 100%;
         }
-        .search-icon {
+        .search-input {
+            border-width:0px;
+            border-radius:4px;
             position: absolute;
-            top: 12px;
-            right: 60px;
-            font-size: 20px;
+            top: 8px;
+            left: 46px;
+            right: 52px;
+            bottom: 2px;
+            width: auto;
+            background-color: white;
+            color: @gray-light;
+            text-align: left;
+        }
+        .icon-search {
+            float: right;
+            font-size: 22px;
             color: #98a0af;
         }
         .right-icon {
@@ -202,12 +206,6 @@
                 }
             }
         }
-    }
-
-
-    .icon-search {
-        top: 22px;
-        left: 8px;
     }
 }
 
