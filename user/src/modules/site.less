@@ -123,14 +123,13 @@ header {
         height: @nav-height; 
         width: 100%;
         position: absolute;
+        background-color: @brand-primary;
 
         .rightButton {
             border-radius: 15px;            
             font-size: 18px;
-
-            position: absolute;
-            top: 12px;
-            right: 6px;
+            float: right;
+            margin: 12px 6px 0px 0px;
             height: 30px;
             width: 30px;
         }
@@ -138,14 +137,21 @@ header {
             border-radius: 15px;
             font-size: 18px;
 
-            position: absolute;
-            top: 12px;
-            left: 6px;
+            margin: 12px 0px 0px 6px;
             height: 30px;
             width: 30px;
  
         }
     }
+}
+
+.immersion {
+  header {
+    nav {
+        height: @nav-height + @immersion-height;
+        padding-top: @immersion-height; 
+    }
+  }
 }
 
 footer {

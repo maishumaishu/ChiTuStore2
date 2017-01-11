@@ -66,12 +66,18 @@
     }
 
     header nav {
-        h4 {
+       &:first-child {
             opacity: 0;
         }
         button{
             opacity: 0.5;
             background-color:@brand-primary;
+        }
+        .icon-heart {
+            margin-top: 2px;
+        }
+        .icon-heart-empty {
+            margin-left: 1px;
         }
     }
 }

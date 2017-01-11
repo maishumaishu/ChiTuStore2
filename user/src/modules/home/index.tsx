@@ -71,17 +71,17 @@ export default async function (page: Page) {
                 let defaultHeader = (
                     <header>
                         <nav>
-                            <img class="logo" src="images/logo_main.png" />
+                            <div class="logo">
+                                <img src="images/logo_main.png" />
+                            </div>
                             <a href="#User_Messages" style="" class="right-icon">
                                 <i class="icon-comments-alt">
                                 </i>
                                 <div style="">消息</div>
                             </a>
-                            <div class="search" on-click={() => methods.showSearchView()}>
-                                <div class="search-input form-control" data-bind="value: name">
-                                    <span>寻找商品、品牌、品类</span>
-                                    <i class="icon-search" style=""></i>
-                                </div>
+                            <div class="search-input form-control" data-bind="value: name">
+                                <span>寻找商品、品牌、品类</span>
+                                <i class="icon-search" style=""></i>
                             </div>
                         </nav>
                     </header>

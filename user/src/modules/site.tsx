@@ -345,7 +345,7 @@ export function defaultTitleBar(h: Function, options?: { title?: string, showBac
 
 export function productTitleBar(h: Function) {
     return (
-        <nav>
+        <nav style={{ opacity: 1, backgroundColor: 'unset' }}>
             <button on-click={() => app.back()} class="leftButton">
                 <i class="icon-chevron-left"></i>
             </button>
