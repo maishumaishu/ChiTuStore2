@@ -84,13 +84,11 @@ export default function (page: Page) {
             render: function (h) {
                 return (
                     <header>
-                        <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc', padding: '8px 10px 0 0' }}>
-                            <span>
-                                <button on-click={() => window['app'].back()} class="pull-left left-button" style="padding: 8px 12px 10px 12px;">
-                                    <i class="icon-chevron-left"></i>
-                                </button>
-                            </span>
-                            <form action="" class="input-group" style="display: table;">
+                        <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc' }}>
+                            <button on-click={() => window['app'].back()} class="leftButton">
+                                <i class="icon-chevron-left"></i>
+                            </button>
+                            <form action="" class="input-group" style="display: table; padding: 8px 10px 0 0;">
                                 <input type="search" class="form-control" />
                                 <span class="input-group-btn"><button type="button" class="btn btn-default">搜索</button></span>
                             </form>
