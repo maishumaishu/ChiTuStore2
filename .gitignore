@@ -1,9 +1,10 @@
+.log
+.baseDir.ts
 node_modules
 /.tscache
-www
 build
 release
-.baseDir.ts
+www
 TODO.txt
-.log
 xcuserdata
+*.xcuserstate

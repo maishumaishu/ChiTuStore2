@@ -87,8 +87,8 @@ export default async function (page: Page) {
                 let model = this as ModelMethods;
                 return (
                     <header>
-                        <nav></nav>
-                        <nav style={{ backgroundColor: 'unset' }}>
+                        <nav class="bg-primary"></nav>
+                        <nav>
                             <button on-click={() => app.back()} class="leftButton">
                                 <i class="icon-chevron-left"></i>
                             </button>
@@ -105,7 +105,7 @@ export default async function (page: Page) {
 
         vm.$nextTick(() => {
             let buttons = page.header.querySelectorAll('nav button');
-            let title = page.header.querySelector('nav') as HTMLElement;
+            let title = page.header.querySelector('nav.bg-primary') as HTMLElement;
 
             page.dataView.addEventListener('scroll', function (event) {
                 let p = page.dataView.scrollTop / 100;

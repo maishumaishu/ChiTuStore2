@@ -70,6 +70,7 @@ export default async function (page: Page) {
             render: function (h) {
                 let defaultHeader = (
                     <header>
+                        <nav class="bg-primary"></nav>
                         <nav>
                             <div class="logo">
                                 <img src="images/logo_main.png" />

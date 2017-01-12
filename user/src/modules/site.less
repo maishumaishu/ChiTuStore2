@@ -96,16 +96,6 @@ header {
     z-index: @zindex-navbar-fixed;
     top: 0px;
 
-    h4 {
-      background-color: @brand-primary;
-      color: #fff;
-      font-size: 18px;
-      height: @nav-height; 
-      margin: 0px;
-      padding: @nav-padding-top + 10px 0 0 0;
-      text-align: center;
-    }
-
     button {
       border: none;
       background-color: unset;
@@ -123,24 +113,33 @@ header {
         height: @nav-height; 
         width: 100%;
         position: absolute;
-        background-color: @brand-primary;
 
         .rightButton {
             border-radius: 15px;            
             font-size: 18px;
             float: right;
-            margin: 12px 6px 0px 0px;
+            margin: 12px 12px 0px 0px;
             height: 30px;
             width: 30px;
         }
         .leftButton {
             border-radius: 15px;
             font-size: 18px;
-
-            margin: 12px 0px 0px 6px;
+            float: left;
+            margin: 12px 0px 0px 12px;
             height: 30px;
             width: 30px;
  
+        }
+
+        h4 {
+          background-color: @brand-primary;
+          color: @body-bg;
+          font-size: 18px;
+          height: @nav-height; 
+          margin: 0px 60px 0px 60px;
+          padding: @nav-padding-top + 10px 0 0 0;
+          text-align: center;
         }
     }
 }
