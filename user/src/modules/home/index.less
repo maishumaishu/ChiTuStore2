@@ -3,7 +3,7 @@
 
 .home-index {
 
-    .padding-top(0);
+    //.padding-top(0);
     .padding-bottom();  
 
     .products {
@@ -28,9 +28,7 @@
                 padding: 8px 0px 0px 8px;
             }
 
-            //.price {
             .price();
-            //}
 
             img {
                 max-width: 70%;
@@ -51,44 +49,51 @@
     }
 
     header {
-        .logo {
-            float: left;
-            padding: 8px 0px 0px 8px;
-            img {
-                width: 26px;
+
+        nav {
+            &:first-child {
+                opacity: 0;
             }
         }
-        
+
         .search-input {
             border-width:0px;
             border-radius:4px;
-            margin: 10px 50px 0px 40px;
+            margin: 10px 40px 0px 40px;
             width: auto;
             background-color: white;
             color: @gray-light;
             text-align: left;
+            opacity: 0.8;
+            font-size: 14px;
         }
         .icon-search {
             float: right;
-            font-size: 22px;
+            font-size: 18px;
             color: #98a0af;
         }
-        .right-icon {
-            // position: absolute;
-            // top: -4px;
-            // right: 8px;
-            float: right;
-            margin: -4px 10px 0px 0px; 
+        .left-icon {
+            float: left;
+            margin: 0px 0px 0px 8px; 
             text-align: center;
             color: white;
-            font-size: 32px;
+            font-size: 20px;
 
             & div {
-                position: relative;
-                font-size: 10px;
-                /*padding-left:4px;*/
-                top: -10px;
-                left: -4px;
+                font-size: 12px;
+                margin-top: -4px;
+            }
+        }
+        .right-icon {
+            float: right;
+            margin: 0px 8px 0px 0px; 
+            text-align: center;
+            color: white;
+            font-size: 22px;
+
+            & div {
+                font-size: 12px;
+                margin-top: -6px;
             }
 
             & .badge {

@@ -48,7 +48,16 @@ export default async function (page: Page) {
                 station.proudcts(pageIndex).then(items => reslove(items));
             }
         }
-    })
+    });
+
+    vm.$nextTick(() => {
+        let nav = page.element.querySelector('header nav') as HTMLElement;
+        vm.$el.addEventListener('scroll', function () {
+            let p = vm.$el.scrollTop / 100;
+            p = p > 1 ? 1 : p;
+            nav.style.opacity = `${p}`;
+        });
+    });
 
     vm.$nextTick(function () {
         let element = page.dataView.querySelector('[name="ad-swiper"]') as HTMLElement;
@@ -72,15 +81,17 @@ export default async function (page: Page) {
                     <header>
                         <nav class="bg-primary"></nav>
                         <nav>
-                            <div class="logo">
-                                <img src="images/logo_main.png" />
-                            </div>
+                            <a href="#user_messages" class="left-icon">
+                                <i class="icon-map-marker">
+                                </i>
+                                <div>上海</div>
+                            </a>
                             <a href="#user_messages" class="right-icon">
                                 <i class="icon-comments-alt">
                                 </i>
                                 <div>消息</div>
                             </a>
-                            <a href="#home_search" class="search-input form-control">
+                            <a href="#home_search" class="search-input form-control input-sm">
                                 <span>寻找商品、品牌、品类</span>
                                 <i class="icon-search"></i>
                             </a>

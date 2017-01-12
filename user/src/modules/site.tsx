@@ -12,9 +12,9 @@ let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 let allowImmersionHeader = false;
 let topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
 
-//if (isCordovaApp && !isAndroid) {
+if (isCordovaApp && !isAndroid) {
     allowImmersionHeader = true;
-//}
+}
 
 export let config = {
     get imageText() {
