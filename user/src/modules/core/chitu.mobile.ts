@@ -319,10 +319,10 @@ class PageDisplayImplement implements chitu.PageDisplayer {
     hide(page: Page) {
         return new Promise<any>(reslove => {
             //============================================
-            // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过滑屏返回，
-            // 通过滑屏返回，是不需要有返回效果的。
+            // 如果 touchmove 时间与方法调用的时间在 500ms 以内，则认为是通过系统浏览器滑屏返回，
+            // 通过系统浏览器滑屏返回，是不需要有返回效果的。
             let now = Date.now();
-            if (isiOS && now - touch_move_time < 500 || page.displayStatic) {
+            if (!isCordovaApp && isiOS && now - touch_move_time < 500 || page.displayStatic) {
                 page.element.style.display = 'none';
                 if (page.previous) {
                     page.previous.element.style.display = 'block';
