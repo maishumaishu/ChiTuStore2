@@ -23,9 +23,9 @@ class Exception extends Error {
  * 说明：页面中元素的获取，都是实时 DOM 查询，而不是保存在一个变量中，是因为
  * 某些MVVM框架，可能会用到虚拟 DOM，把页面中的元素改写了。
  */
-const headerTagName = 'header';
-const footerTagName = 'footer';
-const viewTagName = 'section';
+const headerTagName = 'HEADER';
+const footerTagName = 'FOOTER';
+export const viewTagName = 'SECTION';
 
 type ViewClassName = 'main' | 'loading' | 'error';
 export class Page extends chitu.Page {
@@ -279,7 +279,9 @@ class PageDisplayImplement implements chitu.PageDisplayer {
         page.element.style.zIndex = `${maxZIndex + 1}`;
         page.element.style.display = 'block';
         if (page.displayStatic) {
-            //page.element.style.transform = `translate(0px,0px)`;
+            if(page.previous){
+                page.previous.element.style.display = 'none';
+            }
             return Promise.resolve();
         }
 

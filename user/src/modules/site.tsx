@@ -7,7 +7,7 @@ import Vue = require('vue');
 /** 是否为 APP */
 var isCordovaApp = location.protocol === 'file:';
 /** 是否为安卓系统 */
-let isAndroid = navigator.userAgent.indexOf('Android') > -1;
+export let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 /** 是否允浸入式头 */
 let allowImmersionHeader = false;
 let topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
@@ -146,20 +146,23 @@ export class Page extends BasePage {
         }
 
 
-        let titleBar;
+        let navBar;
         switch (this.routeData.pageName) {
             case 'home.product':
-                titleBar = productTitleBar(createElement);
+                navBar = productNavBar(createElement);
+                break;
+            case 'home.search':
+                navBar = searchNavBar(createElement);
                 break;
             default:
                 let isTopPage = topLevelPages.indexOf(this.routeData.pageName) >= 0;
-                titleBar = defaultTitleBar(createElement, { showBackButton: !isTopPage });
+                navBar = defaultNavBar(createElement, { showBackButton: !isTopPage });
                 break;
         }
 
         let headerElement: HTMLElement = (
             <header>
-                {titleBar}
+                {navBar}
             </header>
         );
         this.element.appendChild(headerElement);
@@ -259,7 +262,7 @@ export class Application extends BaseApplication {
 
 }
 
-function createElement(tagName: string, props, children: Array<HTMLElement | string>): HTMLElement {
+export function createElement(tagName: string, props, children: Array<HTMLElement | string>): HTMLElement {
     props = props || {};
     children = children || [];
     let element = document.createElement(tagName) as HTMLElement;
@@ -325,7 +328,7 @@ if (!location.hash) {
 //================================================================================
 
 
-export function defaultTitleBar(h: Function, options?: { title?: string, showBackButton?: boolean }) {
+export function defaultNavBar(h: Function, options?: { title?: string, showBackButton?: boolean }) {
     options = options || {};
     let title = options.title || '&nbsp';
     let showBackButton = options.showBackButton == null ? true : options.showBackButton;
@@ -343,10 +346,20 @@ export function defaultTitleBar(h: Function, options?: { title?: string, showBac
     );
 }
 
-export function productTitleBar(h: Function) {
+export function productNavBar(h: Function) {
     return (
         <nav style={{ opacity: 1, backgroundColor: 'unset' }}>
             <button on-click={() => app.back()} class="leftButton">
+                <i class="icon-chevron-left"></i>
+            </button>
+        </nav>
+    );
+}
+
+export function searchNavBar(h: Function) {
+    return (
+        <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc' }}>
+            <button on-click={() => window['app'].back()} class="leftButton">
                 <i class="icon-chevron-left"></i>
             </button>
         </nav>

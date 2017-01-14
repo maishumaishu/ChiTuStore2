@@ -1,4 +1,4 @@
-import { Page } from 'site';
+import { Page, searchNavBar } from 'site';
 import { StationService } from 'services';
 
 export default function (page: Page) {

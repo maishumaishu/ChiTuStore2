@@ -71,6 +71,10 @@ a {
     -webkit-user-drag:none;
     -webkit-user-select: none;
     -webkit-overflow-scrolling:touch;
+    
+    > div {
+      background: @body-bg;
+    }
 
     &.loading {
         width: 100%;
@@ -133,7 +137,6 @@ header {
         }
 
         h4 {
-          background-color: @brand-primary;
           color: @body-bg;
           font-size: 18px;
           height: @nav-height; 

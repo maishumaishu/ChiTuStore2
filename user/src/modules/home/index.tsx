@@ -51,12 +51,41 @@ export default async function (page: Page) {
     });
 
     vm.$nextTick(() => {
+        let header = page.element.querySelector('header') as HTMLElement;
         let nav = page.element.querySelector('header nav') as HTMLElement;
-        vm.$el.addEventListener('scroll', function () {
+        let dataViewElement = page.dataView;
+        dataViewElement.addEventListener('scroll', function () {
             let p = vm.$el.scrollTop / 100;
             p = p > 1 ? 1 : p;
             nav.style.opacity = `${p}`;
         });
+
+        let touchStartY: number;
+        let touchstartX: number;
+        dataViewElement.addEventListener('touchstart', function (event) {
+            touchStartY = event.touches[0].clientY;
+            touchstartX = event.touches[0].clientX;
+        });
+
+        dataViewElement.addEventListener('touchmove', function (event) {
+            let touchCurrentY = event.touches[0].clientY;
+            let touchCurrentX = event.touches[0].clientX;
+            let y = touchCurrentY - touchStartY;
+            let x = touchCurrentX - touchstartX;
+            //=====================================================
+            // 计算角度，大于 65 度为竖直方向
+            let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
+            if (dataViewElement.scrollTop <= 0 && d > 65) {
+                header.style.display = 'none';
+            }
+            else {
+                header.style.display = 'block';
+            }
+        });
+
+        dataViewElement.addEventListener('touchend', function (event) {
+            header.style.display = 'block';
+        })
     });
 
     vm.$nextTick(function () {

@@ -1,5 +1,6 @@
 
 //TODO: 如果 items 为0,或者为 1 的情况。
+import cm = require('chitu.mobile');
 
 class Errors {
     static argumentNull(parameterName) {
@@ -53,8 +54,17 @@ class Carousel {
 
         if (this.autoplay) {
             this.play();
-        }
 
+            let pageView = this.findPageView(element);
+            console.assert(pageView != null);
+            pageView.addEventListener('touchmove', () => {
+                this.stop();
+            });
+
+            pageView.addEventListener('touchend', () => {
+                this.play();
+            })
+        }
     }
 
     private listenTouch(element: HTMLElement) {
@@ -333,6 +343,17 @@ class Carousel {
         this.is_pause = value;
         if (this.is_pause == true)
             this.stop();
+    }
+
+    private findPageView(element: HTMLElement) {
+        console.assert(element != null);
+        let p = element;
+        while (p) {
+            if (p.tagName == cm.viewTagName) {
+                return p;
+            }
+            p = p.parentElement;
+        }
     }
 
     public play() {

@@ -1,4 +1,4 @@
-import { Page, defaultTitleBar } from 'site';
+import { Page, defaultNavBar } from 'site';
 import { ShopService } from 'services';
 import Vue = require('vue');
 import 'controls/dataList';
@@ -49,7 +49,7 @@ export default function (page: Page) {
             render(h) {
                 return (
                     <header>
-                        {defaultTitleBar(h, title)}
+                        {defaultNavBar(h, title)}
                         <ul class="tabs" style="margin: 0px;">
                             <li>
                                 <a class="active">综合</a>
