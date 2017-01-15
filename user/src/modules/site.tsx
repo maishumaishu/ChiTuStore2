@@ -139,13 +139,6 @@ export class Page extends BasePage {
         }
 
         let h = createElement;
-
-        let headerStyle = {} as CSSStyleDeclaration;
-        if (this.routeData.pageName == 'home.search') {
-            headerStyle.backgroundColor = '#fff';
-        }
-
-
         let navBar;
         switch (this.routeData.pageName) {
             case 'home.product':
@@ -365,8 +358,3 @@ export function searchNavBar(h: Function) {
         </nav>
     );
 }
-
-//  <button class="rightButton" on-click={model.favor}>
-//                 <i class="icon-heart-empty" style={{ fontWeight: `800`, fontSize: `20px`, display: product.IsFavored ? 'none' : 'block' }} ></i>
-//                 <i class="icon-heart" style={{ display: product.IsFavored ? 'block' : 'none' }}></i>
-//             </button>
