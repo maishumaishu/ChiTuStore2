@@ -43,12 +43,14 @@ function createHeader(page: Page) {
         render(h) {
             return (
                 <header>
-                    <nav class="search bg-primary">
-                        <div name="search-box" class="form-control" style="">
-                            寻找商品、品牌、品类
-                        </div>
-                        <div class="search-icon">
-                            <i class="icon-search"></i>
+                    <nav class="bg-primary">
+                        <div class="search">
+                            <div name="search-box" class="form-control" style="">
+                                寻找商品、品牌、品类
+                            </div>
+                            <div class="search-icon">
+                                <i class="icon-search"></i>
+                            </div>
                         </div>
                     </nav>
                 </header>
