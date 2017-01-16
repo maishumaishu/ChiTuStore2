@@ -3,9 +3,15 @@
 
 .home-index {
 
-    //.padding-top(0);
-    .padding-bottom();  
-
+    section.main{
+        transform: translateY(0 - @menu-height);
+    }
+    .pulldown-indicator {
+        height: @menu-height;
+        padding-top: 20px;
+        //background-color: red;
+        text-align: center;
+    }
     .products {
         .item {
             padding-top: 16px;

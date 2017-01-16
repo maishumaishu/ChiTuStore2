@@ -30,8 +30,6 @@ export default async function (page: Page) {
         pageIndex = pageIndex + 1;
     })
 
-    createHeader(page);
-
     let result = await Promise.all([station.advertItems(), chitu.loadjs('text!pages/home/index.html')]);
     data.advertItems = result[0];
     page.loadingView.style.display = 'none';
@@ -51,9 +49,11 @@ export default async function (page: Page) {
     });
 
     vm.$nextTick(() => {
+        createHeader(page);
         let header = page.element.querySelector('header') as HTMLElement;
         let nav = page.element.querySelector('header nav') as HTMLElement;
         let dataViewElement = page.dataView;
+
         dataViewElement.addEventListener('scroll', function () {
             let p = vm.$el.scrollTop / 100;
             p = p > 1 ? 1 : p;
@@ -86,6 +86,43 @@ export default async function (page: Page) {
         dataViewElement.addEventListener('touchend', function (event) {
             header.style.display = 'block';
         })
+
+        //=====================================================
+        // 下拉刷新
+        const initText = '下拉刷新页面';
+        const readyText = '释放刷新页面';
+        let pulldownIndicator = dataViewElement.querySelector('.pulldown-indicator');
+        console.assert(pulldownIndicator != null);
+        let pulldownText = pulldownIndicator.querySelector('.text');
+        console.assert(pulldownText != null);
+        let status: 'init' | 'ready' = 'init';
+        //let prevY: number;
+        let startY: number;
+        dataViewElement.addEventListener('touchmove', function (event) {
+            //let deltaY = event.touches[0].clientY - prevY;
+            let currentY = event.touches[0].clientY;
+            //prevY = event.touches[0].clientY;
+
+            if (currentY - startY <= 100) {
+                if (status != 'init') {
+                    status = 'init';
+                    pulldownText.innerHTML = initText;
+                }
+            }
+            else {
+                if (status != 'ready') {
+                    status = 'ready';
+                    pulldownText.innerHTML = readyText;
+                }
+            }
+        });
+        dataViewElement.addEventListener('touchstart', function (event) {
+            status = 'init';
+            pulldownText.innerHTML = initText;
+            //prevY = event.touches[0].clientY;
+            startY = event.touches[0].clientY;
+        })
+        //=====================================================
     });
 
     vm.$nextTick(function () {
