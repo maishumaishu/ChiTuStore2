@@ -1,67 +1,69 @@
-import { Page } from 'site';
-import Vue = require('vue');
+import { Page, defaultNavBar } from 'site';
 import { ShoppingCartService, ShoppingCartItem } from 'services';
-import 'controls/imageBox';
+import { ImageBox } from 'controls/imageBox';
+import { ScrollView } from 'controls/scrollView';
 
 export default function (page: Page) {
+
     let shoppingCart = page.createService(ShoppingCartService);
 
-    let data = {
-        items: Array<ShoppingCartItem>()
-    };
-
-    let methods = {
-        decreaseCount: function (item: ShoppingCartItem) {
-            item.Count = item.Count - 1;
-        },
-        increaseCount: function (item: ShoppingCartItem) {
-            item.Count = item.Count + 1;
-        },
-        selectItem: function (item: ShoppingCartItem) {
-            item.Selected = !item.Selected;
+    class ShoppingCartView extends React.Component<{}, { items: ShoppingCartItem[] }>{
+        constructor() {
+            super();
+            this.state = { items: [] };
+            shoppingCart.items().then(items => {
+                this.state.items = items;
+                this.setState(this.state);
+                page.loadingView.style.display = 'none';
+            });
         }
-    };
+        private selectItem(item: ShoppingCartItem) {
+            item.Selected = !item.Selected;
+            this.setState(this.state);
+        }
+        private decreaseCount(item: ShoppingCartItem) {
+            item.Count = item.Count - 1;
+            this.setState(this.state);
+        }
+        private increaseCount(item: ShoppingCartItem) {
+            item.Count = item.Count + 1;
+            this.setState(this.state);
+        }
+        private changeItemCount(item: ShoppingCartItem, value: string) {
+            let count = Number.parseInt(value);
+            if (!count) return;
 
-    let vm = new Vue({
-        el: page.dataView,
-        data,
-        render,
-        methods
-    });
-
-    shoppingCart.items().then(items => {
-        vm.items = items;
-        page.loadingView.style.display = 'none';
-    });
-
-    function render(h) {
-        return (
-            <section class="main container">
-                <ul class="list-group">
-                    {data.items.map(o =>
-                        <li class="list-group-item row">
-                            <div class="pull-left icon">
-                                <i on-click={() => methods.selectItem(o)} class={o.Selected ? 'icon-ok-sign' : 'icon-circle-blank'}></i>
+            item.Count = count;
+            this.setState(this.state);
+        }
+        render() {
+            return <ScrollView className="container">
+                <ul className="list-group">
+                    {this.state.items.map(o =>
+                        <li key={o.Id} className="list-group-item row">
+                            <div className="pull-left icon">
+                                <i onClick={() => this.selectItem(o)} className={o.Selected ? 'icon-ok-sign' : 'icon-circle-blank'}></i>
                             </div>
-                            <a href={"#home_product?id=" + o.ProductId} class="pull-left pic">
-                                <image-box src={o.ImageUrl} class="img-responsive" />
+                            <a href={`#home_product?id=${o.ProductId}`} className="pull-left pic">
+                                <ImageBox src={o.ImageUrl} className="img-responsive" />
                             </a>
-                            <div style="margin-left:110px;">
-                                <a href={"#home_product?id=" + o.ProductId} >{o.Name}</a>
+                            <div style={{ marginLeft: 110 }}>
+                                <a href={`#home_product?id=${o.ProductId}`} >{o.Name}</a>
                                 <div>
-                                    <div class="price pull-left" style="margin-top:10px;">￥{o.Price.toFixed(2)}</div>
-                                    <div class="pull-right">
-                                        <div data-bind="visible:!ko.unwrap(IsGiven)" class="input-group" style="width:120px;">
-                                            <span on-click={() => methods.decreaseCount(o)} class="input-group-addon">
-                                                <i class="icon-minus"></i>
+                                    <div className="price pull-left" style={{ marginTop: 10 }}>￥{o.Price.toFixed(2)}</div>
+                                    <div className="pull-right">
+                                        <div className="input-group" style={{ width: 120, display: o.IsGiven ? 'none' : 'table' }}>
+                                            <span onClick={() => this.decreaseCount(o)} className="input-group-addon">
+                                                <i className="icon-minus"></i>
                                             </span>
-                                            <input value={o.Count} class="form-control" type="text" style="text-align:center;" />
-                                            <span on-click={() => methods.increaseCount(o)} class="input-group-addon">
-                                                <i class="icon-plus"></i>
+                                            <input value={`${o.Count}`} className="form-control" type="text" style={{ textAlign: 'center' }}
+                                                onChange={(e) => (this.changeItemCount(o, (e.target as HTMLInputElement).value))} />
+                                            <span onClick={() => this.increaseCount(o)} className="input-group-addon">
+                                                <i className="icon-plus"></i>
                                             </span>
                                         </div>
                                         <div>
-                                            <span data-bind="visible:IsGiven,text:'X ' + ko.unwrap(Count)" style="padding-left: 6px; display: none;">X 3</span>
+                                            <span data-bind="visible:IsGiven,text:'X ' + ko.unwrap(Count)" style={{ paddingLeft: 6, display: o.IsGiven ? 'block' : 'none' }}>X {o.Count}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -69,24 +71,10 @@ export default function (page: Page) {
                         </li>
                     )}
                 </ul>
-            </section>
-        );
-    };
-
-    createHeader(page);
-}
-
-function createHeader(page: Page) {
-    new Vue({
-        el: page.header,
-        render(h) {
-            return (
-                <header>
-                    <nav class="bg-primary">
-                        <h4>购物车</h4>
-                    </nav>
-                </header>
-            );
+            </ScrollView>
         }
-    })
+    }
+
+    ReactDOM.render(defaultNavBar({ title: '购物车', showBackButton: false }), page.header);
+    ReactDOM.render(<ShoppingCartView />, page.dataView);
 }

@@ -1,6 +1,4 @@
-
 import chitu = require('chitu');
-
 
 export class AjaxError implements Error {
     name: string;
@@ -24,13 +22,9 @@ let config = {
         account: `http://${SERVICE_HOST}/Account/`,
     },
     appToken: '58424776034ff82470d06d3d',
-    storeId: '58401d1906c02a2b8877bd13',
-    get userToken() {
-        return '584cfabb4918e4186a77ff1e';
-    },
+    userToken: '584cfabb4918e4186a77ff1e',
     /** 调用服务接口超时时间，单位为秒 */
     ajaxTimeout: 20,
-    pageSize: 10
 }
 
 function isError(data: any): Error {
@@ -52,7 +46,7 @@ function isError(data: any): Error {
 }
 
 
-//let token = '';
+let token = '';
 
 function userToken(value?: string) {
     /** ------ 测试代码 ------- */
@@ -105,28 +99,15 @@ export function imageUrl(path: string) {
     return url;
 }
 
+//========================================================================================
 
 function serviceUrl(baseUrl, path) {
     return `${baseUrl}${path}?storeId=${storeId()}`;;
 }
 
-interface DataSourceSelectArguments {
-    startRowIndex?: number,
-    maximumRows?: number,
-    filter?: string
-}
-
-interface DataSourceSelectResult<T> {
-    DataItems: T[],
-    MaximumRows?: number,
-    StartRowIndex?: number,
-    TotalRowCount: number
-}
-
-export type News = { Id: string, Title: string, ImgUrl: string, Date: Date, Content: string };
+export type News = { Id: string, Title: string, ImgUrl: string, Date: string, Content: string };
 
 export abstract class Service {
-    private datePrefix = '/Date(';
     error = chitu.Callbacks<Service, Error>();
     ajax<T>(url: string, options: FetchOptions): Promise<T> {
         return new Promise<T>((reslove, reject) => {
@@ -151,49 +132,6 @@ export abstract class Service {
                 });
 
         })
-    }
-
-    private parseStringToDate(value: string) {
-        let prefix = this.datePrefix;
-        var star = prefix.length;
-        var len = value.length - prefix.length - ')/'.length;
-        var str = value.substr(star, len);
-        var num = parseInt(str);
-        var date = new Date(num);
-        return date;
-    }
-    private travelJSON(result: any) {
-        var prefix = this.datePrefix;
-        if (typeof result === 'string') {
-            if (result.substr(0, prefix.length) == prefix)
-                result = this.parseStringToDate(result);
-            return result;
-        }
-        var stack = new Array();
-        stack.push(result);
-        while (stack.length > 0) {
-            var item = stack.pop();
-            for (var key in item) {
-                var value = item[key];
-                if (value == null)
-                    continue;
-
-                if (value instanceof Array) {
-                    for (var i = 0; i < value.length; i++) {
-                        stack.push(value[i]);
-                    }
-                    continue;
-                }
-                if (typeof value == 'object') {
-                    stack.push(value);
-                    continue;
-                }
-                if (typeof value == 'string' && value.substr(0, prefix.length) == prefix) {
-                    item[key] = this.parseStringToDate(value);
-                }
-            }
-        }
-        return result;
     }
 
     private async _ajax<T>(url: string, options: FetchOptions): Promise<T> {
@@ -227,7 +165,6 @@ export abstract class Service {
             if (err)
                 throw err;
 
-            textObject = this.travelJSON(textObject);
             return textObject;
         }
         catch (err) {
@@ -309,7 +246,7 @@ export class StationService extends Service {
         let url = StationService.url('Info/GetNews');
         return this.get<News>(url, { newsId }).then(item => {
             item.ImgUrl = imageUrl(item.ImgUrl);
-            //item.Date = parseDate(item.Date).toLocaleDateString();
+            item.Date = parseDate(item.Date).toLocaleDateString();
             return item;
         });
     }
@@ -322,7 +259,7 @@ export class StationService extends Service {
         return this.get<Array<string>>(StationService.url('Home/HistorySearchWords'));
     }
 
-    advertItems(): Promise<{ ImgUrl: string, Id: string }[]> {
+    advertItems(): Promise<{ ImgUrl: string }[]> {
         return this.get<{ ImgUrl: string }[]>(StationService.url('Home/GetAdvertItems')).then(items => {
             items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
             return items;
@@ -333,23 +270,27 @@ export class StationService extends Service {
         pageIndex = pageIndex === undefined ? 0 : pageIndex;
         let url = StationService.url('Home/GetHomeProducts');
         return this.get<HomeProduct[]>(url, { pageIndex }).then((products) => {
-            products.forEach(o => o.ImagePath = imageUrl(o.ImagePath));
+            for (let product of products) {
+                product.ImagePath = imageUrl(product.ImagePath);
+            }
             return products;
         });
     }
 }
 
-export interface HomeProduct {
-    Id: string, Name: string, ImagePath: string,
-    ProductId: string, Price: number
-};
-export interface Product {
+interface DataSourceSelectResult<T> {
+    DataItems: T[],
+    MaximumRows?: number,
+    StartRowIndex?: number,
+    TotalRowCount: number
+}
+
+type HomeProduct = { Id: string, Name: string, ImagePath: string };
+type Product = {
     Id: string, Arguments: Array<{ key: string, value: string }>,
-    BrandId: string, BrandName: string, Price: number,
-    Score: number, Unit: string, MemberPrice: number,
-    Fields: Array<{ key: string, value: string }>,
+    BrandId: string, BrandName: string, Fields: Array<{ key: string, value: string }>,
     GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
-    ProductCategoryId: string, Name: string, //IsFavored?: boolean,
+    ProductCategoryId: string, Count: number, Name: string, IsFavored?: boolean,
     ProductCategoryName: string,
     CustomProperties: Array<{
         Name: string,
@@ -357,33 +298,9 @@ export interface Product {
     }>
 };
 export type FavorProduct = {
-    Id: string;
     ProductId: string,
     ProductName: string,
     ImageUrl: string
-}
-export interface ProductCategory {
-    Id: string, Name: string, ImagePath: string
-}
-export interface Order {
-    Id: string,
-    Amount: number,
-    BalanceAmount: number,
-    Freight: number,
-    OrderDate: Date,
-    OrderDetails: OrderDetail[],
-    ReceiptAddress: string,
-    Serial: string,
-    Status: string,
-    StatusText: string,
-    Sum: number,
-}
-export interface OrderDetail {
-    ImageUrl: string,
-    ProductId: string,
-    ProductName: string,
-    Price: number,
-    Quantity: number,
 }
 export class ShopService extends Service {
     constructor() {
@@ -395,17 +312,16 @@ export class ShopService extends Service {
     product(productId): Promise<Product> {
         let url = ShopService.url('Product/GetProduct');
         return this.get<Product>(url, { productId }).then(product => {
-            //product.Count = 1;
+            product.Count = 1;
             if (!product.ImageUrls && product.ImageUrl != null)
                 product.ImageUrls = (<string>product.ImageUrl).split(',').map(o => imageUrl(o));
 
             product.ImageUrl = product.ImageUrls[0];
-            //product.IsFavored = null;
-            product.Arguments = product.Arguments || [];
-            product.Fields = product.Fields || [];
-            // this.isFavored(productId).then((result) => {
-            //     product.IsFavored = result;
-            // })
+            product.IsFavored = null;
+
+            this.isFavored(productId).then((result) => {
+                product.IsFavored = result;
+            })
             return product;
         });
     }
@@ -425,16 +341,9 @@ export class ShopService extends Service {
             return o.Products;
         });
     }
-    category(categoryId: string) {
-        let url = ShopService.url('Product/GetCategory');
-        return this.get<ProductCategory>(url, { categoryId });
-    }
     cateories() {
         let url = ShopService.url('Product/GetCategories');
-        return this.get<ProductCategory[]>(url).then(items => {
-            items.forEach(o => o.ImagePath = imageUrl(o.ImagePath));
-            return items;
-        });
+        return this.get<{ Id: string, Name: string }[]>(url);
     }
     //=====================================================================
     // 收藏夹
@@ -450,34 +359,10 @@ export class ShopService extends Service {
     isFavored(productId: string) {
         return this.get<boolean>(ShopService.url('Product/IsFavored'), { productId });
     }
-    favorProduct(productId: string) {
+    favorProduct(productId) {
         return this.post(ShopService.url('Product/FavorProduct'), { productId });
     }
     //=====================================================================
-    // 订单
-    myOrderList(pageIndex, type?: 'WaitingForPayment' | 'Send') {
-        let args = {} as DataSourceSelectArguments;
-        args.startRowIndex = config.pageSize * pageIndex;
-        args.maximumRows = config.pageSize;
-        if (type)
-            args.filter = `Status="${type}"`
-
-        return this.get<Order[]>(ShopService.url('Order/GetMyOrderList'), args)
-            .then(orders => {
-                orders.forEach(o => {
-                    o.OrderDetails.forEach(c => c.ImageUrl = imageUrl(c.ImageUrl));
-                });
-                return orders;
-            });
-    }
-    order(orderId: string) {
-        return this.get<Order>(ShopService.url('Order/GetOrder'), { orderId }).then(o => {
-            o.OrderDetails.forEach(c => c.ImageUrl = imageUrl(c.ImageUrl));
-            return o;
-        });
-    }
-    //=====================================================================
-
 }
 
 export type ShoppingCartItem = {
@@ -500,7 +385,9 @@ export class ShoppingCartService extends Service {
         super();
         let _userToken = userToken();
         if (_userToken) {
-
+            // this.get<number>(this.url('ShoppingCart/GetProductsCount')).then(result => {
+            //     storeCommit('setItemsCount', result);
+            // })
         }
     }
     private url(path: string) {
@@ -510,7 +397,9 @@ export class ShoppingCartService extends Service {
     addItem(productId: string, count?: number) {
         count = count || 1;
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/AddItem'), { productId, count }).then((result) => {
-            return result;
+            let sum = 0;
+            result.forEach(o => sum = sum + o.Count);
+            // store.commit('setItemsCount', sum);
         });
     }
 
@@ -521,9 +410,9 @@ export class ShoppingCartService extends Service {
         });
     }
 
-    productsCount() {
-        return this.get<number>(this.url('ShoppingCart/GetProductsCount'));
-    }
+    // productsCount(): number {
+    //     return store.state.itemsCount;
+    // }
 }
 
 type UserInfo1 = {

@@ -46,8 +46,8 @@ requirejs.config({
         fetch: {
             exports: 'fetch'
         },
-        vue: {
-            exports: 'Vue'
+        'react-dom': {
+            deps: ['react']
         },
         services: {
             deps: services_deps
@@ -59,24 +59,22 @@ requirejs.config({
         css: 'js/css',
         fetch: 'js/fetch',
         hammer: 'js/hammer',
+        react: 'js/react',
+        'react-dom': 'js/react-dom',
+        redux: 'js/redux',
         text: 'js/text',
-        move: 'js/move',
-        vue: 'js/vue',
-        vuex: 'js/vuex',
         controls: modulesPath + '/controls',
         core: modulesPath + '/core',
         device: modulesPath + '/device',
         services: modulesPath + '/services',
         site: modulesPath + '/site',
         'chitu.mobile': modulesPath + '/core/chitu.mobile',
-        'vue.ext': modulesPath + '/core/vue.ext',
-        'carousel': modulesPath + '/core/carousel',
-        'modules': modulesPath
+        carousel: modulesPath + '/core/carousel',
+        modules: modulesPath
     }
 });
 
-
-var modules = ['site', 'vue'];
+var modules = ['site', 'controls/imageBox'];
 if (isCordovaApp) {
     modules.push('cordova');
     modules.push('device');
@@ -91,9 +89,8 @@ else {
 }
 
 function load() {
-    requirejs(modules, function (site, vue) {
-        window['Vue'] = vue;
-        site.config.imageText = '零食有约';
+    requirejs(modules, function (site, exports1) {
+        exports1.config.imageDisaplyText = '麦子的店';
     });
 
 }

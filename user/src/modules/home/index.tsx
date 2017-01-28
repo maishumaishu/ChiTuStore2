@@ -1,175 +1,220 @@
-// import { Page } from 'chitu.mobile';
-import { app, Page } from 'site';
-import { ShopService, StationService } from 'services';
-import * as ui from 'core/ui';
-import Carousel = require('carousel');
-import Vue = require('vue');
-import 'controls/dataList';
-import 'controls/imageBox';
+import { Page } from 'site';
+import { ImageBox } from "controls/imageBox";
+import { DataList } from "controls/dataList";
+import { ScrollView } from 'controls/scrollView';
+import { StationService, HomeProduct } from 'services';
+import Carousel = require('core/carousel');
+import { isAndroid } from 'site';
 
-export default async function (page: Page) {
 
+//Hammer.defaults.touchAction = 'auto';
+
+export default function (page: Page) {
     let station = page.createService(StationService);
-    let shop = page.createService(ShopService);
+    interface IndexPageState {
+        advertItems: Array<{ ImgUrl: string, Id: string }>,
+    }
+    class IndexView extends React.Component<{}, IndexPageState> {
+        private advertItems;
 
-    let searchKeyWords: Array<string> = [];
-    let data = {
-        advertItems: new Array<any>(),
-    };
+        scrollView: ScrollView;
 
-    let methods = {
-        showSearchView() {
-            app.redirect('home_search');
+        constructor(props) {
+            super(props);
+            this.state = { advertItems: [] };
+            station = new StationService();
+            station.advertItems().then(items => {
+                this.state.advertItems = items;
+                this.setState(this.state);
+                //===================================================
+                //轮播停止
+                let e = page.dataView.querySelector('[name="ad-swiper"]') as HTMLElement;
+                console.assert(e != null);
+                let c = new Carousel(e, { autoplay: true });
+                let hammer = new Hammer.Manager(page.dataView);
+                var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_ALL });
+                hammer.add(pan);
+                hammer.on('panstart', function () {
+                    c.stop();
+                })
+
+                hammer.on('panend', function () {
+                    c.play();
+                });
+                //===================================================
+            })
+        }
+
+        protected componentDidMount() {
+        }
+
+        private loadData(pageIndex): Promise<HomeProduct[]> {
+            return station.proudcts(pageIndex);
+        }
+
+        render() {
+            return (
+                <ScrollView ref={(o) => this.scrollView = o}>
+                    <div className="pulldown-indicator">
+                        <span className="text">
+                            上面什么也没有
+                        </span>
+                    </div>
+                    <div style={{ minHeight: '80px' }} name="ad-swiper" className="carousel slide">
+                        <ol className="carousel-indicators">
+                            {this.state.advertItems.map(o =>
+                                <li key={o.Id}></li>
+                            )}
+                        </ol>
+                        <div className="carousel-inner">
+                            {this.state.advertItems.map((o, i) =>
+                                <div key={o.Id} className={i == 0 ? "item active" : "item"}>
+                                    <ImageBox src={o.ImgUrl}>
+                                    </ImageBox>
+                                    <div className="carousel-caption">
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="quickbar">
+                        <a className="col-xs-3 text-center" href="#user_favors">
+                            <div style={{ position: 'relative', left: '50%' }}>
+                                <div className="item">
+                                    <i className="icon-heart"></i>
+                                </div>
+                            </div>
+                            <div className="text">我的收藏</div>
+                        </a>
+                        <a className="col-xs-3 text-center" href="#shopping_orderList">
+                            <div style={{ position: 'relative', left: '50%' }}>
+                                <div className="item">
+                                    <i className="icon-list"></i>
+                                </div>
+                            </div>
+                            <div className="text">订单查询</div>
+                        </a>
+                        <a className="col-xs-3 text-center" href="#User_RechargeList">
+                            <div style={{ position: 'relative', left: '50%' }}>
+                                <div className="item">
+                                    <i className="icon-credit-card"></i>
+                                </div>
+                            </div>
+                            <div className="text">会员充值</div>
+                        </a>
+                        <a className="col-xs-3 text-center" href="#">
+                            <div style={{ position: 'relative', left: '50%', width: '0px' }}>
+                                <div className="item">
+                                    <i className="icon-exchange"></i>
+                                </div>
+                            </div>
+                            <div className="text">积分兑换</div>
+                        </a>
+                    </div>
+                    <DataList className="row products" scroller={null} loadData={this.loadData}
+                        dataItem={(o: HomeProduct) =>
+                            <a key={o.Id} href={`#home_product?id=${o.ProductId}`} className="col-xs-6 text-center item">
+                                <ImageBox src={o.ImagePath} />
+                                <div className="bottom">
+                                    <div className="interception">{o.Name}</div>
+                                    <div>
+                                        <div className="price pull-left">￥{o.Price.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        }>
+                    </DataList >
+                </ScrollView>
+            );
         }
     }
 
-    let pageIndex = 0;
-    let q = station.advertItems().then(items => {
-        data.advertItems = items;
-        page.loadingView.style.display = 'none';
-        pageIndex = pageIndex + 1;
-    })
+    class IndexHeader extends React.Component<{}, { visible: boolean, opacity: number }>{
+        constructor(props) {
+            super(props);
+            this.state = { visible: true, opacity: 0 };
+        }
 
-    let result = await Promise.all([station.advertItems(), chitu.loadjs('text!pages/home/index.html')]);
-    data.advertItems = result[0];
+        protected componentDidMount() {
+            let header = page.header as HTMLElement;
+            let scrollTop = 0;
+            let dataViewElement = indexView.scrollView.element;
+            dataViewElement.addEventListener('scroll', () => {
+                scrollTop = dataViewElement.scrollTop;
+                let p = scrollTop / 100;
+                p = p > 1 ? 1 : p;
+                let state = Object.assign(this.state, { opacity: p });
+                this.setState(state);
+            });
+            //======================================
+            var hammer = new Hammer.Manager(dataViewElement, { touchAction: 'auto' });
+            var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_DOWN });
+            hammer.add(pan);
+            hammer.on('panstart', function (event) {
+                if (scrollTop <= 0) {
+                    header.style.display = 'none';
+                }
+            })
+
+            hammer.on('panend', function () {
+                if (header.style.display == 'none')
+                    header.style.display = 'block';
+            });
+        }
+
+        render() {
+            return (
+                <div style={{ display: this.state.visible ? 'block' : 'none' }}>
+                    <nav className="bg-primary" style={{ opacity: this.state.opacity }}></nav>
+                    <nav>
+                        <a href="#user_messages" className="left-icon">
+                            <i className="icon-map-marker">
+                            </i>
+                            <div>上海</div>
+                        </a>
+                        <a href="#user_messages" className="right-icon">
+                            <i className="icon-comments-alt">
+                            </i>
+                            <div>消息</div>
+                        </a>
+                        <a href="#home_search" className="search-input form-control input-sm">
+                            <span>寻找商品、品牌、品类</span>
+                            <i className="icon-search"></i>
+                        </a>
+                    </nav>
+                </div>
+            );
+        }
+    }
+
+    var indexView: IndexView = ReactDOM.render(<IndexView />, page.dataView);
+    ReactDOM.render(<IndexHeader />, page.header);
+
     page.loadingView.style.display = 'none';
-    pageIndex = pageIndex + 1;
 
-    page.dataView.innerHTML = result[1];
-    let vm = new Vue({
-        el: page.dataView,
-        data,
-        mounted() {
-        },
-        methods: {
-            loadProducts(pageIndex: number, reslove: Function) {
-                station.proudcts(pageIndex).then(items => reslove(items));
-            }
-        }
-    });
-
-    vm.$nextTick(() => {
-        createHeader(page);
-        let header = page.element.querySelector('header') as HTMLElement;
-        let nav = page.element.querySelector('header nav') as HTMLElement;
-        let dataViewElement = page.dataView;
-
-        dataViewElement.addEventListener('scroll', function () {
-            let p = vm.$el.scrollTop / 100;
-            p = p > 1 ? 1 : p;
-            nav.style.opacity = `${p}`;
-        });
-
-        let touchStartY: number;
-        let touchstartX: number;
-        dataViewElement.addEventListener('touchstart', function (event) {
-            touchStartY = event.touches[0].clientY;
-            touchstartX = event.touches[0].clientX;
-        });
-
-        dataViewElement.addEventListener('touchmove', function (event) {
-            let touchCurrentY = event.touches[0].clientY;
-            let touchCurrentX = event.touches[0].clientX;
-            let y = touchCurrentY - touchStartY;
-            let x = touchCurrentX - touchstartX;
-            //=====================================================
-            // 计算角度，大于 65 度为竖直方向
-            let d = Math.atan(Math.abs(y / x)) / 3.14159265 * 180;
-            if (dataViewElement.scrollTop <= 0 && d > 65) {
-                header.style.display = 'none';
-            }
-            else {
-                header.style.display = 'block';
-            }
-        });
-
-        dataViewElement.addEventListener('touchend', function (event) {
-            header.style.display = 'block';
-        })
-
-        //=====================================================
-        // 下拉刷新
-        const initText = '下拉刷新页面';
-        const readyText = '释放刷新页面';
-        let pulldownIndicator = dataViewElement.querySelector('.pulldown-indicator');
-        console.assert(pulldownIndicator != null);
-        let pulldownText = pulldownIndicator.querySelector('.text');
-        console.assert(pulldownText != null);
-        let status: 'init' | 'ready' = 'init';
-        //let prevY: number;
-        let startY: number;
-        dataViewElement.addEventListener('touchmove', function (event) {
-            //let deltaY = event.touches[0].clientY - prevY;
-            let currentY = event.touches[0].clientY;
-            //prevY = event.touches[0].clientY;
-
-            if (currentY - startY <= 100) {
-                if (status != 'init') {
-                    status = 'init';
-                    pulldownText.innerHTML = initText;
-                }
-            }
-            else {
-                if (status != 'ready') {
-                    status = 'ready';
-                    pulldownText.innerHTML = readyText;
-                }
-            }
-        });
-        dataViewElement.addEventListener('touchstart', function (event) {
-            status = 'init';
-            pulldownText.innerHTML = initText;
-            //prevY = event.touches[0].clientY;
-            startY = event.touches[0].clientY;
-        })
-        //=====================================================
-    });
-
-    vm.$nextTick(function () {
-        let element = page.dataView.querySelector('[name="ad-swiper"]') as HTMLElement;
-        let c = new Carousel(element);
-        app.pageShown.add((sender, args) => {
-            if (args.page.name != 'home.index') {
-                c.stop();
-            }
-            else {
-                c.play();
-            }
-        })
-    })
-
-    function createHeader(page: Page) {
-        let vm = new Vue({
-            el: page.header,
-            data,
-            render: function (h) {
-                let defaultHeader = (
-                    <header>
-                        <nav class="bg-primary"></nav>
-                        <nav>
-                            <a href="#user_messages" class="left-icon">
-                                <i class="icon-map-marker">
-                                </i>
-                                <div>上海</div>
-                            </a>
-                            <a href="#user_messages" class="right-icon">
-                                <i class="icon-comments-alt">
-                                </i>
-                                <div>消息</div>
-                            </a>
-                            <a href="#home_search" class="search-input form-control input-sm">
-                                <span>寻找商品、品牌、品类</span>
-                                <i class="icon-search"></i>
-                            </a>
-                        </nav>
-                    </header>
-                );
-
-
-                return defaultHeader;
-
-            }
-        })
+    if (isAndroid) {
+        let start: number;
+        // page.dataView.addEventListener('touchstart', function (event) {
+        //     start = event.touches[0].clientY;
+        // });
+        // page.dataView.addEventListener('touchmove', function (event) {
+        //     if (this.scrollTop <= 0 && (event.touches[0].clientY - start) > 0)
+        //         event.preventDefault();
+        // });
+        //======================================
+        // var hammer = new Hammer.Manager(page.dataView);
+        // var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_DOWN });
+        // page.dataView.style.transition = '0';
+        // let scroller = page.dataView.children[0] as HTMLElement;
+        // hammer.add(pan);
+        // hammer.on('panmove', function (event) {
+        //     if (scroller.scrollTop == 0) {
+        //         scroller.style.transform = `translateY(${event.distance}px)`;
+        //     }
+        // });
+        // hammer.on('panend', function () {
+        //     scroller.style.removeProperty('transform');
+        // })
     }
 
-};
+}

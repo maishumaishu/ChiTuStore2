@@ -2,7 +2,12 @@ import { Service, ShoppingCartService, AjaxError } from 'services';
 import { Application as BaseApplication, Page as BasePage } from 'chitu.mobile';
 import { config as imageBoxConfig } from 'controls/imageBox';
 import * as chitu from 'chitu';
-import Vue = require('vue');
+import { Component } from 'react';
+import React = require('react');
+import ReactDOM = require('react-dom');
+
+window['React'] = React;
+window['ReactDOM'] = ReactDOM;
 
 /** 是否为 APP */
 var isCordovaApp = location.protocol === 'file:';
@@ -26,20 +31,77 @@ export let config = {
     defaultUrl: 'home_index'
 }
 
+class Menu extends Component<{ pageName: string }, { itemsCount: number }> {
+    constructor(props) {
+        super(props);
+        this.state = { itemsCount: 0 };
+        let shoppingCart = new ShoppingCartService();
+        shoppingCart.productsCount().then(num => {
+            this.setState({ itemsCount: num });
+        });
+    }
+    componentDidMount() {
+        let menuElement = this.refs['menu'] as HTMLElement;
+        var activeElement = menuElement.querySelector(`[name="${this.props.pageName}"]`) as HTMLElement;
+        if (activeElement) {
+            activeElement.className = 'active';
+        }
+    }
+    render() {
+        return (
+            <ul ref="menu" className="menu" style={{ marginBottom: '0px' }}>
+                <li>
+                    <a name="home.index" href="#home_index">
+                        <i className="icon-home"></i>
+                        <span>首页</span>
+                    </a>
+                </li>
+                <li>
+                    <a name="home.class" href="#home_class">
+                        <i className="icon-th-large"></i>
+                        <span>分类</span>
+                    </a>
+                </li>
+                <li>
+                    <a name="shopping.shoppingCart" href="#shopping_shoppingCart">
+                        <i className="icon-shopping-cart"></i>
+                        <sub name="products-count" style={{ display: this.state.itemsCount <= 0 ? 'none' : 'block' }} className="sub">
+                            {this.state.itemsCount}
+                        </sub>
+                        <span>购物车</span>
+                    </a>
+
+                </li>
+                <li>
+                    <a name="home.newsList" href="#home_newsList">
+                        <i className="icon-rss"></i>
+                        <span>微资讯</span>
+                    </a>
+                </li>
+                <li>
+                    <a name="user.index" href="#user_index">
+                        <i className="icon-user"></i>
+                        <span>我</span>
+                    </a>
+                </li>
+            </ul>
+        );
+    }
+}
+
 export class Page extends BasePage {
     constructor(params) {
         super(params);
 
         this.buildErrorView();
         this.buildLoadingView();
-        this.buildHeader(50);
+        this.buildHeader();
         if (topLevelPages.indexOf(this.routeData.pageName) >= 0) {
             this.createMenu();
         }
         if (this.routeData.pageName == 'home.product') {
-            this.createFooter(50);
+            this.createFooter();
         }
-
 
         let className = this.routeData.pageName.split('.').join('-');
         this.element.className = (allowImmersionHeader ? 'page immersion ' : 'page ') + className;
@@ -60,11 +122,58 @@ export class Page extends BasePage {
 
     }
 
-    reload() {
-        this.errorView.style.display = 'none';
-        this.loadingView.style.display = 'block';
-        let result = super.reload();
-        return result;
+    private buildErrorView() {
+        ReactDOM.render((
+            <div className="norecords">
+                <div className="icon">
+                    <i className="icon-rss">
+                    </i>
+                </div>
+                <h4 className="text"></h4>
+                <button onClick={() => this.reload()} className="btn btn-default">点击重新加载页面</button>
+            </div>
+        ), this.errorView);
+    }
+
+    private buildLoadingView() {
+        ReactDOM.render((
+            <div className="spin">
+                <i className="icon-spinner"></i>
+            </div>
+        ), this.loadingView);
+    }
+
+    private buildHeader() {
+        let noneHeaderPages = ['user.index'];
+        if (noneHeaderPages.indexOf(this.routeData.pageName) >= 0) {
+            return;
+        }
+
+        let navBar;
+        switch (this.routeData.pageName) {
+            case 'home.product':
+                navBar = productNavBar();
+                break;
+            case 'home.search':
+                navBar = searchNavBar();
+                break;
+            default:
+                let isTopPage = topLevelPages.indexOf(this.routeData.pageName) >= 0;
+                navBar = defaultNavBar({ showBackButton: !isTopPage });
+                break;
+        }
+
+        let headerElement = document.createElement('header');
+        ReactDOM.render(navBar, headerElement);
+        this.element.appendChild(headerElement);
+    }
+
+    private createMenu() {
+        let page = this;
+        let routeData = page.routeData;
+        let footerElement = page.createFooter();
+
+        ReactDOM.render(<Menu pageName={this.routeData.pageName} />, footerElement);
     }
 
     createService<T extends Service>(serviceType: { new (): T }): T {
@@ -73,21 +182,6 @@ export class Page extends BasePage {
             this.showError(error);
         })
         return result;
-    }
-
-    /** 判断主视图是否为活动状态 */
-    private dataViewIsActive() {
-
-        // 选取主视图后面的视图，如果有显示的，则说明为非活动状态
-        let views = this.element.querySelectorAll('section[class="main"] + section');
-        for (let i = 0; i < views.length; i++) {
-            let view = views[i] as HTMLElement;
-            let display = !view.style.display || view.style.display == 'block';
-            if (display)
-                return false;
-        }
-
-        return true;
     }
 
     private showError(err: Error) {
@@ -106,127 +200,26 @@ export class Page extends BasePage {
         }
     }
 
-    private buildErrorView() {
-        let h = createElement;
-        let page = this;
-        let element = (
-            <div class="norecords">
-                <div class="icon">
-                    <i class="icon-rss">
-                    </i>
-                </div>
-                <h4 class="text"></h4>
-                <button on-click={() => this.reload()} class="btn btn-default" style="margin-top:10px;">点击重新加载页面</button>
-            </div>
-        );
-        this.errorView.appendChild(element);
-    }
-
-    private buildLoadingView() {
-        let h = createElement;
-        let element = (
-            <div class="spin">
-                <i class="icon-spinner"></i>
-            </div>
-        );
-        this.loadingView.appendChild(element);
-    }
-
-    private buildHeader(height: number) {
-        let noneHeaderPages = ['user.index'];
-        if (noneHeaderPages.indexOf(this.routeData.pageName) >= 0) {
-            return;
+    /** 判断主视图是否为活动状态 */
+    private dataViewIsActive() {
+        // 选取主视图后面的视图，如果有显示的，则说明为非活动状态
+        let views = this.element.querySelectorAll('section[class="main"] + section');
+        for (let i = 0; i < views.length; i++) {
+            let view = views[i] as HTMLElement;
+            let display = !view.style.display || view.style.display == 'block';
+            if (display)
+                return false;
         }
 
-        let h = createElement;
-        let navBar;
-        switch (this.routeData.pageName) {
-            case 'home.product':
-                navBar = productNavBar(createElement);
-                break;
-            case 'home.search':
-                navBar = searchNavBar(createElement);
-                break;
-            default:
-                let isTopPage = topLevelPages.indexOf(this.routeData.pageName) >= 0;
-                navBar = defaultNavBar(createElement, { showBackButton: !isTopPage });
-                break;
-        }
-
-        let headerElement: HTMLElement = (
-            <header>
-                {navBar}
-            </header>
-        );
-        this.element.appendChild(headerElement);
+        return true;
     }
 
-    private createMenu() {
-        let page = this;
-        let shoppingCart = page.createService(ShoppingCartService);
-        let routeData = page.routeData;
-        let footerElement = page.createFooter(50);
-
-        type ModelComputed = {
-            itemsCount: () => number
-        };
-        type Model = ModelComputed;
-        let vm = new Vue({
-            el: footerElement,
-            computed: ({
-                itemsCount: shoppingCart.productsCount
-            } as ModelComputed),
-            mounted() {
-                let self = this as VueInstance<any>;
-                var activeElement = self.$el.querySelector(`[name="${routeData.pageName}"]`) as HTMLElement;
-                if (activeElement) {
-                    activeElement.className = 'active';
-                }
-            },
-            render(h) {
-                let model = this as Model;
-                return (
-                    <footer>
-                        <ul class="menu" style="margin-bottom:0px;">
-                            <li>
-                                <a name="home.index" href="#home_index">
-                                    <i class="icon-home"></i>
-                                    <span>首页</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a name="home.class" href="#home_class">
-                                    <i class="icon-th-large"></i>
-                                    <span>分类</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a name="shopping.shoppingCart" href="#shopping_shoppingCart">
-                                    <i class="icon-shopping-cart"></i>
-                                    <sub name="products-count" style={{ display: model.itemsCount ? 'block' : 'none' }} class="sub" domProps-innerHTML={model.itemsCount}></sub>
-                                    <span>购物车</span>
-                                </a>
-
-                            </li>
-                            <li>
-                                <a name="home.newsList" href="#home_newsList">
-                                    <i class="icon-rss"></i>
-                                    <span>微资讯</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a name="user.index" href="#user_index">
-                                    <i class="icon-user"></i>
-                                    <span>我</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </footer>
-                )
-            }
-        })
+    reload() {
+        this.errorView.style.display = 'none';
+        this.loadingView.style.display = 'block';
+        let result = super.reload();
+        return result;
     }
-
 }
 
 export class Application extends BaseApplication {
@@ -250,61 +243,6 @@ export class Application extends BaseApplication {
 
         return page;
     }
-
-
-
-}
-
-export function createElement(tagName: string, props, children: Array<HTMLElement | string>): HTMLElement {
-    props = props || {};
-    children = children || [];
-    let element = document.createElement(tagName) as HTMLElement;
-    for (let key in props) {
-        switch (key) {
-            case 'on':
-                let names = Object.getOwnPropertyNames(props[key]);
-                for (let i = 0; i < names.length; i++) {
-                    element.addEventListener(names[i], props[key][names[i]]);
-                }
-                break;
-            case 'attrs':
-                let attrs = props['attrs'];
-                for (let name in attrs) {
-                    if (name.startsWith('on')) {
-                        element[name] = attrs[name];
-                        continue;
-                    }
-                    element.setAttribute(name, attrs[name]);
-                }
-                break;
-            case 'style':
-                let styleValue = props[key];
-                if (typeof (styleValue) == 'string') {
-                    element.setAttribute('style', styleValue);
-                }
-                else {
-                    let names = Object.getOwnPropertyNames(styleValue)
-                    for (let i = 0; i < names.length; i++) {
-                        let name = names[i];
-                        element.style[name] = styleValue[name];
-                    }
-                }
-                break;
-            default:
-                element.setAttribute(key, props[key]);
-                break;
-        }
-
-    }
-    for (let i = 0; i < children.length; i++) {
-        if (typeof (children[i]) == 'string') {
-            element.innerHTML = children[i] as string;
-        }
-        else {
-            element.appendChild(children[i] as HTMLElement);
-        }
-    }
-    return element;
 }
 
 export let app = window['app'] = new Application();
@@ -318,43 +256,43 @@ if (!location.hash) {
     app.redirect(config.defaultUrl);
 }
 
-//================================================================================
-
-
-export function defaultNavBar(h: Function, options?: { title?: string, showBackButton?: boolean }) {
+export function defaultNavBar(options?: { title?: string, showBackButton?: boolean }) {
     options = options || {};
-    let title = options.title || '&nbsp';
+    let title = options.title || '';
     let showBackButton = options.showBackButton == null ? true : options.showBackButton;
 
     return (
-        <nav class="bg-primary">
+        <nav className="bg-primary">
             {showBackButton ?
-                <button name="back-button" on-click={() => app.back()} class="leftButton" style={{ opacity: "1" }}>
-                    <i class="icon-chevron-left"></i>
+                <button name="back-button" onClick={() => app.back()} className="leftButton" style={{ opacity: 1 }}>
+                    <i className="icon-chevron-left"></i>
                 </button> :
                 <span></span>
             }
-            <h4 domProps-innerHTML={title}></h4>
+            <h4>
+                {title}
+            </h4>
         </nav>
     );
 }
 
-export function productNavBar(h: Function) {
+export function productNavBar() {
     return (
         <nav style={{ opacity: 1, backgroundColor: 'unset' }}>
-            <button on-click={() => app.back()} class="leftButton">
-                <i class="icon-chevron-left"></i>
+            <button onClick={() => app.back()} className="leftButton">
+                <i className="icon-chevron-left"></i>
             </button>
         </nav>
     );
 }
 
-export function searchNavBar(h: Function) {
+export function searchNavBar() {
     return (
         <nav style={{ backgroundColor: 'white', borderBottom: 'solid 1px #ccc' }}>
-            <button on-click={() => window['app'].back()} class="leftButton">
-                <i class="icon-chevron-left"></i>
+            <button onClick={() => window['app'].back()} className="leftButton">
+                <i className="icon-chevron-left"></i>
             </button>
         </nav>
     );
 }
+

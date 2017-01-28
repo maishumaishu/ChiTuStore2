@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
-               BuildableName = "ChiTuStore.app"
+               BuildableName = "&#x9ea6;&#x5b50;&#x7684;&#x5e97;.app"
                BlueprintName = "ChiTuStore"
                ReferencedContainer = "container:ChiTuStore.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
-            BuildableName = "ChiTuStore.app"
+            BuildableName = "&#x9ea6;&#x5b50;&#x7684;&#x5e97;.app"
             BlueprintName = "ChiTuStore"
             ReferencedContainer = "container:ChiTuStore.xcodeproj">
          </BuildableReference>
@@ -56,7 +56,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
-            BuildableName = "ChiTuStore.app"
+            BuildableName = "&#x9ea6;&#x5b50;&#x7684;&#x5e97;.app"
             BlueprintName = "ChiTuStore"
             ReferencedContainer = "container:ChiTuStore.xcodeproj">
          </BuildableReference>
@@ -75,7 +75,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
-            BuildableName = "ChiTuStore.app"
+            BuildableName = "&#x9ea6;&#x5b50;&#x7684;&#x5e97;.app"
             BlueprintName = "ChiTuStore"
             ReferencedContainer = "container:ChiTuStore.xcodeproj">
          </BuildableReference>

@@ -1,67 +1,69 @@
-import { Page } from 'site';
-import Vue = require('vue');
+import { Page, defaultNavBar } from 'site';
 import { ShopService, FavorProduct } from 'services';
 import * as ui from 'core/ui';
-import 'controls/dataList';
-import 'controls/imageBox';
+import { DataList } from 'controls/dataList';
+import { ImageBox } from 'controls/imageBox';
 
 export default function (page: Page) {
     let shop = page.createService(ShopService);
-    
-    page.dataView.innerHTML = `
-    <div class="container">
-        <data-list @load="loadFavorProducts">
-            <template scope="props">
-            <div class="item">
-                <div @click="showProduct(props.item.ProductId)" class="col-xs-4">
-                    <image-box :src="props.item.ImageUrl" class="img-responsive"/>
-                </div>
-                <div class="col-xs-8">
-                    <div @click="showProduct(props.item.ProductId)" class="name">
-                        <div>{{props.item.ProductName}}</div>
-                    </div>
-                    <button @click="unfavore($event,props.item)" class="pull-right" :style="{display: props.item.Status == 'favor' ? 'block' : 'none'}">
-                        <i class="icon-heart"></i> 取消收藏
-                    </button>
-                    <label class="pull-right" :style="{display: (props.item.Status == 'unfavor' ? 'block' : 'none')}">
-                        已取消
-                    </label>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <hr class="row">
-            </template>
-        </data-list>
-    </div>`;
-    let vm = new Vue({
-        el: page.dataView,
-        methods: {
-            showProduct(productId: string) {
-                debugger;
-            },
-            loadFavorProducts(pageIndex: number, reslove: Function) {
-                shop.favorProducts().then(items => {
-                    if (pageIndex > 0) {
-                        reslove([]);
-                        return;
-                    }
 
-                    items.forEach(o => o['Status'] = 'favor')
-                    reslove(items);
+    class FavorPage extends React.Component<{}, {}>{
+        private unfavor: Function;
+        constructor() {
+            super();
 
-                    page.loadingView.style.display = 'none';
-                });
-            },
-            // unfavore: function (event, productId: string) {
-            //     debugger;
-            // }
-            unfavore: ui.buttonOnClick((event, item: FavorProduct) => {
+            this.unfavor = (event: React.MouseEvent, item: FavorProduct) => {
+                let btn = event.target as HTMLElement;
+
                 return shop.unfavorProduct(item.ProductId).then(() => {
-                    item['Status'] = 'unfavor';
+                    btn.style.opacity = '0';
+                    setTimeout(() => {
+                        btn.style.display = 'none';
+                        (btn.nextSibling as HTMLElement).style.opacity = '1';
+                    }, 400);
                 });
-            }),
+            };
         }
-    });
 
-    (page.header.querySelector('h4') as HTMLElement).innerHTML = '我的收藏';
+        showProduct(productId: string) {
+            debugger;
+        }
+        loadFavorProducts(pageIndex: number) {
+            if (pageIndex > 0) {
+                return Promise.resolve([]);
+            }
+            return shop.favorProducts().then(items => {
+                page.loadingView.style.display = 'none';
+                return items;
+            });
+        }
+        render() {
+            return (
+                <DataList className="container" scroller={page.dataView} loadData={this.loadFavorProducts} dataItem={(o: FavorProduct) => (
+                    <div key={o.ProductId}>
+                        <div className="item row">
+                            <div onClick={() => this.showProduct(o.ProductId)} className="col-xs-4">
+                                <ImageBox src={o.ImageUrl} className="img-responsive" />
+                            </div>
+                            <div className="col-xs-8">
+                                <div onClick={() => this.showProduct(o.ProductId)} className="name">
+                                    <div>{o.ProductName}</div>
+                                </div>
+                                <button ref={`btn_${o.Id}`} onClick={(event) => this.unfavor(event, o)} className="pull-right">
+                                    <i className="icon-heart"></i> 取消收藏
+                                </button>
+                                <label className="pull-right">
+                                    已取消
+                                </label>
+                            </div>
+                        </div>
+                        <hr className="row" />
+                    </div>
+                )} />
+            );
+        }
+    }
+
+    ReactDOM.render(defaultNavBar({ title: '我的收藏' }), page.header);
+    ReactDOM.render(<FavorPage />, page.dataView);
 }

@@ -1,119 +1,108 @@
-declare class Recognizer {
-    set(options: HammerRecognizerOptions);
-    state: number;
+declare module Hammer {
+    const INPUT_START: number;
+    const INPUT_MOVE: number;
+    const INPUT_END: number;
+    const INPUT_CANCEL: number;
+
+    const STATE_POSSIBLE: number;
+    const STATE_BEGAN: number;
+    const STATE_CHANGED: number;
+    const STATE_ENDED: number;
+    const STATE_RECOGNIZED: number;
+    const STATE_CANCELLED: number;
+    const STATE_FAILED: number;
+
+    const DIRECTION_NONE: number;
+    const DIRECTION_LEFT: number;
+    const DIRECTION_RIGHT: number;
+    const DIRECTION_UP: number;
+    const DIRECTION_DOWN: number;
+    const DIRECTION_ALL: number;
+    const DIRECTION_HORIZONTAL: number;
+    const DIRECTION_VERTICAL: number;
+
+    class Recognizer {
+        'set'(options: HammerRecognizerOptions);
+        state: number;
+    }
+
+    class TouchInput {
+        callback: (manager, eventType, input) => void
+        domHandler: (ev) => void;
+        element: HTMLElement;
+        evTarget: string;
+    }
+
+    class Manager {
+        constructor(element: HTMLElement);//, options: Object = undefined
+        constructor(element: HTMLElement, options: {
+            preventDefault?: boolean, domEvents?: boolean,
+            touchAction?: 'auto' | 'compute' | 'pan-y' | 'pan-x' | 'none'
+        });//, options: Object = undefined
+
+        element: HTMLElement;
+        handlers: { [idnex: string]: Array<Function> };
+        input: TouchInput;
+
+        on(event: 'pan' | 'panstart' | 'panend' | 'panup' | 'pandown' | 'panleft' | 'panright' | 'panmove' | 'pancancel', callback: (event: PanEvent) => void);
+        'get'(recognizer: 'pan' | 'pinch' | 'rotate' | 'swipe'): Recognizer;
+        add(recognizer: Recognizer);
+    }
+
+    interface HammerRecognizerOptions {
+        direction?: number;
+        domEvents?: boolean;
+        threshold?: number;
+        enable?: boolean;
+    }
+
+    class Pan extends Recognizer {
+        constructor(options?: HammerRecognizerOptions);
+    }
+
+    interface Point {
+        x: number,
+        y: number
+    }
+
+    interface PanEvent {
+        angle: number
+        center: Point
+        changedPointers: Array<any>
+        deltaTime: number
+        deltaX: number
+        deltaY: number
+        direction: number
+        distance: number
+        eventType: number
+        isFinal: boolean
+        isFirst: boolean
+        offsetDirection: number
+        pointerType: string
+        pointers: Array<any>
+        preventDefault: () => void
+        rotation: number
+        scale: number
+        srcEvent: TouchEvent
+        target: HTMLElement
+        timeStamp: number
+        type: string
+        velocity: number
+        velocityX: number
+        velocityY: number
+    }
+
+    export let defaults: {
+        touchAction: 'compute' | 'auto' | 'pan-y' | 'pan-x' | 'none',
+        domEvents: boolean,
+        enable: boolean | (() => boolean),
+        cssProps: any,
+        preset: any
+    }
 }
-
-declare interface HammerRecognizerOptions {
-    direction?: number;
-    domEvents?: boolean;
-    threshold?: number;
-    enable?: boolean;
-}
-
-declare interface TouchInput {
-    callback: (manager, eventType, input) => void
-    domHandler: (ev) => void;
-    element: HTMLElement;
-    evTarget: string;
-}
-
-type PanEventName = 'pan' | 'panstart' | 'panmove' | 'pancancel' | 'panend' | 'panup' | 'pandown' | 'panleft' | 'panright';
-declare interface Manager {
-    new (element: HTMLElement);//, options: Object = undefined
-    new (element: HTMLElement, options: Object);//, options: Object = undefined
-
-    element: HTMLElement;
-    handlers: { [idnex: string]: Array<Function> };
-    input: TouchInput;
-
-    on(event: PanEventName, callback: (event: any) => void);
-    get(recognizer: 'pan' | 'pinch' | 'rotate' | 'swipe'): Recognizer;
-    add(recognizer: Recognizer);
-}
-
-interface Pan extends Recognizer {
-    new (options?: HammerRecognizerOptions);
-}
-
-interface Swipe extends Recognizer {
-}
-
-interface Point {
-    x: number,
-    y: number
-}
-
-interface HammerInstance {
-    on(event: PanEventName, callback: (event: PanEvent) => void);
-    get(recognizerName: 'pan'): Pan;
-    get(recognizerName: 'swipe'): Swipe;
-    get(recognizerName: 'pan' | 'pinch' | 'rotate' | 'swipe'): any;
-}
-
-interface PanEvent extends Event {
-    angle: number
-    center: Point
-    changedPointers: Array<any>
-    deltaTime: number
-    deltaX: number
-    deltaY: number
-    direction: number
-    distance: number
-    eventType: number
-    isFinal: boolean
-    isFirst: boolean
-    offsetDirection: number
-    pointerType: string
-    pointers: Array<any>
-    rotation: number
-    scale: number
-    srcEvent: TouchEvent
-    target: HTMLElement
-    timeStamp: number
-    type: string
-    velocity: number
-    velocityX: number
-    velocityY: number
-}
-
-declare interface HammerStatic {
-    INPUT_START: number;
-    INPUT_MOVE: number;
-    INPUT_END: number;
-    INPUT_CANCEL: number;
-
-    STATE_POSSIBLE: number;
-    STATE_BEGAN: number;
-    STATE_CHANGED: number;
-    STATE_ENDED: number;
-    STATE_RECOGNIZED: number;
-    STATE_CANCELLED: number;
-    STATE_FAILED: number;
-
-    DIRECTION_NONE: number;
-    DIRECTION_LEFT: number;
-    DIRECTION_RIGHT: number;
-    DIRECTION_UP: number;
-    DIRECTION_DOWN: number;
-    DIRECTION_ALL: number;
-    DIRECTION_HORIZONTAL: number;
-    DIRECTION_VERTICAL: number;
-
-    new (element: HTMLElement, options: any): HammerInstance;
-
-    Recognizer: Recognizer;
-    TouchInput: TouchInput;
-    Manager: Manager;
-    Pan: Pan;
-    Point: Point;
-    PanEvent: PanEvent;
-}
-
 
 declare module 'hammer' {
-    let hammer: HammerStatic
-    export = hammer;
+
+    export = Hammer;
 }
-
-
 

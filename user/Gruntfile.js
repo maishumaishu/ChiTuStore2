@@ -20,24 +20,12 @@ module.exports = function (grunt) {
             },
         },
         babel: {
-            dist: {
-                options: {
-                    sourceMap: false,
-                    //presets: ["es2015"],
-                    plugins: ["transform-vue-jsx"]
-                },
-                files: [
-                    { expand: true, cwd: 'build/modules', src: ['**/*.jsx'], dest: dest_user_root + '/modules', ext: '.js' }
-                ]
-            },
             es5: {
                 options: {
                     sourceMap: false,
                     presets: ["es2015"],
-                    plugins: ["transform-vue-jsx"]
                 },
                 files: [
-                    { expand: true, cwd: 'build/modules', src: ['core/chitu.mobile.js'], dest: dest_user_root + '/modules.es5' },
                     { expand: true, cwd: 'build/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5', ext: '.js' },
                 ]
             }
@@ -68,7 +56,8 @@ module.exports = function (grunt) {
                     src: ['**/*.less'],
                     dest: `${dest_user_root}/content/app`,
                     ext: '.css'
-                }]
+                },
+                { expand: false, src: `${src_user_root}/content/bootstrap-3.3.5/bootstrap.less`, dest: `${dest_user_root}/content/css/bootstrap.css` }]
             }
         }
     });

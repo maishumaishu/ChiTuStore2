@@ -5,6 +5,6 @@
         "sourceMap": false,
         "outDir": "../build",
         "experimentalDecorators": true,
-        "jsx": "preserve"
+        "jsx": "react"
     }
 }

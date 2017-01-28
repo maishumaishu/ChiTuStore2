@@ -1,70 +1,63 @@
 import { Page, defaultNavBar } from 'site';
-import { ShopService } from 'services';
-import Vue = require('vue');
-import 'controls/dataList';
-import 'controls/imageBox';
+import { ShopService, Product } from 'services';
+
+import { DataList } from 'controls/dataList';
+import { ImageBox } from 'controls/imageBox';
 
 export default function (page: Page) {
 
     let shop = page.createService(ShopService);
-
-    page.dataView.innerHTML = `
-<div class="row products" style="margin: 0px;">
-  <data-list @load="loadProducts">
-    <template scope="props">
-      <a :href="'#home_product?id=' + props.item.Id" class="col-xs-6 text-center item">
-        <image-box :src="props.item.ImageUrl"></image-box>
-        <div class="bottom">
-          <div class="interception">{{props.item.Name}}</div>
-          <div>
-            <div class="price pull-left">￥{{props.item.Price.toFixed(2)}}</div>
-          </div>
-        </div>
-      </a>
-    </template>
-  </data-list>
-</div>`;
-
     let categoryId = page.routeData.values.categoryId;
-    let vm = new Vue({
-        el: page.dataView,
-        methods: {
-            loadProducts(pageIndex, reslove) {
-                shop.products(categoryId, pageIndex).then(items => {
-                    if (pageIndex == 0) {
-                        page.loadingView.style.display = 'none';
-                        buildHeader(items[0].ProductCategoryName);
 
-                    }
-                    reslove(items);
-                })
-            }
+    class ProductListView extends React.Component<{}, {}>{
+        loadProducts(pageIndex: number) {
+            return shop.products(categoryId, pageIndex).then(items => {
+                return items;
+            });
         }
-    });
-
-
-    function buildHeader(title) {
-        let vm = new Vue({
-            el: page.header,
-            render(h) {
-                return (
-                    <header>
-                        {defaultNavBar(h, title)}
-                        <ul class="tabs" style="margin: 0px;">
-                            <li>
-                                <a class="active">综合</a>
-                            </li>
-                            <li>
-                                <a class="">销量</a>
-                            </li>
-                            <li>
-                                <span>价格</span>
-                                <span class="icon-angle-up"></span>
-                            </li>
-                        </ul>
-                    </header>
-                );
-            }
-        })
+        render() {
+            return (
+                <DataList className="products" scroller={page.dataView} loadData={this.loadProducts}
+                    dataItem={(o: Product) => (
+                        <a key={o.Id} href={`#home_product?id=${o.Id}`} className="col-xs-6 text-center item">
+                            <ImageBox src={o.ImageUrl} />
+                            <div className="bottom">
+                                <div className="interception">{o.Name}</div>
+                                <div>
+                                    <div className="price pull-left">￥{o.Price.toFixed(2)}</div>
+                                </div>
+                            </div>
+                        </a>
+                    )} />
+            );
+        }
     }
+
+    class ProductListHeader extends React.Component<{ title: string }, {}>{
+        render() {
+            return (
+                <div>
+                    {defaultNavBar({ title: this.props.title })}
+                    <ul className="tabs" style={{ margin: '0px' }}>
+                        <li>
+                            <a className="active">综合</a>
+                        </li>
+                        <li>
+                            <a className="">销量</a>
+                        </li>
+                        <li>
+                            <span>价格</span>
+                            <span className="icon-angle-up"></span>
+                        </li>
+                    </ul>
+                </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<ProductListView />, page.dataView);
+    shop.category(categoryId).then(o => {
+        page.loadingView.style.display = 'none';
+        ReactDOM.render(<ProductListHeader title={o.Name} />, page.header);
+    })
 }

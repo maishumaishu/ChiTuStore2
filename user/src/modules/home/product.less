@@ -6,9 +6,6 @@
 
     // .padding-top();
     .padding-bottom();
-    .pull-down-indicator {
-        height:  @nav-height;
-    }
  
     .price();
  
@@ -16,11 +13,26 @@
         padding-top: 10px;
     }
 
-    [name="btn_shopping_cart"] {
-        font-size: 28px;
-        margin-bottom: 0px;
+    footer {
+        height: @nav-height;
 
-        & .badge {
+        nav {
+            width: 100%;
+            padding: 10px 10px 0px 10px;
+            background-color: @gray-lighter;
+            height: 50px;
+            // position: absolute;
+            bottom: 0;
+            z-index: 120;
+        }
+
+        .icon-shopping-cart {
+            font-size: 28px;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .badge {
             position: relative;
             top: -40px;
             left: 20px;
@@ -28,15 +40,7 @@
         }
     }
 
-    [name="bottom_bar"] {
-        width: 100%;
-        padding: 10px 10px 0px 10px;
-        background-color: @gray-lighter;
-        height: 50px;
-        position: absolute;
-        bottom: 0;
-        z-index: 120;
-    }
+    
 
     hr {
         border-top-width: 20px;
@@ -78,6 +82,111 @@
         }
         .icon-heart-empty {
             margin-left: 1px;
+        }
+    }
+
+    .pull-up-indicator {
+        padding: 10px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+
+        i {
+            margin-right: 4px;
+        }
+    }
+
+    .pull-down-indicator();
+
+    .product-panel {
+
+        display: none;
+
+        .cust-prop {
+            border: 1px solid @brand-primary;
+            margin-bottom: 8px;
+            margin-right: 10px;
+            border-radius: 4px;
+            padding: 4px 20px 4px 20px;
+            white-space: nowrap;
+            background-color: @bg-color;;
+
+            &.selected {
+                background-color: @brand-primary;
+                color: white;
+            }
+        }
+
+        .modal {
+
+            transform: translateX(100%);
+            transition: 0.4s ease-in;
+
+            .modal-dialog {
+                background-color: @bg-color;;
+                margin: 0px;
+                top: 0px;
+                left: 60px;
+                bottom: 0;
+                right: 0;
+                // position: absolute;
+                border: none;
+
+                .modal-content {
+                    border: none;
+                    box-shadow: none;
+                    padding: 0;
+                    display: block;
+
+                    .modal-header {
+                        padding: 0;
+                        padding-bottom: 10px;
+                    }
+                    .modal-body {
+                        // padding-bottom: 120px;
+                        overflow-y: scroll;
+                    }
+                    .modal-footer {
+                        position: fixed;
+                        bottom: 0px;
+                        background-color: @bg-color;
+                        input {
+                            text-align: center;
+                            -webkit-appearance: none;   //取消文本框的阴影
+                        }
+                    }
+                }
+            }
+        }
+
+        .modal-backdrop.in {
+            //opacity: @modal-backdrop-opacity;
+            transition: opacity 0.4s ease-in;
+        }
+    }
+
+    .product-panel { 
+        nav {
+            background-color: @brand-primary;
+            color: @bg-color;
+            height: @nav-height;
+            font-size: @topbar-font-size;
+            width: 100%;
+            
+            .nav-tabs {
+                border-bottom: none;
+                width: 100%;
+                position: absolute;
+            }
+        }
+    }
+
+    &.immersion {
+        .product-panel {
+            nav {
+                padding-top: @immersion-height;    
+                height: @nav-height + @immersion-height;    
+            }
         }
     }
 }

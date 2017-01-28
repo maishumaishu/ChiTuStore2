@@ -1,54 +1,36 @@
 import { Page } from 'site';
-import { StationService } from 'services';
-import Vue = require('vue');
-import 'controls/dataList';
-import 'controls/imageBox';
+import { StationService, News } from 'services';
+
+import { DataList } from 'controls/dataList';
+import { ImageBox } from 'controls/imageBox';
 
 export default function (page: Page) {
-    let station = page.createService(StationService)
-    page.dataView.innerHTML = `
-<div class="container">
-    <data-list ref="newsList" v-on:load="newsListLoad">
-        <template scope="props">
-            <a class="item" :href="'#home_news?id=' + props.item.Id">
-                <image-box :src="props.item.ImgUrl" class="img-responsive"></image-box>
-                <div class="title">{{ props.item.Title }}</div>
-            </a>
-        </template>
-    </data-list>
-</div>`;
+    let station = page.createService(StationService);
 
-    new Vue({
-        el: page.dataView,
-        methods: {
-            newsListLoad(pageIndex: number, reslove: Function, reject: Function) {
-                station.newsList(pageIndex)
-                    .then(items => {
-                        if (pageIndex == 0)
-                            page.loadingView.style.display = 'none';
+    class NewsListView extends React.Component<{}, {}>{
+        loadNewsList(pageIndex: number): Promise<News[]> {
+            return station.newsList(pageIndex).then(o => {
+                if (pageIndex == 0)
+                    page.loadingView.style.display = 'none';
 
-                        pageIndex = pageIndex + 1;
-                        reslove(items)
-                    })
-                    .catch(err => reject(err));
-            }
-        },
-    })
-
-    createHeader(page);
-}
-
-function createHeader(page: Page) {
-    new Vue({
-        el: page.header,
-        render(h) {
+                return o;
+            });
+        }
+        render() {
             return (
-                <header>
-                    <nav class="bg-primary" style="width:100%;">
-                        <h4>微资讯</h4>
-                    </nav>
-                </header>
+                <DataList scroller={page.dataView} loadData={this.loadNewsList}
+                    dataItem={(o: News) => (
+                        <div key={o.Id}>
+                            <a className="item" href={`#home_news?id=${o.Id}`}>
+                                <ImageBox src={o.ImgUrl} className="img-responsive" />
+                                <div className="title">{o.Title}</div>
+                            </a>
+                        </div>)}
+                    />
             );
         }
-    })
+    }
+
+    ReactDOM.render(<NewsListView />, page.dataView);
 }
+

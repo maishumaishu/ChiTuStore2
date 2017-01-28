@@ -41,6 +41,27 @@
     }
 }
 
+
+.pull-down-indicator {
+    .pull-down-indicator {
+        height: @nav-height;
+        padding: 10px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+
+        i {
+            margin-right: 4px;
+        }
+    }
+
+    &.immersion {
+        .pull-down-indicator {
+            height: @nav-height + @immersion-height;
+        }
+    }
+}
+
 .padding-bottom(){
     section {
         padding-bottom: @menu-height;

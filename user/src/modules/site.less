@@ -1,4 +1,4 @@
-﻿@import "common.less";
+@import "common.less";
 
 body {
   overflow-x: hidden;
@@ -23,6 +23,12 @@ a {
   }
 }
 
+button {
+  &:focus {
+    outline: none;
+  }
+}
+
 .norecords {
   text-align: center;
   padding-top: @norecords-padding-top;
@@ -44,11 +50,26 @@ a {
       display: block;
       color: white;
     }
+
+    .icon-rss {
+          -moz-transform: rotate(-45deg);
+          -ms-transform: rotate(-45deg);
+          -o-transform: rotate(-45deg);
+          -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+          position: relative;
+          top: 14px;
+          left: 3px;
+      }
   }
 
   .text {
     padding-top: 10px;
     font-size: 16px;
+  }
+
+  button {
+    margin-top: 10px;
   }
 }
 
@@ -117,6 +138,7 @@ header {
         height: @nav-height; 
         width: 100%;
         position: absolute;
+        z-index: 200;
 
         .rightButton {
             border-radius: 15px;            
@@ -147,12 +169,22 @@ header {
     }
 }
 
+.tabs {
+  position: absolute;
+  top: @nav-height;
+  width: 100%;
+  z-index: 100;
+}
+
 .immersion {
   header {
     nav {
         height: @nav-height + @immersion-height;
         padding-top: @immersion-height; 
     }
+  }
+  .tabs {
+    top: @nav-height + @immersion-height;
   }
 }
 
@@ -234,8 +266,7 @@ footer {
 
 .data-loading {
     text-align: center;
-    // height: 50px;
-    padding: 20px 0px 20px 0px; 
+    padding: 20px 10px 20px 10px; 
     span {
       font-weight: bold;
     }
