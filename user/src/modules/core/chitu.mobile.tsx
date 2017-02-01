@@ -1,128 +1,20 @@
 import * as chitu from 'chitu';
-import React = require('react');
-import ReactDom = require('react-dom');
-
-// class PageView extends React.Component<{}, {}>{
-//     render() {
-//         return (
-//             <section>
-//             </section>
-//         );
-//     }
-// }
-
-class Errors {
-    static argumentNull(paramName: string) {
-        let msg = `Argument '${paramName}' can not be null`;
-        return new Error(msg);
-    }
-    static headerExists(pageName: string) {
-        let msg = `Header is exists in '${pageName}'.`;
-        return new Error(msg);
-    }
-    static footerExists(pageName: string) {
-        let msg = `Header is exists in '${pageName}'.`;
-        return new Error(msg);
-    }
-}
-
-class Exception extends Error {
-    handled: boolean = false;
-}
-
 /**
  * 说明：页面中元素的获取，都是实时 DOM 查询，而不是保存在一个变量中，是因为
  * 某些MVVM框架，可能会用到虚拟 DOM，把页面中的元素改写了。
  */
-const headerTagName = 'HEADER';
-const footerTagName = 'FOOTER';
+
 export const viewTagName = 'SECTION';
 
-type ViewClassName = 'main' | 'loading' | 'error';
-export class Page extends chitu.Page {
-    private views: ViewClassName[] = ['main', 'loading', 'error'];
-    private headerHeight = 0;
-    private footerHeight = 0;
-    private resize = chitu.Callbacks<Page, { headerHeight: number, footerHeight: number }>();
 
-    private _viewCompleted: boolean = false;
+export class Page extends chitu.Page {
+
     public displayStatic: boolean = false;
     public allowSwipeBackGestrue = false;
     public app: Application;
 
     constructor(params: chitu.PageParams) {
         super(params);
-
-        for (let className of this.views) {
-            this.createView(className);
-        }
-
-        this.view('error').style.display = 'none';
-
-        this.load.add((sender: Page, args: any) => {
-            this._viewCompleted = true;
-            if (args.viewHTML)
-                this.view('main').innerHTML = args.viewHTML || '';
-        });
-    }
-
-    private createView(className: string) {
-        let childElement = document.createElement(viewTagName);
-        childElement.className = className;
-        this.element.appendChild(childElement);
-        return childElement;
-    }
-
-    protected view(className: ViewClassName) {
-        let element = this.element.querySelector(`.${className}`) as HTMLElement;
-        return element;
-    }
-
-    get dataView() {
-        return this.view('main');
-    }
-
-    get errorView() {
-        return this.view('error');
-    }
-
-    get loadingView() {
-        return this.view('loading');
-    }
-
-    get header(): HTMLElement {
-        return this.element.querySelector(headerTagName) as HTMLElement;
-    }
-
-    get footer(): HTMLElement {
-        return this.element.querySelector(footerTagName) as HTMLElement;
-    }
-
-    get viewCompleted(): boolean {
-        return this._viewCompleted;
-    }
-
-    createHeader(headerHeight: number): HTMLElement {
-        if (this.header != null)
-            throw Errors.headerExists(this.routeData.pageName);
-
-        let headerElement = document.createElement(headerTagName);
-        this.headerHeight = headerHeight;
-        headerElement.style.height = headerHeight + 'px';
-        this.element.insertBefore(headerElement, this.dataView);
-
-        return headerElement;
-    }
-
-    createFooter(): HTMLElement {
-        if (this.footer != null)
-            throw Errors.footerExists(this.routeData.pageName);
-
-        let footerElement = document.createElement('footer');
-        //footerElement.style.height = footerHeight + 'px';
-        this.element.appendChild(footerElement);
-
-        return footerElement;
     }
 }
 
@@ -143,7 +35,7 @@ export class Application extends chitu.Application {
 
     protected createPage(routeData: chitu.RouteData) {
         let page = super.createPage(routeData);
-        (page as Page).app = this;
+        //(page as Page).app = this;
         this.pageShown.fire(this, { page });
 
         return page;
@@ -553,4 +445,4 @@ class LowMachinePageDisplayImplement implements chitu.PageDisplayer {
             }, 500)
         });
     }
-} 
+}

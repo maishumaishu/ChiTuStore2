@@ -17,7 +17,7 @@ module.exports = function (grunt) {
                 options: {
                     failOnError: false
                 }
-            },
+            }
         },
         babel: {
             es5: {
@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                     presets: ["es2015"],
                 },
                 files: [
-                    { expand: true, cwd: 'build/modules', src: ['**/*.js', '**/*.jsx'], dest: dest_user_root + '/modules.es5', ext: '.js' },
+                    { expand: true, cwd: `${dest_user_root}/modules`, src: ['**/*.js'], dest: dest_user_root + '/modules.es5' },
                 ]
             }
         },
@@ -37,8 +37,8 @@ module.exports = function (grunt) {
                         expand: true, cwd: src_user_root, dest: dest_user_root,
                         src: ['js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'ui/**/*.*', 'index.html'],
                     },
-                    { expand: true, cwd: src_user_root + '/modules', dest: dest_user_root + '/pages', src: ['**/*.html'] },
-                    { expand: true, cwd: 'build', dest: dest_user_root, src: ['**/*.js'] }
+                    //{ expand: true, cwd: src_user_root + '/modules', dest: dest_user_root + '/pages', src: ['**/*.html'] },
+                    //{ expand: true, cwd: 'build', dest: dest_user_root, src: ['**/*.js'] }
                 ],
             },
             ios: {
@@ -59,14 +59,26 @@ module.exports = function (grunt) {
                 },
                 { expand: false, src: `${src_user_root}/content/bootstrap-3.3.5/bootstrap.less`, dest: `${dest_user_root}/content/css/bootstrap.css` }]
             }
-        }
+        },
+        concat: {
+
+            dest: {
+                options: {
+
+                },
+                src: [`${src_user_root}/js/hammer.js`, `${src_user_root}/js/bezier-easing.js`, `${dest_user_root}/modules/controls/*.js`],
+                dest: `${dest_user_root}/modules/controls.js`,
+            }
+        },
     });
 
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-stylus');
     grunt.loadNpmTasks('grunt-contrib-less');
 
-    grunt.registerTask('default', ['shell', 'less', 'babel', 'copy']);
+    grunt.registerTask('default', ['shell', 'less', 'concat', 'babel', 'copy']);
+    //grunt.registerTask('default', ['concat']);
 }

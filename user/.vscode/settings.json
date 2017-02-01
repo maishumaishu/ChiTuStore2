@@ -1,0 +1,11 @@
+{
+    "files.exclude": {
+        "build": true,
+        "node_modules": true,
+        "LICENSE": true,
+        //"README.md": true,
+        "/**/.baseDir.*": true,
+        ".tscache": true,
+        "build":true
+    }
+}

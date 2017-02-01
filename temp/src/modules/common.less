@@ -1,0 +1,69 @@
+﻿@import "../content/bootstrap-3.3.5/variables.less";
+
+//@header-height: 50px;          // 页面头部的高度
+@footer-height: 50px;            // 页面头部的高度
+@header-title-font-size: 18px;   // 页面头部标题栏
+@topbar-font-size: 18px;         //
+@menu-height:50px;               // 菜单高度
+@nav-height:50px;                //导航栏高度
+ 
+@v-padding: 10px;
+@h-padding: 10px;
+@sub-num: #BF0705;
+@bg-color: white;
+@star-color: #bf0705;
+@page-zindex: 100;
+@immersion-height:15px;
+@norecords-padding-top:100px;
+
+.price(){
+    .price {
+        color:#f70;
+        font-weight: bold;
+    }
+}
+
+.padding-top(@padding-top: 0px){
+    section {
+        padding-top: @nav-height + @padding-top;
+    }
+
+    &.immersion {
+        section {
+            padding-top: @nav-height + @immersion-height + @padding-top;
+        }
+        // header {
+        //     padding-top: @immersion-height;
+        // }
+        // .norecords {
+        //     padding-top: @norecords-padding-top + @immersion-height;
+        // }
+    }
+}
+
+
+.pull-down-indicator {
+    .pull-down-indicator {
+        height: @nav-height;
+        padding: 10px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+
+        i {
+            margin-right: 4px;
+        }
+    }
+
+    &.immersion {
+        .pull-down-indicator {
+            height: @nav-height + @immersion-height;
+        }
+    }
+}
+
+.padding-bottom(){
+    section {
+        padding-bottom: @menu-height;
+    }
+}

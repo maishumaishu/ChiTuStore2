@@ -1,0 +1,219 @@
+@import "../../content/bootstrap-3.3.5/variables.less";
+@import "../common.less";
+
+.home-index {
+
+    section.main{
+        transform: translateY(0 - @menu-height);
+    }
+    .pulldown-indicator {
+        height: @menu-height;
+        padding-top: 20px;
+        //background-color: red;
+        text-align: center;
+    }
+    .products {
+        .item {
+            padding-top: 16px;
+            padding-bottom: 10px;
+
+            &:nth-child(2n+1) {
+                border-bottom: 1px solid @gray-lighter;
+                border-right: 1px solid @gray-lighter;
+                /*margin-top: 1px;*/
+            }
+
+
+            &:nth-child(2n) {
+                border-left: 1px solid white;
+                border-bottom: 1px solid @gray-lighter;
+            }
+
+            .bottom {
+                text-align: left;
+                padding: 8px 0px 0px 8px;
+            }
+
+            .price();
+
+            img {
+                max-width: 70%;
+                height: auto;
+            }
+        }
+
+        promotion-label {
+            padding-top: 2px;
+            /*position: relative;
+            display: block;
+            top: -24px;
+            left: 0px;
+            height: 20px;
+            min-height: 20px;
+            text-align: right;*/
+        }
+    }
+
+    header {
+
+        nav {
+            &:first-child {
+                opacity: 0;
+            }
+        }
+
+        .search-input {
+            border-width:0px;
+            border-radius:4px;
+            margin: 10px 52px 0px 52px;
+            width: auto;
+            background-color: white;
+            color: @gray-light;
+            text-align: left;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        .icon-search {
+            float: right;
+            font-size: 18px;
+            color: #98a0af;
+        }
+        .left-icon {
+            float: left;
+            margin: 2px 0px 0px 0px; 
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            width: 50px;
+
+            & div {
+                font-size: 12px;
+                margin-top: -4px;
+            }
+        }
+        .right-icon {
+            float: right;
+            margin: 0px 0px 0px 0px; 
+            text-align: center;
+            color: white;
+            font-size: 22px;
+            width: 50px;
+            & div {
+                font-size: 12px;
+                margin-top: -6px;
+            }
+
+            & .badge {
+                position: relative;
+                right: -50px;
+                color: @brand-primary;
+                background-color: @btn-primary-color;
+            }
+        }
+    }
+    .quickbar {
+        @quickbar_item_width: 60px;
+        @quickbar_item_left: -28px;
+        @quickbar_icon_fontsize: 40px;
+        @quickbar_icon_top: 12px;
+
+        padding: 20px 0px 0px 0px;
+
+        .text {
+            margin-top: 6px;
+            //padding-right: 12px;
+            font-size: 12px;
+        }
+
+        .col-xs-3 {
+            padding: 0px;
+        }
+
+        & :nth-child(1) {
+            .item {
+                position: relative;
+                left: @quickbar_item_left;
+                border-radius: 50%;
+                background-color: #F06292;
+                width: @quickbar_item_width;
+                height: @quickbar_item_width;
+                text-align: center;
+
+                i {
+                    color: white;
+                    font-size: @quickbar_icon_fontsize; //48px;
+                    position: relative;
+                    left: 0px;
+                    top: @quickbar_icon_top;
+                }
+            }
+        }
+
+        & :nth-child(2) {
+            .item {
+                position: relative;
+                left: @quickbar_item_left;
+                border-radius: 50%;
+                background-color: #4DD0E2;
+                width: @quickbar_item_width;
+                height: @quickbar_item_width;
+                text-align: center;
+
+                i {
+                    color: white;
+                    font-size: @quickbar_icon_fontsize - 4;
+                    position: relative;
+                    left: 0px;
+                    top: @quickbar_icon_top + 2;
+                }
+            }
+        }
+
+        & :nth-child(3) {
+            .item {
+                position: relative;
+                left: @quickbar_item_left;
+                border-radius: 50%;
+                background-color: #FF8A66;
+                width: @quickbar_item_width;
+                height: @quickbar_item_width;
+                text-align: center;
+
+                i {
+                    color: white;
+                    font-size: @quickbar_icon_fontsize - 4;
+                    position: relative;
+                    left: 0px;
+                    top: @quickbar_icon_top;
+                }
+            }
+        }
+
+        & :nth-child(4) {
+            .item {
+                position: relative;
+                left: @quickbar_item_left;
+                border-radius: 50%;
+                background-color: #CF93D9;
+                width: @quickbar_item_width;
+                height: @quickbar_item_width;
+                text-align: center;
+
+                i {
+                    color: white;
+                    font-size: @quickbar_icon_fontsize;
+                    position: relative;
+                    left: 0px;
+                    top: @quickbar_icon_top - 2;
+                }
+            }
+        }
+    }
+
+    .carousel-inner .item img {
+        width: 100%;
+    }
+}
+
+
+

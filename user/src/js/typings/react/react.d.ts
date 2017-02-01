@@ -379,11 +379,17 @@ declare module React {
     // This interface is not complete. Only properties accepting
     // unitless numbers are listed here (see CSSProperty.js in React)
     interface CSSProperties {
+        
+        background?: string;
+        backgroundColor?: string;
+
         border?: string;
+        borderRadius?: number | string;
+        borderTopWidth?: number | string;
+        borderWidth?: number | string;
         bottom?: number | string;
         boxFlex?: number;
         boxFlexGroup?: number;
-        backgroundColor?: string;
         borderBottom?: string;
 
         color?: string;
@@ -429,6 +435,7 @@ declare module React {
         paddingTop?: number | string;
         position?: 'relative' | 'absolute' | 'fixed'
         textAlign?: string;
+        transform?: string;
         transition?: string;
         width?: number | string;
 

@@ -1,15 +1,18 @@
 import { Page, defaultNavBar } from 'site';
 import { ShopService, Product } from 'services';
 
-import { DataList } from 'controls/dataList';
-import { ImageBox } from 'controls/imageBox';
+let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, DataList, Panel,
+    PageComponent, PageHeader, PageFooter, PageView, Tabs } = controls;
 
 export default function (page: Page) {
 
     let shop = page.createService(ShopService);
     let categoryId = page.routeData.values.categoryId;
 
-    class ProductListView extends React.Component<{}, {}>{
+    class ProductListView extends React.Component<{ title: string }, {}>{
+
+        private dataView: HTMLElement;
+
         loadProducts(pageIndex: number) {
             return shop.products(categoryId, pageIndex).then(items => {
                 return items;
@@ -17,18 +20,33 @@ export default function (page: Page) {
         }
         render() {
             return (
-                <DataList className="products" scroller={page.dataView} loadData={this.loadProducts}
-                    dataItem={(o: Product) => (
-                        <a key={o.Id} href={`#home_product?id=${o.Id}`} className="col-xs-6 text-center item">
-                            <ImageBox src={o.ImageUrl} />
-                            <div className="bottom">
-                                <div className="interception">{o.Name}</div>
-                                <div>
-                                    <div className="price pull-left">￥{o.Price.toFixed(2)}</div>
-                                </div>
-                            </div>
-                        </a>
-                    )} />
+                <PageComponent>
+                    <PageHeader>
+                        {defaultNavBar({ title: this.props.title })}
+                        <Tabs className="tabs" scroller={() => this.dataView}>
+                            <span className="active">综合</span>
+                            <span className="">销量</span>
+                            <span>
+                                <span>价格</span>
+                                <span className="icon-angle-up"></span>
+                            </span>
+                        </Tabs>
+                    </PageHeader>
+                    <PageView ref={(o) => o ? this.dataView = o.element : null}>
+                        <DataList className="products" scroller={() => this.dataView} loadData={this.loadProducts}
+                            dataItem={(o: Product) => (
+                                <a key={o.Id} href={`#home_product?id=${o.Id}`} className="col-xs-6 text-center item">
+                                    <ImageBox src={o.ImageUrl} />
+                                    <div className="bottom">
+                                        <div className="interception">{o.Name}</div>
+                                        <div>
+                                            <div className="price pull-left">￥{o.Price.toFixed(2)}</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            )} />
+                    </PageView>
+                </PageComponent>
             );
         }
     }
@@ -55,9 +73,8 @@ export default function (page: Page) {
         }
     }
 
-    ReactDOM.render(<ProductListView />, page.dataView);
+    // ReactDOM.render(<ProductListView />, page.dataView);
     shop.category(categoryId).then(o => {
-        page.loadingView.style.display = 'none';
-        ReactDOM.render(<ProductListHeader title={o.Name} />, page.header);
+        ReactDOM.render(<ProductListView title={o.Name} />, page.element);
     })
 }

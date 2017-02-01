@@ -1,0 +1,49 @@
+@import "../common.less";
+
+.shopping-shoppingCart {
+
+    .padding-top();
+    .padding-bottom();
+
+    .pic {
+        padding-right: 0;
+        text-align: left;
+        width: 60px;
+        height: 60px;
+        position: absolute;
+        left: 36px;
+    }
+    
+    .list-group-item {
+        min-height: 80px;
+        .icon-ok-sign, .icon-circle-blank {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            margin: -14px 0;
+            font-size: 24px;
+            color: #BF0705;
+        }
+    }
+
+    .price();
+    
+    .settlement {
+        .select-all {
+            .icon-ok-sign {
+                top: 4px;
+                left: -22px;
+            }
+
+            .icon-circle-blank {
+                top: 4px;
+                left: -22px;
+            }
+
+            .text {
+                position: relative;
+                left: -18px;
+            }
+        }
+    }
+}

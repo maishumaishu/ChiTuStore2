@@ -1,44 +1,37 @@
 import { Service, ShoppingCartService, AjaxError } from 'services';
-import { Application as BaseApplication, Page as BasePage } from 'chitu.mobile';
-import { config as imageBoxConfig } from 'controls/imageBox';
-import * as chitu from 'chitu';
-import { Component } from 'react';
-import React = require('react');
-import ReactDOM = require('react-dom');
+import { Application as BaseApplication } from 'chitu.mobile';
 
-window['React'] = React;
-window['ReactDOM'] = ReactDOM;
+
+import * as chitu from 'chitu';
 
 /** 是否为 APP */
-var isCordovaApp = location.protocol === 'file:';
+let isCordovaApp = location.protocol === 'file:';
 /** 是否为安卓系统 */
 export let isAndroid = navigator.userAgent.indexOf('Android') > -1;
 /** 是否允浸入式头 */
 let allowImmersionHeader = false;
 let topLevelPages = ['home.index', 'home.class', 'shopping.shoppingCart', 'home.newsList', 'user.index'];
 
+const loadingClassName = 'loading';
+
 if (isCordovaApp && !isAndroid) {
     allowImmersionHeader = true;
 }
 
 export let config = {
-    get imageText() {
-        return imageBoxConfig.imageDisaplyText;
-    },
-    set imageText(value) {
-        imageBoxConfig.imageDisaplyText = value;
-    },
+    // get imageText() {
+    //     return imageBoxConfig.imageDisaplyText;
+    // },
+    // set imageText(value) {
+    //     imageBoxConfig.imageDisaplyText = value;
+    // },
     defaultUrl: 'home_index'
 }
 
-class Menu extends Component<{ pageName: string }, { itemsCount: number }> {
+export class Menu extends React.Component<{ pageName: string }, { itemsCount: number }> {
     constructor(props) {
         super(props);
         this.state = { itemsCount: 0 };
-        let shoppingCart = new ShoppingCartService();
-        shoppingCart.productsCount().then(num => {
-            this.setState({ itemsCount: num });
-        });
     }
     componentDidMount() {
         let menuElement = this.refs['menu'] as HTMLElement;
@@ -89,19 +82,13 @@ class Menu extends Component<{ pageName: string }, { itemsCount: number }> {
     }
 }
 
-export class Page extends BasePage {
+export class Page extends chitu.Page {
+    private allowSwipeBackGestrue;
+    private displayStatic;
+
     constructor(params) {
         super(params);
 
-        this.buildErrorView();
-        this.buildLoadingView();
-        this.buildHeader();
-        if (topLevelPages.indexOf(this.routeData.pageName) >= 0) {
-            this.createMenu();
-        }
-        if (this.routeData.pageName == 'home.product') {
-            this.createFooter();
-        }
 
         let className = this.routeData.pageName.split('.').join('-');
         this.element.className = (allowImmersionHeader ? 'page immersion ' : 'page ') + className;
@@ -110,8 +97,9 @@ export class Page extends BasePage {
         //=========================================
         // 在 shown 加入转动，而不是一开始加，避免闪烁
         this.shown.add((sender: Page, args) => {
-            let i = sender.loadingView.querySelector('i') as HTMLElement;
-            i.className = i.className + ' icon-spin';
+            let i = sender.element.querySelector('section.loading i') as HTMLElement;
+            if (i)
+                i.className = i.className + ' icon-spin';
         })
         //=========================================
 
@@ -120,10 +108,31 @@ export class Page extends BasePage {
         this.allowSwipeBackGestrue = (isCordovaApp || isAndroid) && topLevelPages.indexOf(this.routeData.pageName) < 0;
         //===================================================readonly
 
+        this.renderLoading();
     }
 
-    private buildErrorView() {
-        ReactDOM.render((
+    private renderLoading() {
+        ReactDOM.render(
+            <div>
+                {this.createHeader()}
+                <section className={loadingClassName}>
+                    <div className="spin">
+                        <i className="icon-spinner"></i>
+                    </div>
+                </section>
+                {topLevelPages.indexOf(this.routeData.pageName) >= 0 ?
+                    <footer>
+                        <Menu pageName={this.name} />
+                    </footer>
+                    : null
+                }
+            </div>,
+            this.element
+        );
+    }
+
+    private renderError() {
+        ReactDOM.render(
             <div className="norecords">
                 <div className="icon">
                     <i className="icon-rss">
@@ -131,19 +140,11 @@ export class Page extends BasePage {
                 </div>
                 <h4 className="text"></h4>
                 <button onClick={() => this.reload()} className="btn btn-default">点击重新加载页面</button>
-            </div>
-        ), this.errorView);
+            </div>, this.element
+        );
     }
 
-    private buildLoadingView() {
-        ReactDOM.render((
-            <div className="spin">
-                <i className="icon-spinner"></i>
-            </div>
-        ), this.loadingView);
-    }
-
-    private buildHeader() {
+    private createHeader() {
         let noneHeaderPages = ['user.index'];
         if (noneHeaderPages.indexOf(this.routeData.pageName) >= 0) {
             return;
@@ -163,17 +164,7 @@ export class Page extends BasePage {
                 break;
         }
 
-        let headerElement = document.createElement('header');
-        ReactDOM.render(navBar, headerElement);
-        this.element.appendChild(headerElement);
-    }
-
-    private createMenu() {
-        let page = this;
-        let routeData = page.routeData;
-        let footerElement = page.createFooter();
-
-        ReactDOM.render(<Menu pageName={this.routeData.pageName} />, footerElement);
+        return <header>{(navBar)}</header>;
     }
 
     createService<T extends Service>(serviceType: { new (): T }): T {
@@ -185,18 +176,13 @@ export class Page extends BasePage {
     }
 
     private showError(err: Error) {
-        let method: string;
-        let display = this.loadingView.style.display || 'block';
-        if (this.dataViewIsActive()) {
-            alert(err.message);
-            console.log(err);
+        let loadingElement = this.element.querySelector(`.${loadingClassName}`) as HTMLElement;
+        if (loadingElement) {
+            this.renderError();
         }
         else {
-            let element = this.view('error').querySelector('.text') as HTMLElement;
-            console.assert(element != null);
-            element.innerHTML = err.message;
-
-            this.errorView.style.display = 'block'
+            alert(err.message);
+            console.log(err);
         }
     }
 
@@ -215,9 +201,8 @@ export class Page extends BasePage {
     }
 
     reload() {
-        this.errorView.style.display = 'none';
-        this.loadingView.style.display = 'block';
         let result = super.reload();
+        this.renderLoading();
         return result;
     }
 }
@@ -235,7 +220,7 @@ export class Application extends BaseApplication {
     }
 
     protected createPage(routeData: chitu.RouteData) {
-        let page = super.createPage(routeData) as Page;
+        let page = super.createPage(routeData);// as Page;
 
         let path = routeData.actionPath.substr(routeData.basePath.length);
         let cssPath = `css!content/app` + path;
@@ -256,22 +241,29 @@ if (!location.hash) {
     app.redirect(config.defaultUrl);
 }
 
-export function defaultNavBar(options?: { title?: string, showBackButton?: boolean }) {
+export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element }) {
     options = options || {};
     let title = options.title || '';
     let showBackButton = options.showBackButton == null ? true : options.showBackButton;
 
     return (
         <nav className="bg-primary">
-            {showBackButton ?
-                <button name="back-button" onClick={() => app.back()} className="leftButton" style={{ opacity: 1 }}>
-                    <i className="icon-chevron-left"></i>
-                </button> :
-                <span></span>
-            }
-            <h4>
-                {title}
-            </h4>
+            <div className="col-xs-3" style={{ padding: 0 }}>
+                {showBackButton ?
+                    <button name="back-button" onClick={() => app.back()} className="left-button" style={{ opacity: 1 }}>
+                        <i className="icon-chevron-left"></i>
+                    </button> :
+                    <span></span>
+                }
+            </div>
+            <div className="col-xs-6" style={{ padding: 0 }}>
+                <h4>
+                    {title}
+                </h4>
+            </div>
+            <div className="col-xs-3" style={{ padding: 0 }}>
+                {options.right ? (options.right) : null}
+            </div>
         </nav>
     );
 }

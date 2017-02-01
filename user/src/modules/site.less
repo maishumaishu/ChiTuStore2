@@ -73,6 +73,8 @@ button {
   }
 }
 
+.price();
+
 /* 页面样式 开始*/
 .page {
   width: 100%;
@@ -87,27 +89,23 @@ button {
     position: absolute;
     width: 100%;
     height: 100%;
-    overflow-y:scroll;
+    overflow-y: scroll;
     overflow-x: hidden;
     -webkit-user-drag:none;
-    -webkit-user-select: none;
+    // -webkit-user-select: none;
     -webkit-overflow-scrolling:touch;
-    
-    > div {
-      background: @body-bg;
-    }
+  }
 
-    &.loading {
-        width: 100%;
-        font-size: 120px;
-        text-align: center;  
-        padding-top: 80px;
-        color: #bbb;
-        background-color: @bg-color;
-    }
-    &.error {
-        background-color: @bg-color;
-    }
+  .loading {
+      width: 100%;
+      font-size: 120px;
+      text-align: center;  
+      padding-top: 80px;
+      color: #bbb;
+      background-color: @bg-color;
+  }
+  .error {
+      background-color: @bg-color;
   }
 }
 
@@ -140,6 +138,7 @@ header {
         position: absolute;
         z-index: 200;
 
+        .right-button,
         .rightButton {
             border-radius: 15px;            
             font-size: 18px;
@@ -148,6 +147,8 @@ header {
             height: 30px;
             width: 30px;
         }
+
+        .left-button,
         .leftButton {
             border-radius: 15px;
             font-size: 18px;
@@ -162,19 +163,49 @@ header {
           color: @body-bg;
           font-size: 18px;
           height: @nav-height; 
-          margin: 0px 60px 0px 60px;
-          padding: @nav-padding-top + 10px 0 0 0;
+          padding: @nav-padding-top 0 0 0;
           text-align: center;
         }
     }
 }
 
-.tabs {
-  position: absolute;
-  top: @nav-height;
-  width: 100%;
-  z-index: 100;
+ul.tabs {
+    opacity: 0.9;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: @nav-height;
+    width: 100%;
+    z-index: 100;
+
+    li {
+        float: left;
+        text-align: center;
+        background-color: #fff;
+        font-size: 16px;
+        display: block;
+        border: 1px solid @gray-lighter;
+        border-left: none;
+        padding: 8px;
+        color: #999;
+        cursor: pointer;
+        // width: 33.33%;
+
+        &:first-child {
+            border-left: 1px solid #e5e5e5;
+        }
+
+        //a {
+        text-decoration: none;
+
+        &.active {
+            color: @brand-primary;
+            font-weight: bold;
+        }
+    }
+    
 }
+
 
 .immersion {
   header {
@@ -295,7 +326,16 @@ footer {
   width: 100%;
 }
 
+.modal-dialog {
+  z-index: @zindex-modal;
+}
 
+.validationMessage {
+  color: red;
+  font-weight: bold;
+}
 
-
+.label {
+  border-radius: 0;
+}
 

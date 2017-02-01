@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "amd",
+        "sourceMap": false,
+        "outDir": "../build",
+        "experimentalDecorators": true,
+        "jsx": "react"
+    }
+}

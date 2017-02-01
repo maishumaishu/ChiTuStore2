@@ -1,7 +1,8 @@
-import { Page, defaultNavBar } from 'site';
+import { Page, Menu, defaultNavBar } from 'site';
 import { StationService, imageUrl, News } from 'services';
-import { HtmlView } from 'controls/HtmlView';
 import * as site from 'site';
+
+let { PageComponent, PageHeader, PageFooter, PageView, HtmlView } = controls;
 
 // import Vue = require('vue');
 
@@ -9,20 +10,35 @@ export default function (page: Page) {
     let station = page.createService(StationService);
     let id = page.routeData.values.id;
     console.assert(id);
-    station.news(id).then(news => {
-        page.loadingView.style.display = 'none';
-        ReactDOM.render((
-            <div className="container">
-                <h2>{news.Title}</h2>
-                <div className="small">
-                    {news.Date.toLocaleDateString()}
-                </div>
-                <HtmlView content={news.Content} />
-            </div>
-        ), page.dataView)
-    });
 
-    ReactDOM.render(defaultNavBar({ title: '资讯详情' }), page.header);
+    class NewsPage extends React.Component<{ news: News }, {}>{
+        render() {
+            let news = this.props.news;
+            return (
+                <PageComponent>
+                    <PageHeader>
+                        {defaultNavBar({ title: '资讯详情' })}
+                    </PageHeader>
+                    <PageFooter>
+                        <Menu pageName={page.name} />
+                    </PageFooter>
+                    <PageView>
+                        <div className="container">
+                            <h2>{news.Title}</h2>
+                            <div className="small">
+                                {news.Date.toLocaleDateString()}
+                            </div>
+                            <HtmlView content={news.Content} />
+                        </div>
+                    </PageView>
+                </PageComponent>
+            );
+        }
+    }
+
+    station.news(id).then(news => {
+        ReactDOM.render(<NewsPage news={news} />, page.element);
+    })
 
 }
 

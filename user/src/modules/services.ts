@@ -1,7 +1,6 @@
 
 import chitu = require('chitu');
 
-
 export class AjaxError implements Error {
     name: string;
     message: string;
@@ -29,7 +28,7 @@ let config = {
         return '584cfabb4918e4186a77ff1e';
     },
     /** 调用服务接口超时时间，单位为秒 */
-    ajaxTimeout: 20,
+    ajaxTimeout: 10,
     pageSize: 10
 }
 
@@ -90,7 +89,10 @@ function parseDate(value: string): Date {
 //========================================================================================
 
 export function imageUrl(path: string) {
-    if (path.startsWith('http://localhost')) {
+    if (path.startsWith(`http://localhost:${location.port}`)) {
+        path = path.substr(`http://localhost:${location.port}`.length);
+    }
+    else if (path.startsWith('http://localhost')) {
         path = path.substr('http://localhost'.length);
     }
     const imageBasePath = 'http://service.alinq.cn:2800/AdminServices/Shop';
@@ -310,6 +312,15 @@ export class StationService extends Service {
         return this.get<News>(url, { newsId }).then(item => {
             item.ImgUrl = imageUrl(item.ImgUrl);
             //item.Date = parseDate(item.Date).toLocaleDateString();
+            let div = document.createElement('div');
+            div.innerHTML = item.Content;
+            let imgs = div.querySelectorAll('img');
+            for (let i = 0; i < imgs.length; i++) {
+                (imgs[i] as HTMLImageElement).src = imageUrl((imgs[i] as HTMLImageElement).src);
+            }
+
+            item.Content = div.innerHTML;
+
             return item;
         });
     }
@@ -341,8 +352,12 @@ export class StationService extends Service {
 
 export interface HomeProduct {
     Id: string, Name: string, ImagePath: string,
-    ProductId: string, Price: number
+    ProductId: string, Price: number, PromotionLabel: string
 };
+export interface CustomProperty {
+    Name: string,
+    Options: Array<{ Name: string, Selected: boolean, Value: string }>
+}
 export interface Product {
     Id: string, Arguments: Array<{ key: string, value: string }>,
     BrandId: string, BrandName: string, Price: number,
@@ -351,11 +366,16 @@ export interface Product {
     GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
     ProductCategoryId: string, Name: string, //IsFavored?: boolean,
     ProductCategoryName: string,
-    CustomProperties: Array<{
-        Name: string,
-        Options: Array<{ Name: string, Selected: boolean, Value: string }>
-    }>
+    CustomProperties: Array<CustomProperty>,
+    Promotions: Promotion[]
 };
+export interface Promotion {
+    Type: 'Given' | 'Reduce' | 'Discount',
+    Contents: {
+        Id: string,
+        Description: string
+    }[],
+}
 export type FavorProduct = {
     Id: string;
     ProductId: string,
@@ -369,7 +389,10 @@ export interface Order {
     Id: string,
     Amount: number,
     BalanceAmount: number,
+    CouponTitle: string,
+    Discount: number,
     Freight: number,
+    Invoice: string,
     OrderDate: Date,
     OrderDetails: OrderDetail[],
     ReceiptAddress: string,
@@ -384,6 +407,29 @@ export interface OrderDetail {
     ProductName: string,
     Price: number,
     Quantity: number,
+    Score: number
+}
+export interface ReceiptInfo {
+    Address: string,
+    CityId: string,
+    CityName: string,
+    Consignee: string,
+    CountyId: string,
+    CountyName: string,
+    FullAddress: string,
+    Id: string,
+    IsDefault: boolean,
+    Mobile: string,
+    Name: string,
+    Phone: string,
+    PostalCode: string,
+    ProvinceId: string,
+    ProvinceName: string,
+    RegionId: string
+}
+export interface Region {
+    Id: string,
+    Name: string
 }
 export class ShopService extends Service {
     constructor() {
@@ -394,20 +440,24 @@ export class ShopService extends Service {
     }
     product(productId): Promise<Product> {
         let url = ShopService.url('Product/GetProduct');
-        return this.get<Product>(url, { productId }).then(product => {
-            //product.Count = 1;
-            if (!product.ImageUrls && product.ImageUrl != null)
-                product.ImageUrls = (<string>product.ImageUrl).split(',').map(o => imageUrl(o));
+        return this.get<Product>(url, { productId })
+            .then(product => this.processProduct(product));
+    }
+    productByProperies(groupId: string, properties: { [propName: string]: string }): Promise<Product> {
+        type t = { key: string };
+        var d = { groupId, filter: JSON.stringify(properties) };
+        return this.get<Product>(ShopService.url('Product/GetProductByPropertyFilter'), d)
+            .then(o => this.processProduct(o));
+    }
+    private processProduct(product: Product): Product {
+        if (!product.ImageUrls && product.ImageUrl != null)
+            product.ImageUrls = (<string>product.ImageUrl).split(',').map(o => imageUrl(o));
 
-            product.ImageUrl = product.ImageUrls[0];
-            //product.IsFavored = null;
-            product.Arguments = product.Arguments || [];
-            product.Fields = product.Fields || [];
-            // this.isFavored(productId).then((result) => {
-            //     product.IsFavored = result;
-            // })
-            return product;
-        });
+        product.ImageUrl = product.ImageUrls[0];
+        product.Arguments = product.Arguments || [];
+        product.Fields = product.Fields || [];
+
+        return product;
     }
     productIntroduce(productId: string): Promise<string> {
         let url = ShopService.url('Product/GetProductIntroduce');
@@ -455,6 +505,10 @@ export class ShopService extends Service {
     }
     //=====================================================================
     // 订单
+    balancePay(orderId: string, amount: number) {
+        type TResult = { Id: string, Amount: number, BalanceAmount: number };
+        return this.post<TResult>(ShopService.url('Order/BalancePay'), { orderId: orderId, amount: amount });
+    }
     myOrderList(pageIndex, type?: 'WaitingForPayment' | 'Send') {
         let args = {} as DataSourceSelectArguments;
         args.startRowIndex = config.pageSize * pageIndex;
@@ -476,8 +530,45 @@ export class ShopService extends Service {
             return o;
         });
     }
+    createOrder(productIds: string[], quantities: number[]) {
+        var result = this.post<Order>(ShopService.url('Order/CreateOrder'), { productIds: productIds, quantities: quantities })
+            .then(function (order) {
+                return order;
+            });
+        return result;
+    }
     //=====================================================================
+    // Address
+    receiptInfos() {
+        return this.get<ReceiptInfo[]>(ShopService.url('Address/GetReceiptInfos'));
+    }
+    receiptInfo(id: string) {
+        return this.get<ReceiptInfo>(ShopService.url('Address/GetReceiptInfo'), { id })
+            .then(o => {
+                o.RegionId = o.CountyId;
+                return o;
+            });
+    }
+    provinces(): Promise<Region[]> {
+        var result = this.get<Region[]>(ShopService.url('Address/GetProvinces'))
+        return result;
+    }
+    cities(province: string): Promise<Region[]> {
+        var guidRule = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (guidRule.test(province))
+            return this.get<Region[]>('Address/GetCities', { provinceId: province });
 
+        return this.get<Region[]>('Address/GetCities', { provinceName: province });;
+    }
+    counties = (cityId: string) => {
+        var result = this.get<Region[]>('Address/GetCounties', { cityId: cityId });
+        return result;
+    }
+    saveReceiptInfo(receiptInfo: ReceiptInfo) {
+        var self = this;
+        var result = this.post<{ Id: string, IsDefault: boolean }>('Address/SaveReceiptInfo', receiptInfo);
+        return result;
+    }
 }
 
 export type ShoppingCartItem = {
@@ -493,6 +584,7 @@ export type ShoppingCartItem = {
     Selected: boolean,
     Unit: number,
     Price: number,
+    Type: 'Reduce' | 'Discount'
 }
 
 export class ShoppingCartService extends Service {
@@ -506,27 +598,51 @@ export class ShoppingCartService extends Service {
     private url(path: string) {
         return `${config.service.shop}${path}?storeId=${storeId()}`;
     }
+    private processShoppingCartItems(items: ShoppingCartItem[]) {
+        for (let i = 0; i < items.length; i++) {
+            items[i].ImageUrl = imageUrl(items[i].ImageUrl);
+            if (items[i].Remark) {
+                Object.assign(items[i], JSON.parse(items[i].Remark));
+            }
+        }
+        return items;
+    }
 
     addItem(productId: string, count?: number) {
         count = count || 1;
-        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/AddItem'), { productId, count }).then((result) => {
-            return result;
-        });
+        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/AddItem'), { productId, count })
+            .then((result) => this.processShoppingCartItems(result));
+    }
+
+    updateItem(productId: string, count: number, selected: boolean) {
+        let data = { productId: productId, count: count, selected: selected };
+        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UpdateItem'), data)
+            .then(items => this.processShoppingCartItems(items));
     }
 
     items() {
-        return this.get<ShoppingCartItem[]>(this.url('ShoppingCart/GetItems')).then(items => {
-            items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
-            return items;
-        });
+        return this.get<ShoppingCartItem[]>(this.url('ShoppingCart/GetItems'))
+            .then(items => this.processShoppingCartItems(items));
     }
 
     productsCount() {
         return this.get<number>(this.url('ShoppingCart/GetProductsCount'));
     }
+
+    selectAll = () => {
+        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/SelectAll'))
+            .then(items => this.processShoppingCartItems(items));
+    }
+
+    unselectAll = () => {
+        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UnselectAll'))
+            .then(items => this.processShoppingCartItems(items));
+    }
+
+
 }
 
-type UserInfo1 = {
+interface UserInfo1 {
     Id: string,
     Email: string,
     Mobile: string,
@@ -537,7 +653,7 @@ type UserInfo1 = {
     HeadImageUrl: string,
 }
 
-type UserInfo2 = {
+interface UserInfo2 {
     Balance: number,
     NotPaidCount: number,
     Score: number,
@@ -546,6 +662,9 @@ type UserInfo2 = {
     NickName: string,
     ToEvaluateCount: number,
 }
+
+export type UserInfo = UserInfo1 & UserInfo2;
+
 
 export class MemberService extends Service {
     constructor() {
@@ -565,5 +684,20 @@ export class MemberService extends Service {
         });
     }
 
+}
+
+export class AccountService extends Service {
+    private url(path: string) {
+        return `${config.service.account}${path}?storeId=${storeId()}`;
+    }
+
+    /**
+     * 获取用户账户的余额
+     */
+    balance = () => {
+        return this.get<UserInfo2>(this.url('Account/GetAccount')).then(function (data) {
+            return (new Number(data.Balance)).valueOf();
+        });
+    }
 }
 

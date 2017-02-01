@@ -1,0 +1,21 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "io.cordova.hellocordova"
+        },
+        "cordova-plugin-crosswalk-webview": {
+            "PACKAGE_NAME": "chitu.store2"
+        },
+        "cordova-plugin-inappbrowser": {
+            "PACKAGE_NAME": "chitu.store2"
+        }
+    },
+    "dependent_plugins": {}
+}

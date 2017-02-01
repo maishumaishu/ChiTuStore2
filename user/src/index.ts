@@ -47,10 +47,26 @@ requirejs.config({
             exports: 'fetch'
         },
         'react-dom': {
-            deps: ['react']
+            deps: ['react'],
+            exports: window['ReactDOM'],
+            init: function () {
+                debugger;
+            }
+        },
+        react: {
+            exports: window['React'],
+            init: function () {
+                debugger;
+            }
         },
         services: {
             deps: services_deps
+        },
+        controls: {
+            deps: ['react-dom', 'react']
+        },
+        'controls/scrollView': {
+            deps: ['hammer', 'bezier-easing']
         }
     },
     paths: {
@@ -68,13 +84,21 @@ requirejs.config({
         device: modulesPath + '/device',
         services: modulesPath + '/services',
         site: modulesPath + '/site',
+        validate:modulesPath + '/core/validate',
         'chitu.mobile': modulesPath + '/core/chitu.mobile',
         carousel: modulesPath + '/core/carousel',
         modules: modulesPath
     }
 });
 
-var modules = ['site', 'controls/imageBox'];
+var modules = [
+    'site',
+    'hammer', 'bezier-easing', 'controls/common', 
+    'controls/button', 'controls/dataList', 'controls/dialog', 'controls/htmlView',
+    'controls/imageBox', 'controls/indicators', 'controls/page', 'controls/panel',
+    'controls/tabs'
+];
+
 if (isCordovaApp) {
     modules.push('cordova');
     modules.push('device');
@@ -89,9 +113,14 @@ else {
 }
 
 function load() {
-    requirejs(modules, function (site, exports1) {
-        exports1.config.imageDisaplyText = '麦子的店';
-    });
+    requirejs(['react', 'react-dom'], function (React, ReactDOM) {
+        window['React'] = React;
+        window['ReactDOM'] = ReactDOM;
+
+        requirejs(modules, function (site, exports1) {
+            controls.imageBoxConfig.imageDisaplyText = '麦子的店';
+        });
+    })
 
 }
 
