@@ -3,10 +3,11 @@ namespace controls {
 
     interface DataListProps extends React.Props<DataList> {
         loadData: ((pageIndex: number) => Promise<Array<any>>),
-        dataItem: ((o: any) => JSX.Element),
+        dataItem: ((o: any, index: number) => JSX.Element),
         className?: string,
         pageSize?: number,
-        scroller?: () => HTMLElement
+        scroller?: () => HTMLElement,
+        emptyItem?: JSX.Element
     }
     interface DataListState {
         items: Array<any>
@@ -50,6 +51,10 @@ namespace controls {
         }
 
         componentDidMount() {
+            // let isEmpty = this.state.items.length == 0;
+            // if (isEmpty)
+            //     return;
+
             let scroller: HTMLElement;
             if (this.props.scroller)
                 scroller = this.props.scroller();
@@ -58,6 +63,16 @@ namespace controls {
                 scroller = this.element.parentElement;
             }
             scrollOnBottom(scroller, this.loadData.bind(this));
+        }
+
+        createDataItem(data: any, index: number) {
+            try {
+                return this.props.dataItem(data, index);
+            }
+            catch (e) {
+                let error = e as Error;
+                return <div>{error.message}</div>
+            }
         }
 
         render() {
@@ -85,12 +100,16 @@ namespace controls {
             }
             return (
                 <div ref={(o: HTMLElement) => this.element = o} className={this.props.className}>
-                    {this.state.items.map(o =>
-                        this.props.dataItem(o)
+                    {this.state.items.map((o, i) =>
+                        this.createDataItem(o, i)
                     )}
-                    <div className="data-loading col-xs-12">
-                        {indicator}
-                    </div>
+                    {this.props.emptyItem != null && this.state.items.length == 0 ?
+                        this.props.emptyItem
+                        :
+                        <div className="data-loading col-xs-12">
+                            {indicator}
+                        </div>}
+
                 </div >
             );
         }

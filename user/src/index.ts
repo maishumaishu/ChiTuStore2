@@ -93,10 +93,11 @@ requirejs.config({
 
 var modules = [
     'site',
-    'hammer', 'bezier-easing', 'controls/common', 
-    'controls/button', 'controls/dataList', 'controls/dialog', 'controls/htmlView',
-    'controls/imageBox', 'controls/indicators', 'controls/page', 'controls/panel',
-    'controls/tabs'
+    //'hammer', 'bezier-easing', 'controls/common', 
+    // 'controls/button', 'controls/dataList', 'controls/dialog', 'controls/htmlView',
+    // 'controls/imageBox', 'controls/indicators', 'controls/page', 'controls/panel',
+    // 'controls/tabs'
+    'controls'
 ];
 
 if (isCordovaApp) {

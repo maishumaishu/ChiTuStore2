@@ -396,6 +396,7 @@ export interface Order {
     OrderDate: Date,
     OrderDetails: OrderDetail[],
     ReceiptAddress: string,
+    Remark: string,
     Serial: string,
     Status: string,
     StatusText: string,
@@ -509,6 +510,11 @@ export class ShopService extends Service {
         type TResult = { Id: string, Amount: number, BalanceAmount: number };
         return this.post<TResult>(ShopService.url('Order/BalancePay'), { orderId: orderId, amount: amount });
     }
+    confirmOrder(orderId: string, remark: string, invoice: string) {
+        let args = { orderId, remark, invoice };
+        var result = this.post<Order>(ShopService.url('Order/ConfirmOrder'), args);
+        return result;
+    }
     myOrderList(pageIndex, type?: 'WaitingForPayment' | 'Send') {
         let args = {} as DataSourceSelectArguments;
         args.startRowIndex = config.pageSize * pageIndex;
@@ -535,6 +541,10 @@ export class ShopService extends Service {
             .then(function (order) {
                 return order;
             });
+        return result;
+    }
+    changeReceipt(orderId, receiptId) {
+        var result = this.post<Order>(ShopService.url('Order/ChangeReceipt'), { orderId, receiptId });
         return result;
     }
     //=====================================================================
@@ -639,7 +649,13 @@ export class ShoppingCartService extends Service {
             .then(items => this.processShoppingCartItems(items));
     }
 
+    /*移除购物车中的多个产品*/
+    removeItems(productIds: string[]): Promise<any> {
+        var result = this.post<ShoppingCartItem[]>(this.url('ShoppingCart/RemoveItems'), { productIds })
+            .then((data) => this.processShoppingCartItems(data));
 
+        return result;
+    }
 }
 
 interface UserInfo1 {
@@ -686,6 +702,20 @@ export class MemberService extends Service {
 
 }
 
+export interface BalanceDetail {
+    Amount: number,
+    Balance: number,
+    CreateDateTime: Date,
+    RelatedId: string,
+    RelatedType: string,
+    Type: string
+}
+export interface ScoreDetail {
+    Score: number,
+    Type: string,
+    CreateDateTime:Date,
+    Balance:number,
+}
 export class AccountService extends Service {
     private url(path: string) {
         return `${config.service.account}${path}?storeId=${storeId()}`;
@@ -698,6 +728,18 @@ export class AccountService extends Service {
         return this.get<UserInfo2>(this.url('Account/GetAccount')).then(function (data) {
             return (new Number(data.Balance)).valueOf();
         });
+    }
+
+    balanceDetails(): Promise<BalanceDetail[]> {
+        return this.get<BalanceDetail[]>(this.url('Account/GetBalanceDetails'), {});
+    }
+
+    scoreDetails(): Promise<ScoreDetail[]> {
+        // var result: LoadListPromise<any> = <LoadListPromise<any>>services.callMethod(services.config.accountServiceUrl, )
+        //     .done(() => {
+        //         result.loadCompleted = true;
+        //     });
+        return this.get<ScoreDetail[]>(this.url('Account/GetScoreDetails'), {});
     }
 }
 

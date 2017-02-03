@@ -151,7 +151,7 @@ export default function (page: Page) {
                                 </div>
                                 <div className="text">会员充值</div>
                             </a>
-                            <a className="col-xs-3 text-center" href="#">
+                            <a className="col-xs-3 text-center" href="#user_scoreList">
                                 <div style={{ position: 'relative', left: '50%', width: '0px' }}>
                                     <div className="item">
                                         <i className="icon-exchange"></i>

@@ -241,6 +241,8 @@ if (!location.hash) {
     app.redirect(config.defaultUrl);
 }
 
+//============================================================
+// ui
 export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element }) {
     options = options || {};
     let title = options.title || '';
@@ -287,4 +289,8 @@ export function searchNavBar() {
         </nav>
     );
 }
-
+//============================================================
+export function formatDate(date: Date) {
+    let d = date;
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours()+1}:${d.getMinutes()}`;
+}

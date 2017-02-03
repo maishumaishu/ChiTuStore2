@@ -42,7 +42,7 @@ declare namespace chitu {
         run(): void;
         getPage(name: string): Page;
         showPage(routeString: string, args?: any): Page;
-        private setLocationHash(routeString);
+        setLocationHash(routeString);
         private closeCurrentPage();
         private clearPageStack();
         redirect(routeString: string, args?: any): Page;

@@ -1,5 +1,6 @@
 import { Page, defaultNavBar, app } from 'site';
-import { ShopService, AccountService, Order } from 'services';
+import { ShopService, ShoppingCartService, AccountService, Order } from 'services';
+import { SetAddress, RouteValue } from 'modules/user/receiptList';
 
 export default function (page: Page) {
 
@@ -7,6 +8,7 @@ export default function (page: Page) {
         PageComponent, PageHeader, PageFooter, PageView, Dialog } = controls;
 
     let shop = page.createService(ShopService);
+    let shoppingCart = page.createService(ShoppingCartService)
     let account = page.createService(AccountService);
 
     interface OrderPageState {
@@ -15,9 +17,16 @@ export default function (page: Page) {
     }
 
     class OrderPage extends React.Component<{ order: Order, balance: number }, OrderPageState>{
+        private setAddress: SetAddress;
         constructor(props) {
             super(props);
             this.setStateByOrder(this.props.order);
+            this.setAddress = (address: string, order: Order) => {
+                this.state.order.ReceiptAddress = address;
+                this.setStateByOrder(this.state.order);
+                Object.assign(this.state.order, order);
+                this.setState(this.state);
+            }
         }
         private showCoupons() {
 
@@ -31,6 +40,29 @@ export default function (page: Page) {
             shop.balancePay(order.Id, balanceAmount).then(o => {
                 order.BalanceAmount = o.BalanceAmount;
                 this.setStateByOrder(order);
+            });
+        }
+        private confirmOrder() {
+
+            let order = this.props.order;
+            let orderId = order.Id;
+            let remark = order.Remark;
+            let invoice = order.Invoice;
+            return shop.confirmOrder(orderId, remark, invoice).then(() => {
+                let productIds = order.OrderDetails.map(o => o.ProductId);
+                shoppingCart.removeItems(productIds);
+
+                //===============================================
+                // 进入后订单列表，按返回键可以进入到个人中心
+                app.setLocationHash('user_index');
+                //================================================
+                let actualPaid = order.Sum - order.BalanceAmount;
+                if (actualPaid > 0) {
+                    app.redirect(`shopping_purchase?id=${order.Id}`);
+                }
+                else {
+                    app.redirect('shopping_orderList');
+                }
             });
         }
         private setStateByOrder(order: Order) {
@@ -47,10 +79,14 @@ export default function (page: Page) {
                 this.setState(this.state);
             }
         }
-        private onAddressSelect(address: string) {
-            this.state.order.ReceiptAddress = address;
-            this.setStateByOrder(this.state.order);
+        private showReceiptList() {
+            let routeValue: RouteValue = { callback: this.setAddress, orderId: this.state.order.Id };
+            app.showPage('user_receiptList', routeValue);
         }
+        // private onAddressSelect(address: string) {
+        //     this.state.order.ReceiptAddress = address;
+        //     this.setStateByOrder(this.state.order);
+        // }
         render() {
             let order = this.state.order;
             let balance = this.props.balance;
@@ -60,6 +96,11 @@ export default function (page: Page) {
                     <PageHeader>
                         {defaultNavBar({ title: '确认订单' })}
                     </PageHeader>
+                    <PageFooter>
+                        <div className="container" style={{ paddingTop: 10, paddingBottom: 10 }}>
+                            <button onClick={() => this.confirmOrder()} className="btn btn-block btn-primary">提交订单</button>
+                        </div>
+                    </PageFooter>
                     <PageView>
                         <div className="container">
                             <h4 className="text-primary">收货信息</h4>
@@ -68,7 +109,7 @@ export default function (page: Page) {
                                     点击这里设置收货信息
                                 </div>
                             </a>
-                            <a onClick={() => app.showPage('user_receiptList', { callback: this.onAddressSelect.bind(this) })}
+                            <a onClick={() => this.showReceiptList()}
                                 className="address" style={{ minHeight: 40, display: order.ReceiptAddress ? 'block' : 'none' }}>
                                 <div className="pull-left" style={{ paddingRight: 20 }}>
                                     <span className="small">{order.ReceiptAddress}</span>
@@ -131,10 +172,16 @@ export default function (page: Page) {
                             <hr data-bind="visible:order.CouponTitle" style={{ margin: 0, borderTopWidth: 10 }} />
                             : null}
 
-                        <div onClick={() => this.showInvoice()} className="container">
+                        <div className="container"
+                            onClick={() => app.showPage('shopping_invoice', {
+                                callback: (invoice: string) => {
+                                    this.state.order.Invoice = invoice;
+                                    this.setState(this.state);
+                                }
+                            })}>
                             <h4 className="pull-left">发票信息</h4>
                             <div className="pull-right" style={{ paddingTop: 6 }}>
-                                <span>{order.Invoice}</span>
+                                <span style={{ paddingRight: 10 }}>{order.Invoice}</span>
                                 <i className="icon-chevron-right"></i>
                             </div>
                         </div>
@@ -149,7 +196,7 @@ export default function (page: Page) {
                                 <div className="col-xs-4">商品</div>
                                 <div className="col-xs-8 text-right">
                                     <span style={{ paddingRight: 4 }}>+</span>
-                                    <span className="price">￥{order.Amount}</span>
+                                    <span className="price">￥{order.Amount.toFixed(2)}</span>
                                 </div>
                             </div>
                             <div className="row">
@@ -173,7 +220,7 @@ export default function (page: Page) {
                                         <input type="checkbox" checked={order.BalanceAmount > 0} onChange={() => this.balancePay()} />
                                         <span style={{ padding: '8px 4px 0px 8px' }}>余额支付</span>
                                         <span className="price">
-                                            ￥{this.state.maxOrderBalance}
+                                            ￥{this.state.maxOrderBalance.toFixed(2)}
                                         </span>
                                     </label> : null)}
 
@@ -184,11 +231,6 @@ export default function (page: Page) {
                                     </span>
                                 </div>
                             </div>
-
-                        </div>
-
-                        <div className="container" style={{ paddingTop: 10, paddingBottom: 10 }}>
-                            <button type="submit" className="btn btn-block btn-primary" data-bind="tap: confirmOrder,click: confirmOrder">提交订单</button>
                         </div>
                     </PageView >
                 </PageComponent>

@@ -1,13 +1,17 @@
 import { Page, defaultNavBar, app } from 'site';
-import { ShopService, ReceiptInfo } from 'services';
+import { ShopService, ReceiptInfo, Order } from 'services';
 
 let { PageComponent, PageHeader, PageView, Button } = controls;
+export type SetAddress = (address: string, order: Order) => void;
+export interface RouteValue {
+    callback: SetAddress,
+    orderId: string
+}
 
 export default function (page: Page) {
 
     let shop = page.createService(ShopService);
-    let setAddress: (address: string, receiptId: string) => void = page.routeData.values.callback;
-
+    let routeValue = (page.routeData.values || {}) as RouteValue;
     class ReceiptListPage extends React.Component<{ items: ReceiptInfo[] }, { items?: ReceiptInfo[] }>{
         constructor(props) {
             super(props);
@@ -37,11 +41,19 @@ export default function (page: Page) {
         private deleteReceipt() {
             return Promise.resolve();
         }
+        private setAddress(receipt: ReceiptInfo) {
+            shop.changeReceipt(routeValue.orderId, receipt.Id)
+                .then((order) => {
+                    // order.Freight = 100;
+                    routeValue.callback(this.detail(receipt), order);
+                    app.back();
+                });
+        }
         render() {
             return (
                 <PageComponent>
                     <PageHeader>
-                        {defaultNavBar({ title: setAddress ? '选择收货地址' : '收货地址' })}
+                        {defaultNavBar({ title: routeValue.callback ? '选择收货地址' : '收货地址' })}
                     </PageHeader>
                     <PageView>
                         <div data-bind="foreach: receipts">
@@ -49,7 +61,11 @@ export default function (page: Page) {
                                 <div key={o.Id} style={{ marginBottom: 14 }}>
                                     <div className="container">
                                         <h5 data-bind="text:Name">{o.Name}</h5>
-                                        <div onClick={() => { setAddress(this.detail(o), o.Id); app.back() } } className="small">{this.detail(o)}</div>
+                                        {routeValue.callback ?
+                                            <div onClick={() => this.setAddress(o)} className="small">{this.detail(o)}</div>
+                                            :
+                                            <div className="small">{this.detail(o)}</div>
+                                        }
                                     </div>
                                     <div style={{ marginTop: 6 }}>
                                         <hr style={{ marginBottom: 8 }} />
