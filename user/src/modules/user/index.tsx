@@ -24,13 +24,13 @@ export default async function (page: Page) {
                 <PageComponent>
                     <PageView>
                         <div className="user-info">
-                            <a href="#User_UserInfo" className="pull-left" style={{ margin: '-8px 20px 0px 0px' }}>
+                            <a href="#user_userInfo" className="pull-left" style={{ margin: '-8px 20px 0px 0px' }}>
                                 <ImageBox src={userInfo.HeadImageUrl} className="img-circle img-full" />
                             </a>
 
                             <div>
                                 <div style={{ width: '100%' }}>
-                                    <a className="nick-name" href="#User_UserInfo">
+                                    <a className="nick-name" href="#user_userInfo">
                                         {userInfo.NickName == null ? '未填写' : userInfo.NickName}
                                     </a>
                                 </div>
@@ -39,7 +39,7 @@ export default async function (page: Page) {
                                 </div>
                                 {userInfo.Balance != null ?
                                     <div className="pull-right">
-                                        <a href="#User_RechargeList" style={{ color: 'white' }}>
+                                        <a href="#user_rechargeList" style={{ color: 'white' }}>
                                             <h5>余额&nbsp;&nbsp;
                                         <span className="price">￥{userInfo.Balance.toFixed(2)}</span>&nbsp;&nbsp;
                                         <span className="icon-chevron-right"></span>

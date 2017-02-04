@@ -21,7 +21,7 @@ var browser = function () {
     }
 
     return browser;
-} ();
+}();
 
 // 通浏览器版本设定是否使用 es5
 if (isCordovaApp || browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
@@ -84,7 +84,7 @@ requirejs.config({
         device: modulesPath + '/device',
         services: modulesPath + '/services',
         site: modulesPath + '/site',
-        validate:modulesPath + '/core/validate',
+        validate: modulesPath + '/core/validate',
         'chitu.mobile': modulesPath + '/core/chitu.mobile',
         carousel: modulesPath + '/core/carousel',
         modules: modulesPath
@@ -119,7 +119,8 @@ function load() {
         window['ReactDOM'] = ReactDOM;
 
         requirejs(modules, function (site, exports1) {
-            controls.imageBoxConfig.imageDisaplyText = '麦子的店';
+            controls.imageBoxConfig.imageDisaplyText = '零食觅密';
+            //controls.imageBoxConfig.imageDisaplyText = '麦子的店';
         });
     })
 

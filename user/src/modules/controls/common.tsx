@@ -10,4 +10,9 @@ namespace controls {
         }
         return children;
     }
+    export function createHammerManager(element: HTMLElement): Hammer.Manager {
+        let manager = new Hammer.Manager(element, { touchAction: 'auto' });
+        return manager;
+    }
+
 }

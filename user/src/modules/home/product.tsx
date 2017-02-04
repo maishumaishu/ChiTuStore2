@@ -1,4 +1,4 @@
-import { ShoppingCartService, imageUrl, ShopService, Product, Promotion, CustomProperty } from 'services';
+import { ShoppingCartService, ShopService, Product, Promotion, CustomProperty, userData } from 'services';
 import { Page, config, app } from 'site';
 import { createStore } from 'redux';
 import cm = require('chitu.mobile');
@@ -44,12 +44,13 @@ export default async function (page: Page) {
         private header: controls.PageHeader;
         private introduceView: HTMLElement;
         private productPanel: ProductPanel;
+        private productsCountSubscrbe: (value: number) => void;
 
         constructor(props) {
             super(props);
             this.state = {
                 productSelectedText: this.productSelectedText(this.props.product), content: null,
-                pullUpStatus: 'init', isFavored: false, productsCount: 0, count: 1,
+                pullUpStatus: 'init', isFavored: false, productsCount: userData.productsCount.value, count: 1,
                 product: this.props.product
             };
 
@@ -58,16 +59,18 @@ export default async function (page: Page) {
                 this.setState(this.state);
             });
 
-            shoppingCart.productsCount().then(productsCount => {
-                this.state.productsCount = productsCount;
+            this.productsCountSubscrbe = (value) => {
+                this.state.productsCount = value;
                 this.setState(this.state);
-            });
+            }
+            userData.productsCount.add(this.productsCountSubscrbe);
 
             productStore.subscribe(() => {
                 let p = productStore.getState();
                 this.updateStateByProduct(p);
             })
         }
+
         private showPanel() {
             this.productPanel.show();
         }
@@ -120,6 +123,11 @@ export default async function (page: Page) {
                 }
 
             });
+
+        }
+
+        protected componentWillUnmount() {
+            userData.productsCount.remove(this.productsCountSubscrbe);
         }
 
         private favor() {
@@ -146,12 +154,7 @@ export default async function (page: Page) {
         }
 
         addToShoppingCart() {
-            return shoppingCart.addItem(id, this.state.count).then(r => {
-                shoppingCart.productsCount().then(productsCount => {
-                    this.state.productsCount = productsCount;
-                    this.setState(this.state);
-                });
-            });
+            return shoppingCart.addItem(id, this.state.count);
         }
 
         updateProductCount(value) {
@@ -266,7 +269,7 @@ export default async function (page: Page) {
                         <PullUpIndicator onRelease={this.showIntroduceView.bind(this)} distance={30}
                             initText="上拉查看商品详情" readyText="释放查看商品详情" />
                     </PageView>
-                    <PageView ref={(o) => { o ? this.introduceView = o.element : null } } style={{ transform: 'translateY(100%)' }}>
+                    <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}>
                         <PullDownIndicator onRelease={this.showProductView.bind(this)}
                             initText="下拉查看商品详情" readyText="释放查看商品详情" />
                         {this.state.content ?
@@ -406,7 +409,7 @@ export default async function (page: Page) {
                                 </div>
                             </div>
                             <div className="clearfix"></div>
-                            <button onClick={() => { this.props.parent.addToShoppingCart(); this.panel.hide() } } className="btn btn-primary btn-block"
+                            <button onClick={() => { this.props.parent.addToShoppingCart(); this.panel.hide() }} className="btn btn-primary btn-block"
                                 data-dialog="toast:'成功添加到购物车'">
                                 加入购物车
                         </button>

@@ -1,0 +1,68 @@
+@import "../common.less";
+
+.shopping-evaluation {
+    .padding-top(@tab-height);
+
+    .products {
+        .item {
+            .image {
+                width: 80px;
+                height: 80px;
+            }
+
+            .name {
+                margin-left: 100px;
+                min-height: 60px;
+            }
+
+            a {
+                position: relative;
+                bottom: 8px;
+                border: 1px solid @brand-primary;
+                padding: 4px 12px 4px 12px;
+                border-radius: 4px;
+                color: @brand-primary;
+            }
+
+            label {
+                position: relative;
+                bottom: 4px;
+            }
+        }
+
+        hr {
+            margin-top: 4px;
+            margin-bottom: 14px;
+        }
+    }
+    
+    ul {
+        border-bottom: 1px solid #777777;
+        background-color: white;
+        opacity: 0.9;
+
+        li {
+            width: 50%;
+            float: left;
+            text-align: center;
+            height: 40px;
+            padding-top: 10px;
+
+            &.active {
+                border-bottom: 2px solid @brand-primary;
+            }
+        }
+    }
+
+    .norecords {
+
+
+        .icon {
+
+
+            i {
+                top: 24px;
+            }
+        }
+    }
+}

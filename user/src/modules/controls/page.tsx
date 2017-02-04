@@ -76,7 +76,7 @@ namespace controls {
                 let scroller = this.element as HTMLElement;
                 scroller.style.transition = '0';
 
-                var hammer = new Hammer.Manager(scroller, { touchAction: 'auto' });
+                let hammer = createHammerManager(scroller); ;
                 var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL });
                 let moving: 'moveup' | 'movedown' = null;
 

@@ -1,4 +1,4 @@
-import { Service, ShoppingCartService, AjaxError } from 'services';
+import { Service, ShoppingCartService, AjaxError, userData } from 'services';
 import { Application as BaseApplication } from 'chitu.mobile';
 
 
@@ -29,9 +29,17 @@ export let config = {
 }
 
 export class Menu extends React.Component<{ pageName: string }, { itemsCount: number }> {
+    private productsCountSubscribe: (value: number) => void;
+
     constructor(props) {
         super(props);
-        this.state = { itemsCount: 0 };
+        this.state = { itemsCount: userData.productsCount.value || 0 };
+
+        this.productsCountSubscribe = (value) => {
+            this.state.itemsCount = value;
+            this.setState(this.state);
+        };
+        userData.productsCount.add(this.productsCountSubscribe)
     }
     componentDidMount() {
         let menuElement = this.refs['menu'] as HTMLElement;
@@ -39,6 +47,9 @@ export class Menu extends React.Component<{ pageName: string }, { itemsCount: nu
         if (activeElement) {
             activeElement.className = 'active';
         }
+    }
+    componentWillUnmount() {
+        userData.productsCount.remove(this.productsCountSubscribe);
     }
     render() {
         return (
@@ -292,5 +303,5 @@ export function searchNavBar() {
 //============================================================
 export function formatDate(date: Date) {
     let d = date;
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours()+1}:${d.getMinutes()}`;
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours() + 1}:${d.getMinutes()}`;
 }

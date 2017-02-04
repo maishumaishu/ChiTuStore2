@@ -34,7 +34,7 @@ namespace controls {
             let start = false;
             let startY: number;
 
-            let manager = new Hammer.Manager(viewElement);
+            let manager = createHammerManager(viewElement); //new Hammer.Manager(viewElement, { touchAction: 'auto' });
             manager.add(new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL }));
             manager.on('panstart', (event) => {
                 if (viewElement.scrollTop + viewElement.clientHeight >= viewElement.scrollHeight)
@@ -135,7 +135,7 @@ namespace controls {
             console.assert(viewElement != null);
 
             let preventDefault = false;
-            let manager = new Hammer.Manager(viewElement);
+            let manager = createHammerManager(viewElement); //new Hammer.Manager(viewElement);
             manager.add(new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL }));
             viewElement.addEventListener('touchmove', (event) => {
                 let scrollTop = isAndroid ? Number.parseInt(viewElement.getAttribute('data-scrolltop')) : viewElement.scrollTop;

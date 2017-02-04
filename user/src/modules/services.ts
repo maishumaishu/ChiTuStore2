@@ -88,12 +88,15 @@ function parseDate(value: string): Date {
 
 //========================================================================================
 
-export function imageUrl(path: string) {
+function imageUrl(path: string) {
     if (path.startsWith(`http://localhost:${location.port}`)) {
         path = path.substr(`http://localhost:${location.port}`.length);
     }
     else if (path.startsWith('http://localhost')) {
         path = path.substr('http://localhost'.length);
+    }
+    else if (path.startsWith('file://')) {
+        path = path.substr('file://'.length);
     }
     const imageBasePath = 'http://service.alinq.cn:2800/AdminServices/Shop';
     let url: string;
@@ -307,7 +310,7 @@ export class StationService extends Service {
         });
     }
 
-    news(newsId: string) {
+    news(newsId: string): Promise<News> {
         let url = StationService.url('Info/GetNews');
         return this.get<News>(url, { newsId }).then(item => {
             item.ImgUrl = imageUrl(item.ImgUrl);
@@ -432,6 +435,12 @@ export interface Region {
     Id: string,
     Name: string
 }
+export interface ProductComent {
+    Id: string,
+    Name: string,
+    ImageUrl: string,
+    Status: 'Evaluated' | 'ToEvaluate'
+}
 export class ShopService extends Service {
     constructor() {
         super();
@@ -486,6 +495,22 @@ export class ShopService extends Service {
             items.forEach(o => o.ImagePath = imageUrl(o.ImagePath));
             return items;
         });
+    }
+    toCommentProducts() {
+        var result = this.get<ProductComent[]>(ShopService.url('Product/GetToCommentProducts'))
+            .then(items => {
+                items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
+                return items;
+            });
+        return result;
+    }
+    commentedProducts() {
+        var result = this.get<ProductComent[]>(ShopService.url('Product/GetCommentedProducts'))
+            .then(items => {
+                items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
+                return items;
+            });
+        return result;
     }
     //=====================================================================
     // 收藏夹
@@ -615,6 +640,12 @@ export class ShoppingCartService extends Service {
                 Object.assign(items[i], JSON.parse(items[i].Remark));
             }
         }
+        //==============================================
+        // Price >0 的为山商品，<= 0 的为赠品，折扣
+        let sum = 0;
+        items.filter(o => o.Price > 0).forEach(o => sum = sum + o.Count);
+        userData.productsCount.value = sum;
+        //==============================================
         return items;
     }
 
@@ -638,6 +669,14 @@ export class ShoppingCartService extends Service {
     productsCount() {
         return this.get<number>(this.url('ShoppingCart/GetProductsCount'));
     }
+
+    // private _productsCount: chitu.Callback<ShopService, number>;
+    // get productsCount() {
+    //     if (!this._productsCount)
+    //         this._productsCount = chitu.Callbacks<ShopService, number>();
+
+    //     return this._productsCount;
+    // }
 
     selectAll = () => {
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/SelectAll'))
@@ -713,8 +752,8 @@ export interface BalanceDetail {
 export interface ScoreDetail {
     Score: number,
     Type: string,
-    CreateDateTime:Date,
-    Balance:number,
+    CreateDateTime: Date,
+    Balance: number,
 }
 export class AccountService extends Service {
     private url(path: string) {
@@ -735,11 +774,55 @@ export class AccountService extends Service {
     }
 
     scoreDetails(): Promise<ScoreDetail[]> {
-        // var result: LoadListPromise<any> = <LoadListPromise<any>>services.callMethod(services.config.accountServiceUrl, )
-        //     .done(() => {
-        //         result.loadCompleted = true;
-        //     });
         return this.get<ScoreDetail[]>(this.url('Account/GetScoreDetails'), {});
     }
 }
+
+export class ValueCallback<T> {
+    private funcs = new Array<(args: T) => void>();
+    private _value: T;
+
+    constructor() {
+    }
+    add(func: (args: T) => any): (args: T) => any {
+        this.funcs.push(func);
+        return func;
+    }
+    remove(func: (args: T) => any) {
+        this.funcs = this.funcs.filter(o => o != func);
+    }
+    fire(args: T) {
+        this.funcs.forEach(o => o(args));
+    }
+    get value(): T {
+        return this._value;
+    }
+    set value(value: T) {
+        this._value = value;
+        this.fire(value);
+    }
+}
+
+class UserData {
+    private _productsCount: ValueCallback<number>;
+    get productsCount() {
+        if (!this._productsCount)
+            this._productsCount = new ValueCallback<number>();
+
+        return this._productsCount;
+    }
+
+    loadData() {
+        if (!config.userToken)
+            return;
+
+        let ShoppingCart = new ShoppingCartService();
+        ShoppingCart.productsCount().then((value) => {
+            this.productsCount.value = value;
+        })
+    }
+}
+
+export let userData = new UserData();
+userData.loadData();
 

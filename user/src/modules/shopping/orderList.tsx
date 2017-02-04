@@ -1,16 +1,13 @@
 import { Page, defaultNavBar } from 'site';
 import { ShopService, Order } from 'services';
 
-let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox, Tabs } = controls;
+let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox, Tabs, Button } = controls;
 type DataList = controls.DataList;
 
 export default function (page: Page) {
 
     let orderListView: OrderListView;
-    //let orderListHeader: OrderListHeader;
     let shop = page.createService(ShopService);
-
-    // page.loadingView.style.display = 'none';
 
     class OrderListView extends React.Component<{}, { activeIndex: number }>{
 
@@ -41,30 +38,55 @@ export default function (page: Page) {
             orderListView.setState(orderListView.state);
         }
 
-
-        // componentDidMount() {
-        //     let scrollTop: number;
-        //     this.dataView.addEventListener('scroll', () => {
-        //         if (this.dataView.scrollTop - scrollTop > 0) { //向上 >0 //page.dataView.scrollTop > 100
-        //             if (this.dataView.scrollTop > 100)
-        //                 this.tabs.style.top = '0px';
-        //         }
-        //         else {
-        //             this.tabs.style.removeProperty('top');
-        //         }
-        //         scrollTop = this.dataView.scrollTop;
-        //     })
-        // }
-
-
         componentDidUpdate() {
-            //let dataList = this.refs['dataList'] as DataList;
             this.dataList.reset();
             this.dataList.loadData();
         }
 
+        private pay() {
+            return Promise.resolve();
+        }
 
+        private confirmReceived() {
+            return Promise.resolve();
+        }
 
+        /** 评价晒单 */
+        private evaluate() {
+
+        }
+
+        private statusControl(order: Order) {
+            let control: JSX.Element;
+            let btnClassName = 'btn btn-small btn-primary pull-right';
+            switch (order.Status) {
+                case 'WaitingForPayment':
+                    control = <Button className={btnClassName}>立即付款</Button>
+                    break;
+                case 'Send':
+                    control = <Button className={btnClassName} onClick={() => this.confirmReceived()}
+                        confirm={'你确定收到货了吗？'}>确认收货</Button>;
+                    break;
+                case 'ToEvaluate':
+                    control = <a href={'#shopping_evaluation'} className={btnClassName}>评价晒单</a>;
+                    break;
+                case 'Canceled':
+                    control = <label className="pull-right">已取消</label>;
+                    break;
+                case 'Paid':
+                    control = <label className="pull-right">已付款</label>;
+                    break;
+                case 'Evaluated':
+                    control = <label className="pull-right">已评价</label>;
+                    break;
+                case 'Received':
+                    control = <label className="pull-right">已收货</label>;
+                    break;
+                default:
+                    return null;
+            }
+            return control;
+        }
         render() {
             return (
                 <PageComponent>
@@ -109,7 +131,7 @@ export default function (page: Page) {
                                         实付款：<span className="price">￥{o.Amount.toFixed(2)}</span>
                                     </h4>
                                     <div className="pull-right">
-                                        <button className="btn btn-small btn-primary pull-right">立即付款</button>
+                                        {this.statusControl(o)}
                                     </div>
                                 </div>
                             </div>
