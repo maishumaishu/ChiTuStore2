@@ -12,13 +12,52 @@ app.use('/*', function (req: express.Request, res: express.Response) {
     if (req.headers['content-length'])
         contentLength = new Number(req.headers['content-length']).valueOf();
 
-    if (contentLength > 0) {
-        req.on('data', (data) => {
-            request(req, res, data);
+    try {
+        let host = config.realServiceHost;
+        let port = config.realServicePort;
+
+        if (!req.query.storeId) {
+            throw errors.queryStringRequired('storeId');
+        }
+
+        let headers: any = Object.assign(req.headers, {
+            'application-id': req.query.storeId,
+            host,
         });
+
+
+        let request = http.request(
+            {
+                host: host,
+                path: req.originalUrl,
+                method: req.method,
+                headers: headers,
+                port: port
+            },
+            (response) => {
+
+                res.statusCode = response.statusCode;
+                res.statusMessage = response.statusMessage;
+
+                console.assert(response != null);
+                for (var key in response.headers) {
+                    res.setHeader(key, response.headers[key]);
+                }
+                response.pipe(res);
+            }
+        ).on('error', (err) => {
+            outputError(res, err);
+        });
+
+        req.on('data', (data) => {
+            request.write(data);
+        })
+        req.on('end', () => {
+            request.end();
+        })
     }
-    else {
-        request(req, res);
+    catch (err) {
+        outputError(res, err);
     }
 });
 
@@ -60,10 +99,10 @@ async function request(req: express.Request, res: express.Response, data?: strin
             outputError(res, err);
         });
 
-        if (data) {
-            request.write(data);
-        }
-        request.end();
+        // if (data) {
+        //     request.write(data);
+        // }
+        // request.end();
     }
     catch (err) {
         outputError(res, err);
