@@ -1,0 +1,53 @@
+@import "../../content/bootstrap-3.3.5/variables.less";
+@import "../common.less";
+
+.shopping-productEvaluate {
+    .padding-top(10);
+
+    .icon-star,
+    .icon-star-empty {
+        color: @brand-primary;
+        font-size: 24px;
+    }
+
+    .evaluation {
+        margin-top: 10px;
+        textarea {
+            height: 100px;
+        }
+        .word-num {
+            position: absolute;
+            right: 20px;
+            bottom: 0px;
+            color: #777777;
+        }
+    }
+
+    .pictures {
+        [type="file"] {
+            opacity: 0;
+            width: 80px;
+            height: 80px;
+            position: relative;
+            top: 0;
+            z-index: 2;
+        }
+
+        i {
+            font-size: 38px;
+            position: relative;
+            top: -60px;
+            left: 0px;
+            z-index: 1;
+        }
+
+        .item {
+            text-align: center;
+            width: 80px;
+            height: 80px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    }
+}

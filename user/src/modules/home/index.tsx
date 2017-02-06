@@ -160,7 +160,7 @@ export default function (page: Page) {
                                 <div className="text">积分兑换</div>
                             </a>
                         </div>
-                        <DataList className="products" loadData={this.loadData}
+                        <DataList className="products" loadData={this.loadData} showCompleteText={true}
                             dataItem={(o: HomeProduct) =>
                                 <a key={o.Id} href={`#home_product?id=${o.ProductId}`} className="col-xs-6 text-center item">
                                     <ImageBox src={o.ImagePath} />

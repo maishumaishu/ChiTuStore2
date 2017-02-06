@@ -5,7 +5,7 @@ let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Pa
     PageComponent, PageHeader, PageFooter, PageView, Button, Dialog } = controls;
 
 
-export default function (page: Page, hideMenu: boolean) {
+export default function (page: Page, hideMenu: boolean = false) {
 
     interface ShoppingCartState {
         items?: ShoppingCartItem[], status?: 'read' | 'write',

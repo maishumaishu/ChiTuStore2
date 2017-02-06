@@ -6,5 +6,7 @@ build
 release
 www
 TODO.txt
-xcuserdata
+.xcuserdata
+.temp
+
 *.xcuserstate

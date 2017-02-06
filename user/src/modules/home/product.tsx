@@ -187,18 +187,6 @@ export default async function (page: Page) {
                             </Button>
                         </nav>
                     </PageHeader>
-                    <PageFooter style={{ position: 'fixed' }}>
-                        <nav>
-                            <a href={'#shopping_shoppingCartNoMenu'} className="pull-left">
-                                <i className="icon-shopping-cart"></i>
-                                {this.state.productsCount ?
-                                    <span className="badge bg-primary">{productsCount}</span>
-                                    : null
-                                }
-                            </a>
-                            <Button onClick={() => this.addToShoppingCart()} className="btn btn-primary pull-right" >加入购物车</Button>
-                        </nav>
-                    </PageFooter>
                     <PageView ref={(o) => this.dataView = o ? o.element : null} className="main">
                         <div name="productImages" className="swiper-container">
                             <div className="swiper-wrapper">
@@ -266,11 +254,17 @@ export default async function (page: Page) {
                             </div>
                         </div>
                         <hr />
-                        <PullUpIndicator onRelease={this.showIntroduceView.bind(this)} distance={30}
+                        <PullUpIndicator
+                            onRelease={() =>
+                                {/*this.showIntroduceView()*/}
+                            } distance={30}
                             initText="上拉查看商品详情" readyText="释放查看商品详情" />
                     </PageView>
                     <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}>
-                        <PullDownIndicator onRelease={this.showProductView.bind(this)}
+                        <PullDownIndicator
+                            onRelease={() =>
+                            {/*this.showProductView*/ }
+                            }
                             initText="下拉查看商品详情" readyText="释放查看商品详情" />
                         {this.state.content ?
                             <HtmlView content={this.state.content} className="container" />
@@ -282,6 +276,18 @@ export default async function (page: Page) {
                             </div>
                         }
                     </PageView>
+                    <PageFooter style={{ position: 'absolute' }}>
+                        <nav>
+                            <a href={'#shopping_shoppingCartNoMenu'} className="pull-left">
+                                <i className="icon-shopping-cart"></i>
+                                {this.state.productsCount ?
+                                    <span className="badge bg-primary">{productsCount}</span>
+                                    : null
+                                }
+                            </a>
+                            <Button onClick={() => this.addToShoppingCart()} className="btn btn-primary pull-right" >加入购物车</Button>
+                        </nav>
+                    </PageFooter>
                     <ProductPanel ref={(o) => this.productPanel = o} parent={this} product={this.props.product} />
                 </PageComponent>
 

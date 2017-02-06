@@ -7,7 +7,8 @@ namespace controls {
         className?: string,
         pageSize?: number,
         scroller?: () => HTMLElement,
-        emptyItem?: JSX.Element
+        emptyItem?: JSX.Element,
+        showCompleteText?: boolean
     }
     interface DataListState {
         items: Array<any>
@@ -79,10 +80,12 @@ namespace controls {
             let indicator: JSX.Element;
             switch (this.status) {
                 case 'complted':
-                    indicator =
+                    indicator = this.props.showCompleteText ?
                         <div>
                             <span>数据已全部加载完</span>
                         </div>
+                        :
+                        null
                     break;
                 case 'fail':
                     indicator =

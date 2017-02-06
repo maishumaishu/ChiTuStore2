@@ -8,8 +8,8 @@
             "type": "node",
             "request": "launch",
             "name": "启动程序",
-            "program": "${workspaceRoot}/build/services/app.js",
-            "cwd": "${workspaceRoot}/build/services/",
+            "program": "${workspaceRoot}/server/build/app.js",
+            "cwd": "${workspaceRoot}/server/build/",
             "outFiles": [],
             "sourceMaps": true
         },

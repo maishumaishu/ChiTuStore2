@@ -93,7 +93,7 @@ requirejs.config({
 
 var modules = [
     'site',
-    //'hammer', 'bezier-easing', 'controls/common', 
+    // 'hammer', 'bezier-easing', 'controls/common', 
     // 'controls/button', 'controls/dataList', 'controls/dialog', 'controls/htmlView',
     // 'controls/imageBox', 'controls/indicators', 'controls/page', 'controls/panel',
     // 'controls/tabs'
@@ -120,7 +120,6 @@ function load() {
 
         requirejs(modules, function (site, exports1) {
             controls.imageBoxConfig.imageDisaplyText = '零食觅密';
-            //controls.imageBoxConfig.imageDisaplyText = '麦子的店';
         });
     })
 

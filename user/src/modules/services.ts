@@ -13,7 +13,8 @@ export class AjaxError implements Error {
     }
 }
 
-const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
+//const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
+const SERVICE_HOST = 'localhost:2800/UserServices';
 let config = {
     service: {
         shop: `http://${SERVICE_HOST}/Shop/`,
@@ -135,24 +136,30 @@ export abstract class Service {
     error = chitu.Callbacks<Service, Error>();
     ajax<T>(url: string, options: FetchOptions): Promise<T> {
         return new Promise<T>((reslove, reject) => {
-            let timeId = setTimeout(() => {
-                let err = new AjaxError(options.method);
-                err.name = 'timeout';
-                reject(err);
-                this.error.fire(this, err);
-                clearTimeout(timeId);
+            let timeId: number;
+            if (options.method == 'get') {
+                timeId = setTimeout(() => {
+                    let err = new AjaxError(options.method);
+                    err.name = 'timeout';
+                    reject(err);
+                    this.error.fire(this, err);
+                    clearTimeout(timeId);
 
-            }, config.ajaxTimeout * 1000)
+                }, config.ajaxTimeout * 1000)
+            }
 
             this._ajax<T>(url, options)
                 .then(data => {
                     reslove(data);
-                    clearTimeout(timeId);
+                    if (timeId)
+                        clearTimeout(timeId);
                 })
                 .catch(err => {
                     reject(err);
                     this.error.fire(this, err);
-                    clearTimeout(timeId);
+
+                    if (timeId)
+                        clearTimeout(timeId);
                 });
 
         })
@@ -439,7 +446,8 @@ export interface ProductComent {
     Id: string,
     Name: string,
     ImageUrl: string,
-    Status: 'Evaluated' | 'ToEvaluate'
+    Status: 'Evaluated' | 'ToEvaluate',
+    OrderDetailId: string,
 }
 export class ShopService extends Service {
     constructor() {
@@ -570,6 +578,60 @@ export class ShopService extends Service {
     }
     changeReceipt(orderId, receiptId) {
         var result = this.post<Order>(ShopService.url('Order/ChangeReceipt'), { orderId, receiptId });
+        return result;
+    }
+
+    private resizeImage(img: HTMLImageElement, max_width: number, max_height: number): string {
+
+        var canvas = document.createElement('canvas');
+
+        var width: number = img.width;
+        var height: number = img.height;
+
+        // calculate the width and height, constraining the proportions
+        if (width > height) {
+            if (width > max_width) {
+                height = Math.round(height *= max_width / width);
+                width = max_width;
+            }
+        } else {
+            if (height > max_height) {
+                width = Math.round(width *= max_height / height);
+                height = max_height;
+            }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        return canvas.toDataURL("/jpeg", 0.7);
+
+    }
+
+    /**
+     * 评价晒单
+     * @param score: 评分
+     * @param evaluation: 评价
+     * @param anonymous: 是否匿名评价
+     * @param imageDatas: 多个上传的图片，用 ',' 连接
+     * @param imageThumbs: 多个缩略图，用 ',' 连接
+     */
+    evaluateProduct(orderDetailId: string, score: number, evaluation: string, anonymous: boolean, imageDatas: string[]) {
+        //let imageString = imageDatas.join(',');
+        let imageThumbs = imageDatas.map(o => {
+            var image = new Image();
+            image.src = o;
+            return this.resizeImage(image, 200, 200);
+        });
+        var data = {
+            orderDetailId, evaluation,
+            score, anonymous,
+            imageDatas: imageDatas.join(','),
+            imageThumbs: imageThumbs.join(','),
+        };
+        var result = this.post<any>(ShopService.url('Product/EvaluateProduct'), data)
         return result;
     }
     //=====================================================================

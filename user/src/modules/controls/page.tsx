@@ -56,11 +56,11 @@ namespace controls {
         }
     }
 
-    let easing = BezierEasing(0.42, 0, 1, 1);
+    let easing = BezierEasing(0, 0, 1, 0.5);
 
     /** 是否为安卓系统 */
-    let isAndroid = navigator.userAgent.indexOf('Android') > -1;
-    let isIOS = navigator.userAgent.indexOf('iPhone') > 0 || navigator.userAgent.indexOf('iPad') > 0
+    //let isAndroid = navigator.userAgent.indexOf('Android') > -1;
+    //let isIOS = navigator.userAgent.indexOf('iPhone') > 0 || navigator.userAgent.indexOf('iPad') > 0
 
     export class PageView extends React.Component<React.Props<PageView> & { className?: string, style?: React.CSSProperties }, {}>{
 
@@ -69,37 +69,41 @@ namespace controls {
         element: HTMLElement;
 
         protected componentDidMount() {
-            if (isAndroid) {
+            if (isAndroid || isWeb) {
                 let start: number;
 
                 //======================================
                 let scroller = this.element as HTMLElement;
                 scroller.style.transition = '0';
 
-                let hammer = createHammerManager(scroller); ;
+                let hammer = createHammerManager(scroller);;
                 var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL });
-                let moving: 'moveup' | 'movedown' = null;
+                let moving: 'moveup' | 'movedown' | 'overscroll' = null;
 
                 hammer.add(pan);
                 hammer.on('panmove', (event) => {
                     console.log('deltaY:' + event.deltaY);
-                    if (scroller.scrollTop <= 0) {
+                    if (scroller.scrollTop == 0) {
                         moving = 'movedown';
                     }
-                    else if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight) {
+                    else if (scroller.scrollTop + scroller.clientHeight == scroller.scrollHeight) {
                         moving = 'moveup';
+                    }
+                    else if ((scroller.scrollTop + scroller.clientHeight > scroller.scrollHeight) || scroller.scrollTop < 0) {
+                        moving = 'overscroll';
                     }
 
                     if (moving) {
-                        event.srcEvent.preventDefault();
-                        this.element.style.touchAction = 'none';
                         let distance = easing(event.distance / 1000) * 1000;
                         if (moving == 'movedown') {
                             scroller.style.transform = `translateY(${distance}px)`;
                             scroller.setAttribute('data-scrolltop', `${0 - distance}`);
                         }
-                        else {
+                        else if (moving == 'moveup') {
                             scroller.style.transform = `translateY(-${distance}px)`;
+                        }
+                        else if (moving == 'overscroll') {
+                            scroller.setAttribute('data-scrolltop', `${scroller.scrollTop}`);
                         }
                     }
                 });
@@ -111,21 +115,21 @@ namespace controls {
                     moving = null;
                     this.element.style.touchAction = 'auto';
                 });
-            }
-            else if (isIOS) {
-                let start: number;
-                this.element.addEventListener('touchstart', (event) => {
-                    let rect = this.element.getBoundingClientRect();
-                    console.log('start top:' + rect.top);
-                    start = rect.top;
+
+                let startY: number;
+                scroller.addEventListener('touchstart', (event) => {
+                    startY = event.touches[0].clientY;
                 })
-                this.element.addEventListener('touchmove', (event) => {
-                    // let rect = this.element.getBoundingClientRect();
-                    // if ((rect.top - start) >= 0 && rect.top > 0) {
-                    //     event.preventDefault();
-                    // }
-                    // console.log('move top:' + rect.top);
-                    // event.stopPropagation();
+                scroller.addEventListener('touchmove', (event) => {
+                    let deltaY = event.touches[0].clientY - startY;
+                    if (deltaY < 0 && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    else if (deltaY > 0 && scroller.scrollTop <= 0) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
                 })
             }
         }
