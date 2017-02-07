@@ -138,7 +138,8 @@ namespace controls {
             let manager = createHammerManager(viewElement); //new Hammer.Manager(viewElement);
             manager.add(new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL }));
             viewElement.addEventListener('touchmove', (event) => {
-                let scrollTop = isAndroid ? Number.parseInt(viewElement.getAttribute('data-scrolltop')) : viewElement.scrollTop;
+                let scrollTopString = viewElement.getAttribute('data-scrolltop');
+                let scrollTop = scrollTopString ? Number.parseInt(scrollTopString) : viewElement.scrollTop;
                 if (scrollTop >= 0) {
                     return;
                 }
@@ -182,8 +183,6 @@ namespace controls {
                 // 延时避免在 IOS 下闪烁
                 window.setTimeout(() => {
                     preventDefault = false;
-                    // startY = null;
-                    // start = false;
                     this.state.status = 'init';
                     this.setState(this.state);
                 }, 200);

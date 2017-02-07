@@ -45,6 +45,8 @@ export default async function (page: Page) {
         private introduceView: HTMLElement;
         private productPanel: ProductPanel;
         private productsCountSubscrbe: (value: number) => void;
+        private isShowIntroduceView = false;
+        private isShowProductView = false;
 
         constructor(props) {
             super(props);
@@ -170,6 +172,9 @@ export default async function (page: Page) {
             this.setState(this.state);
         }
 
+
+
+
         render() {
             let p = this.state.product;
             let productsCount = this.state.productsCount;
@@ -187,7 +192,16 @@ export default async function (page: Page) {
                             </Button>
                         </nav>
                     </PageHeader>
-                    <PageView ref={(o) => this.dataView = o ? o.element : null} className="main">
+                    <PageView ref={(o) => this.dataView = o ? o.element : null} className="main"
+                        panEnd={() => {
+                            let prevent = false;
+                            if (this.isShowIntroduceView) {
+                                this.showIntroduceView();
+                                this.isShowIntroduceView = false;
+                                prevent = true;
+                            }
+                            return prevent;
+                        }}>
                         <div name="productImages" className="swiper-container">
                             <div className="swiper-wrapper">
                                 {p.ImageUrls.map(o => (
@@ -256,14 +270,23 @@ export default async function (page: Page) {
                         <hr />
                         <PullUpIndicator
                             onRelease={() =>
-                                {/*this.showIntroduceView()*/}
+                                this.isShowIntroduceView = true
                             } distance={30}
                             initText="上拉查看商品详情" readyText="释放查看商品详情" />
                     </PageView>
-                    <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}>
+                    <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}
+                        panEnd={() => {
+                            let prevent = false;
+                            if (this.isShowProductView) {
+                                this.isShowProductView = false;
+                                this.showProductView();
+                                prevent = true;
+                            }
+                            return prevent;
+                        }}>
                         <PullDownIndicator
                             onRelease={() =>
-                            {/*this.showProductView*/ }
+                                this.isShowProductView = true
                             }
                             initText="下拉查看商品详情" readyText="释放查看商品详情" />
                         {this.state.content ?

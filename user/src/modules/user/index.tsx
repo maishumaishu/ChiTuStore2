@@ -1,5 +1,5 @@
 import { Page, Menu } from 'site';
-import { MemberService, UserInfo } from 'services';
+import { MemberService, UserInfo, userData } from 'services';
 let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox, Tabs } = controls;
 
 
@@ -8,12 +8,51 @@ export default async function (page: Page) {
     let member = page.createService(MemberService);
 
     class UserIndexPage extends React.Component<{}, { userInfo: UserInfo }>{
+        private notPaidCountSubscribe: (value: number) => void;
+        private sendCountSubscribe: (value: number) => void;
+        private toEvaluateCountSubscribe: (value: number) => void;
+        private balanceSubscribe: (value: number) => void;
+        private nickNameSubscribe: (value: string) => void;
+
         constructor(props) {
             super(props);
 
-            this.state = { userInfo: {} as UserInfo };
-            member.userInfo().then(o => {
-                this.state.userInfo = o;
+            this.state = {
+                userInfo: {
+                    NotPaidCount: userData.notPaidCount.value,
+                    SendCount: userData.sendCount.value,
+                    ToEvaluateCount: userData.toEvaluateCount.value,
+                    Balance: userData.balance.value,
+                    NickName: userData.nickName.value
+                } as UserInfo
+            };
+
+            this.createSubscribes();
+        }
+
+        private createSubscribes() {
+            this.notPaidCountSubscribe = userData.notPaidCount.add((value) => {
+                this.state.userInfo.NotPaidCount = value;
+                this.setState(this.state);
+            })
+
+            this.sendCountSubscribe = userData.sendCount.add((value) => {
+                this.state.userInfo.SendCount = value;
+                this.setState(this.state);
+            })
+
+            this.toEvaluateCountSubscribe = userData.toEvaluateCount.add(value => {
+                this.state.userInfo.ToEvaluateCount = value;
+                this.setState(this.state);
+            })
+
+            this.balanceSubscribe = userData.balance.add(value => {
+                this.state.userInfo.Balance = value;
+                this.setState(this.state);
+            })
+
+            this.nickNameSubscribe = userData.nickName.add(value => {
+                this.state.userInfo.NickName = value;
                 this.setState(this.state);
             })
         }
@@ -73,7 +112,8 @@ export default async function (page: Page) {
                             </div>
                             <div className="col-xs-3">
                                 <a href="#shopping_evaluation" style={{ color: 'black' }}>
-                                    {userInfo.ToEvaluateCount != null ? <sub className="sub">{userInfo.ToEvaluateCount}</sub> : null}
+                                    {userInfo.ToEvaluateCount != null && userInfo.ToEvaluateCount != 0 ?
+                                        <sub className="sub">{userInfo.ToEvaluateCount}</sub> : null}
                                     <i className="icon-star icon-3x"></i>
                                     <div className="name">待评价</div>
                                 </a>

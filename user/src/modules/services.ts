@@ -13,8 +13,8 @@ export class AjaxError implements Error {
     }
 }
 
-//const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
-const SERVICE_HOST = 'localhost:2800/UserServices';
+const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
+//const SERVICE_HOST = 'localhost:2800/UserServices';
 let config = {
     service: {
         shop: `http://${SERVICE_HOST}/Shop/`,
@@ -866,12 +866,39 @@ export class ValueCallback<T> {
 }
 
 class UserData {
-    private _productsCount: ValueCallback<number>;
-    get productsCount() {
-        if (!this._productsCount)
-            this._productsCount = new ValueCallback<number>();
+    private _productsCount = new ValueCallback<number>();
+    private _toEvaluateCount = new ValueCallback<number>();
+    private _sendCount = new ValueCallback<number>();
+    private _notPaidCount = new ValueCallback<number>();
+    private _balance = new ValueCallback<number>();
+    private _nickName = new ValueCallback<string>();
 
+    /** 购物车中的商品数 */
+    get productsCount() {
         return this._productsCount;
+    }
+
+    /** 待评价商品数 */
+    get toEvaluateCount() {
+        return this._toEvaluateCount;
+    }
+
+    /** 已发货订单数量 */
+    get sendCount() {
+        return this._sendCount;
+    }
+
+    /** 未付货订单数 */
+    get notPaidCount() {
+        return this._notPaidCount;
+    }
+
+    get balance() {
+        return this._balance;
+    }
+
+    get nickName() {
+        return this._nickName;
     }
 
     loadData() {
@@ -881,6 +908,15 @@ class UserData {
         let ShoppingCart = new ShoppingCartService();
         ShoppingCart.productsCount().then((value) => {
             this.productsCount.value = value;
+        })
+
+        let member = new MemberService();
+        member.userInfo().then(o => {
+            this.toEvaluateCount.value = o.ToEvaluateCount;
+            this.sendCount.value = o.SendCount;
+            this.notPaidCount.value = o.NotPaidCount;
+            this.balance.value = o.Balance;
+            this.nickName.value = o.NickName;
         })
     }
 }
