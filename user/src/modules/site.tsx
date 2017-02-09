@@ -19,12 +19,6 @@ if (isCordovaApp && !isAndroid) {
 }
 
 export let config = {
-    // get imageText() {
-    //     return imageBoxConfig.imageDisaplyText;
-    // },
-    // set imageText(value) {
-    //     imageBoxConfig.imageDisaplyText = value;
-    // },
     defaultUrl: 'home_index'
 }
 
@@ -83,7 +77,7 @@ export class Menu extends React.Component<{ pageName: string }, { itemsCount: nu
                     </a>
                 </li>
                 <li>
-                    <a name="user.index" href="#user_index">ValueStore
+                    <a name="user.index" href="#user_index">
                         <i className="icon-user"></i>
                         <span>我</span>
                     </a>
@@ -242,7 +236,7 @@ export class Application extends BaseApplication {
 }
 
 export let app = window['app'] = new Application();
-app.run();
+//app.run();
 app.backFail.add(() => {
     app.redirect(config.defaultUrl);
 });

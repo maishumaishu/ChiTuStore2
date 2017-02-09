@@ -119,6 +119,7 @@ function load() {
         window['ReactDOM'] = ReactDOM;
 
         requirejs(modules, function (site, exports1) {
+            site.app.run();
             controls.imageBoxConfig.imageDisaplyText = '零食觅密';
         });
     })

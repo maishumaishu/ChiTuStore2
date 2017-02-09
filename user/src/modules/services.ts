@@ -710,14 +710,14 @@ export class ShoppingCartService extends Service {
         count = count || 1;
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/AddItem'), { productId, count })
             .then((result) => this.processShoppingCartItems(result))
-            .then((result) => userData.ShoppingCartItems.value = result);
+            .then((result) => userData.shoppingCartItems.value = result);
     }
 
     updateItem(productId: string, count: number, selected: boolean) {
         let data = { productId: productId, count: count, selected: selected };
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UpdateItem'), data)
             .then(items => this.processShoppingCartItems(items))
-            .then((result) => userData.ShoppingCartItems.value = result);
+            .then((result) => userData.shoppingCartItems.value = result);
     }
 
     items() {
@@ -740,20 +740,20 @@ export class ShoppingCartService extends Service {
     selectAll = () => {
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/SelectAll'))
             .then(items => this.processShoppingCartItems(items))
-            .then(items => userData.ShoppingCartItems.value = items);
+            .then(items => userData.shoppingCartItems.value = items);
     }
 
     unselectAll = () => {
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UnselectAll'))
             .then(items => this.processShoppingCartItems(items))
-            .then(items => userData.ShoppingCartItems.value = items);
+            .then(items => userData.shoppingCartItems.value = items);
     }
 
     /*移除购物车中的多个产品*/
     removeItems(productIds: string[]): Promise<any> {
         var result = this.post<ShoppingCartItem[]>(this.url('ShoppingCart/RemoveItems'), { productIds })
             .then(items => this.processShoppingCartItems(items))
-            .then(items => userData.ShoppingCartItems.value = items);
+            .then(items => userData.shoppingCartItems.value = items);
 
         return result;
     }
@@ -905,7 +905,7 @@ class UserData {
         return this._nickName;
     }
 
-    get ShoppingCartItems() {
+    get shoppingCartItems() {
         return this._shoppingCartItems;
     }
 
@@ -919,13 +919,7 @@ class UserData {
         // })
 
         ShoppingCart.items().then((value) => {
-            this.ShoppingCartItems.value = value;
-            //==============================================
-            // Price >0 的为山商品，<= 0 的为赠品，折扣
-            let sum = 0;
-            value.filter(o => o.Price > 0).forEach(o => sum = sum + o.Count);
-            userData.productsCount.value = sum;
-            //==============================================
+            this.shoppingCartItems.value = value;
         })
 
         let member = new MemberService();
@@ -935,6 +929,15 @@ class UserData {
             this.notPaidCount.value = o.NotPaidCount;
             this.balance.value = o.Balance;
             this.nickName.value = o.NickName;
+        })
+
+        this.shoppingCartItems.add(value => {
+            //==============================================
+            // Price >0 的为山商品，<= 0 的为赠品，折扣
+            let sum = 0;
+            value.filter(o => o.Price > 0).forEach(o => sum = sum + o.Count);
+            userData.productsCount.value = sum;
+            //==============================================
         })
     }
 

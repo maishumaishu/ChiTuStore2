@@ -48,7 +48,7 @@ namespace controls {
                         <div className="modal-dialog">
                             <div className="modal-content">
                                 <div className="modal-body">
-                                    <h5>{this.state.content}</h5>
+                                    <h5 dangerouslySetInnerHTML={{ __html: this.state.content }}></h5>
                                 </div>
                                 {(this.props.footer ?
                                     <div className="modal-footer">
@@ -75,6 +75,13 @@ namespace controls {
         constructor(props) {
             super(props);
         }
+
+        // get content() {
+        //     return this.dialog.content;
+        // }
+        // set content(value: string) {
+        //     this.dialog.content = value;
+        // }
 
         show() {
             this.dialog.show();
