@@ -1,6 +1,6 @@
-import { ShoppingCartService, ShopService, Product, Promotion, CustomProperty, userData } from 'services';
+import { ShoppingCartService, ShopService, Product, Promotion, CustomProperty, userData, ValueStore } from 'services';
 import { Page, config, app, subscribe } from 'site';
-import { createStore } from 'redux';
+//import { createStore } from 'redux';
 import cm = require('chitu.mobile');
 import BezierEasing = require('bezier-easing');
 
@@ -8,12 +8,13 @@ import BezierEasing = require('bezier-easing');
 let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
     PageComponent, PageHeader, PageFooter, PageView, Button } = controls;
 
-let productStore = createStore((product: Product, args: { product: Product, type: string }) => {
-    if (args) {
-        product = args.product;
-    }
-    return product;
-});
+let productStore = new ValueStore<Product>();
+// createStore((product: Product, args: { product: Product, type: string }) => {
+//     if (args) {
+//         product = args.product;
+//     }
+//     return product;
+// });
 
 export default async function (page: Page) {
 
@@ -62,10 +63,13 @@ export default async function (page: Page) {
                 this.state.productsCount = value;
                 this.setState(this.state);
             })
-            productStore.subscribe(() => {
-                let p = productStore.getState();
-                this.updateStateByProduct(p);
+            subscribe(this, productStore, (value) => {
+                this.updateStateByProduct(value);
             })
+            // productStore.subscribe(() => {
+            //     let p = productStore.getState();
+            //     this.updateStateByProduct(p);
+            // })
         }
 
         private showPanel() {
@@ -196,7 +200,7 @@ export default async function (page: Page) {
                                 prevent = true;
                             }
                             return prevent;
-                        } }>
+                        }}>
                         <div name="productImages" className="swiper-container">
                             <div className="swiper-wrapper">
                                 {p.ImageUrls.map(o => (
@@ -269,7 +273,7 @@ export default async function (page: Page) {
                             } distance={30}
                             initText="上拉查看商品详情" readyText="释放查看商品详情" />
                     </PageView>
-                    <PageView ref={(o) => { o ? this.introduceView = o.element : null } } style={{ transform: 'translateY(100%)' }}
+                    <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}
                         panEnd={() => {
                             let prevent = false;
                             if (this.isShowProductView) {
@@ -278,7 +282,7 @@ export default async function (page: Page) {
                                 prevent = true;
                             }
                             return prevent;
-                        } }>
+                        }}>
                         <PullDownIndicator
                             onRelease={() =>
                                 this.isShowProductView = true
@@ -362,7 +366,7 @@ export default async function (page: Page) {
                 .then(o => {
                     this.state.product = o;
                     this.setState(this.state);
-                    productStore.dispatch({ product: o, type: 'update' });
+                    productStore.value = o;
                 });
         }
         show() {
@@ -433,7 +437,7 @@ export default async function (page: Page) {
                                 </div>
                             </div>
                             <div className="clearfix"></div>
-                            <button onClick={() => { this.props.parent.addToShoppingCart(); this.panel.hide() } } className="btn btn-primary btn-block"
+                            <button onClick={() => { this.props.parent.addToShoppingCart(); this.panel.hide() }} className="btn btn-primary btn-block"
                                 data-dialog="toast:'成功添加到购物车'">
                                 加入购物车
                         </button>

@@ -23,7 +23,9 @@ VS Code
 
 1. requirejs
 
-2. VUE
+2. reactjs
+
+3. hammerjs
 
 ## 构建工具
 
