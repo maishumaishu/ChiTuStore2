@@ -15,20 +15,41 @@ namespace controls {
     let defaultIndicatorProps = {} as IndicatorProps;
     defaultIndicatorProps.distance = 50;
 
-    export class PullUpIndicator extends React.Component<IndicatorProps, { status: IndicatorStatus }>{
+    export class PullUpIndicator extends React.Component<IndicatorProps, {}>{//, { status: IndicatorStatus }
 
         private element: HTMLElement;
+        private initElement: HTMLElement;
+        private readyElement: HTMLElement;
 
         constructor(props: IndicatorProps) {
 
             super(props);
-            this.state = { status: 'init' };
+            this.state = {};//
+        }
+
+        private get status(): IndicatorStatus {
+            if (!this.initElement.style.display || this.initElement.style.display == 'block') {
+                return 'init';
+            }
+
+            return 'ready';
+        }
+        private set status(value: IndicatorStatus) {
+            if (value == 'init') {
+                this.initElement.style.display = 'block';
+                this.readyElement.style.display = 'none';
+            }
+            else {
+                this.initElement.style.display = 'none';
+                this.readyElement.style.display = 'block';
+            }
         }
 
         componentDidMount() {
             let indicator = this.element; //this.refs['pull-up-indicator'] as HTMLElement;
             let viewElement = this.element.parentElement;
             console.assert(viewElement != null);
+            this.status = 'init';
 
             let preventDefault = false;
             let start = false;
@@ -62,10 +83,10 @@ namespace controls {
                 let status = null;
                 let deltaY = currentY - startY;
                 let distance = 0 - Math.abs(this.props.distance);
-                if (deltaY < distance && this.state.status != 'ready') {
+                if (deltaY < distance && this.status != 'ready') {
                     status = 'ready';
                 }
-                else if (deltaY > distance && this.state.status != 'init') {
+                else if (deltaY > distance && this.status != 'init') {
                     status = 'init';
                 }
 
@@ -74,8 +95,8 @@ namespace controls {
                     // 延时设置，避免卡
                     window.setTimeout(() => {
                         preventDefault = true;
-                        this.state.status = status;
-                        this.setState(this.state);
+                        this.status = status;
+                        //this.setState(this.state);
                     }, 100);
                     //=================================
                     // 因为更新 DOM 需要时间，一定时间内，不要移动，否则会闪
@@ -85,7 +106,7 @@ namespace controls {
             });
 
             manager.on('panend', () => {
-                if (this.state.status == 'ready' && this.props.onRelease != null) {
+                if (this.status == 'ready' && this.props.onRelease != null) {
                     this.props.onRelease();
                 }
                 //=================================
@@ -94,21 +115,22 @@ namespace controls {
                     preventDefault = false;
                     startY = null;
                     start = false;
-                    this.state.status = 'init';
+                    this.status = 'init';
                     this.setState(this.state);
                 }, 200);
                 //=================================
             });
         }
-
+        //style={{ display: this.state.status == 'init' ? 'block' : 'none' }}
+        //style={{ display: this.state.status == 'ready' ? 'block' : 'none' }}
         render() {
             return (
                 <div className="pull-up-indicator" ref={(o: HTMLElement) => this.element = o}>
-                    <div className="init" style={{ display: this.state.status == 'init' ? 'block' : 'none' }}>
+                    <div className="init" ref={(o: HTMLElement) => this.initElement = o}>
                         <i className="icon-chevron-up"></i>
                         <span>{this.props.initText}</span>
                     </div>
-                    <div className="ready" style={{ display: this.state.status == 'ready' ? 'block' : 'none' }}>
+                    <div className="ready" ref={(o: HTMLElement) => this.readyElement = o} >
                         <i className="icon-chevron-down"></i>
                         <span>{this.props.readyText}</span>
                     </div>
@@ -118,21 +140,42 @@ namespace controls {
     }
 
     PullUpIndicator.defaultProps = defaultIndicatorProps;
-
-    export class PullDownIndicator extends React.Component<IndicatorProps, { status: IndicatorStatus }>{
+    //{ status: IndicatorStatus }
+    export class PullDownIndicator extends React.Component<IndicatorProps, {}>{
 
         private element: HTMLElement;
+        private initElement: HTMLElement;
+        private readyElement: HTMLElement;
 
         constructor(props: IndicatorProps) {
 
             super(props);
-            this.state = { status: 'init' };
+            this.state = {};
+        }
+
+        private get status(): IndicatorStatus {
+            if (!this.initElement.style.display || this.initElement.style.display == 'block') {
+                return 'init';
+            }
+
+            return 'ready';
+        }
+        private set status(value: IndicatorStatus) {
+            if (value == 'init') {
+                this.initElement.style.display = 'block';
+                this.readyElement.style.display = 'none';
+            }
+            else {
+                this.initElement.style.display = 'none';
+                this.readyElement.style.display = 'block';
+            }
         }
 
         componentDidMount() {
             let indicator = this.element;
             let viewElement = this.element.parentElement;
             console.assert(viewElement != null);
+            this.status = 'init'
 
             let preventDefault = false;
             let manager = createHammerManager(viewElement); //new Hammer.Manager(viewElement);
@@ -153,10 +196,10 @@ namespace controls {
                 let status = null;
 
                 let distance = 0 - Math.abs(this.props.distance);
-                if (scrollTop < distance && this.state.status != 'ready') {
+                if (scrollTop < distance && this.status != 'ready') {
                     status = 'ready';
                 }
-                else if (scrollTop > distance && this.state.status != 'init') {
+                else if (scrollTop > distance && this.status != 'init') {
                     status = 'init';
                 }
 
@@ -165,8 +208,8 @@ namespace controls {
                     // 延时设置，避免卡
                     window.setTimeout(() => {
                         preventDefault = true;
-                        this.state.status = status;
-                        this.setState(this.state);
+                        this.status = status;
+                        //this.setState(this.state);
                     }, 100);
                     //=================================
                     // 因为更新 DOM 需要时间，一定时间内，不要移动，否则会闪
@@ -176,15 +219,15 @@ namespace controls {
             });
 
             manager.on('panend', () => {
-                if (this.state.status == 'ready' && this.props.onRelease != null) {
+                if (this.status == 'ready' && this.props.onRelease != null) {
                     this.props.onRelease();
                 }
                 //=================================
                 // 延时避免在 IOS 下闪烁
                 window.setTimeout(() => {
                     preventDefault = false;
-                    this.state.status = 'init';
-                    this.setState(this.state);
+                    this.status = 'init';
+                    //this.setState(this.state);
                 }, 200);
                 //=================================
             });
@@ -193,11 +236,11 @@ namespace controls {
         render() {
             return (
                 <div className="pull-down-indicator" ref={(o: HTMLElement) => this.element = o}>
-                    <div className="init" style={{ display: this.state.status == 'init' ? 'block' : 'none' }}>
+                    <div className="init" ref={(o: HTMLElement) => this.initElement = o}>
                         <i className="icon-chevron-down"></i>
                         <span>{this.props.initText}</span>
                     </div>
-                    <div className="ready" style={{ display: this.state.status == 'ready' ? 'block' : 'none' }}>
+                    <div className="ready" ref={(o: HTMLElement) => this.readyElement = o}>
                         <i className="icon-chevron-up"></i>
                         <span>{this.props.readyText}</span>
                     </div>
