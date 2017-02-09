@@ -195,7 +195,7 @@ export default async function (page: Page) {
                         panEnd={() => {
                             let prevent = false;
                             if (this.isShowIntroduceView) {
-                                this.showIntroduceView();
+
                                 this.isShowIntroduceView = false;
                                 prevent = true;
                             }
@@ -268,9 +268,10 @@ export default async function (page: Page) {
                         </div>
                         <hr />
                         <PullUpIndicator
-                            onRelease={() =>
-                                this.isShowIntroduceView = true
-                            } distance={30}
+                            onRelease={() => {
+                                this.isShowIntroduceView = true;
+                                this.showIntroduceView();
+                            }} distance={30}
                             initText="上拉查看商品详情" readyText="释放查看商品详情" />
                     </PageView>
                     <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}
@@ -278,15 +279,15 @@ export default async function (page: Page) {
                             let prevent = false;
                             if (this.isShowProductView) {
                                 this.isShowProductView = false;
-                                this.showProductView();
                                 prevent = true;
                             }
                             return prevent;
                         }}>
                         <PullDownIndicator
-                            onRelease={() =>
-                                this.isShowProductView = true
-                            }
+                            onRelease={() => {
+                                this.isShowProductView = true;
+                                this.showProductView();
+                            }}
                             initText="下拉查看商品详情" readyText="释放查看商品详情" />
                         {this.state.content ?
                             <HtmlView content={this.state.content} className="container" />

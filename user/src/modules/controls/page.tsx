@@ -69,8 +69,12 @@ namespace controls {
 
         //onPanEnd: () => boolean;
 
+        iosAppComponentDidMount() {
+
+        }
         protected componentDidMount() {
             if (isIOS && isCordovaApp) {
+                this.iosAppComponentDidMount();
                 return;
             }
 
@@ -121,7 +125,7 @@ namespace controls {
                 if (!moving) {
                     return;
                 }
-                
+
                 moving = null;
                 this.element.style.touchAction = 'auto';
 

@@ -20,6 +20,7 @@ namespace controls {
         private element: HTMLElement;
         private initElement: HTMLElement;
         private readyElement: HTMLElement;
+        private _status: IndicatorStatus;
 
         constructor(props: IndicatorProps) {
 
@@ -34,8 +35,14 @@ namespace controls {
 
             return 'ready';
         }
+
         private set status(value: IndicatorStatus) {
-            if (value == 'init') {
+            if (this._status == value)
+                return;
+
+            this._status = value;
+
+            if (this._status == 'init') {
                 this.initElement.style.display = 'block';
                 this.readyElement.style.display = 'none';
             }
@@ -44,6 +51,7 @@ namespace controls {
                 this.readyElement.style.display = 'block';
             }
         }
+
 
         componentDidMount() {
             let indicator = this.element; //this.refs['pull-up-indicator'] as HTMLElement;
@@ -93,11 +101,11 @@ namespace controls {
                 if (status != null) {
                     //=================================
                     // 延时设置，避免卡
-                    window.setTimeout(() => {
-                        preventDefault = true;
-                        this.status = status;
-                        //this.setState(this.state);
-                    }, 100);
+                    //window.setTimeout(() => {
+                    preventDefault = true;
+                    this.status = status;
+                    //this.setState(this.state);
+                    //}, 100);
                     //=================================
                     // 因为更新 DOM 需要时间，一定时间内，不要移动，否则会闪
                     window.setTimeout(() => preventDefault = false, 200);
@@ -111,13 +119,13 @@ namespace controls {
                 }
                 //=================================
                 // 延时避免在 IOS 下闪烁
-                window.setTimeout(() => {
-                    preventDefault = false;
-                    startY = null;
-                    start = false;
-                    this.status = 'init';
-                    this.setState(this.state);
-                }, 200);
+                // window.setTimeout(() => {
+                preventDefault = false;
+                startY = null;
+                start = false;
+                this.status = 'init';
+                //     this.setState(this.state);
+                // }, 200);
                 //=================================
             });
         }
@@ -146,6 +154,7 @@ namespace controls {
         private element: HTMLElement;
         private initElement: HTMLElement;
         private readyElement: HTMLElement;
+        private _status: IndicatorStatus;
 
         constructor(props: IndicatorProps) {
 
@@ -160,8 +169,13 @@ namespace controls {
 
             return 'ready';
         }
+
         private set status(value: IndicatorStatus) {
-            if (value == 'init') {
+            if (this._status == value)
+                return;
+
+            this._status = value;
+            if (this._status == 'init') {
                 this.initElement.style.display = 'block';
                 this.readyElement.style.display = 'none';
             }
@@ -206,11 +220,11 @@ namespace controls {
                 if (status != null) {
                     //=================================
                     // 延时设置，避免卡
-                    window.setTimeout(() => {
-                        preventDefault = true;
-                        this.status = status;
-                        //this.setState(this.state);
-                    }, 100);
+                    // window.setTimeout(() => {
+                    preventDefault = true;
+                    this.status = status;
+                    //     //this.setState(this.state);
+                    // }, 100);
                     //=================================
                     // 因为更新 DOM 需要时间，一定时间内，不要移动，否则会闪
                     window.setTimeout(() => preventDefault = false, 200);
@@ -224,11 +238,11 @@ namespace controls {
                 }
                 //=================================
                 // 延时避免在 IOS 下闪烁
-                window.setTimeout(() => {
-                    preventDefault = false;
-                    this.status = 'init';
-                    //this.setState(this.state);
-                }, 200);
+                // window.setTimeout(() => {
+                //     preventDefault = false;
+                this.status = 'init';
+                //this.setState(this.state);
+                // }, 200);
                 //=================================
             });
         }
