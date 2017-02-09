@@ -1,5 +1,5 @@
 import { Page, Menu, defaultNavBar, app } from 'site';
-import { ShoppingCartService, ShopService, ShoppingCartItem } from 'services';
+import { ShoppingCartService, ShopService, ShoppingCartItem, userData } from 'services';
 
 let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
     PageComponent, PageHeader, PageFooter, PageView, Button, Dialog } = controls;
@@ -16,25 +16,22 @@ export default function (page: Page, hideMenu: boolean = false) {
     let shop = page.createService(ShopService);
 
     class ShoppingCartPage extends React.Component<
-        { items: ShoppingCartItem[], hideMenu: boolean, pageName: string },
+        { hideMenu: boolean, pageName: string },
         ShoppingCartState>{
 
         private dialog: controls.Dialog;
 
         constructor(props) {
             super(props);
-            this.setStateByItems(this.props.items);
+            this.setStateByItems(userData.ShoppingCartItems.value || []);
+            userData.ShoppingCartItems.add(items => {
+                this.setStateByItems(items);
+            })
         }
 
         private selectItem(item: ShoppingCartItem) {
 
-            let p = shoppingCart.updateItem(item.ProductId, item.Count, !item.Selected)
-                .then((items) => {
-
-
-                    this.setStateByItems(items);
-                });
-
+            let p = shoppingCart.updateItem(item.ProductId, item.Count, !item.Selected);
             showDialog(this.dialog, p);
             return p;
         }
@@ -114,8 +111,6 @@ export default function (page: Page, hideMenu: boolean = false) {
             else
                 this.setState(state);
         }
-
-
 
         render() {
             return (
@@ -216,9 +211,9 @@ export default function (page: Page, hideMenu: boolean = false) {
         }
     }
 
-    shoppingCart.items().then(items => {
-        ReactDOM.render(<ShoppingCartPage items={items} hideMenu={hideMenu} pageName={page.name} />, page.element);
-    });
+    //shoppingCart.items().then(items => {
+    ReactDOM.render(<ShoppingCartPage hideMenu={hideMenu} pageName={page.name} />, page.element);
+    //});
 
 }
 

@@ -54,7 +54,7 @@ export default function (page: Page) {
 
                 //===============================================
                 // 进入后订单列表，按返回键可以进入到个人中心
-                app.setLocationHash('user_index');
+                //app.setLocationHash('user_index');
                 //================================================
                 let actualPaid = order.Sum - order.BalanceAmount;
                 if (actualPaid > 0) {

@@ -1,4 +1,4 @@
-import { Service, ShoppingCartService, AjaxError, userData } from 'services';
+import { Service, ShoppingCartService, AjaxError, userData, ValueStore } from 'services';
 import { Application as BaseApplication } from 'chitu.mobile';
 
 
@@ -83,7 +83,7 @@ export class Menu extends React.Component<{ pageName: string }, { itemsCount: nu
                     </a>
                 </li>
                 <li>
-                    <a name="user.index" href="#user_index">
+                    <a name="user.index" href="#user_index">ValueStore
                         <i className="icon-user"></i>
                         <span>我</span>
                     </a>
@@ -304,4 +304,14 @@ export function searchNavBar() {
 export function formatDate(date: Date) {
     let d = date;
     return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours() + 1}:${d.getMinutes()}`;
+}
+
+
+export function subscribe<T>( component: React.Component<any, any>,item: ValueStore<T>, callback: (value: T) => void) {
+    let func = item.add(callback);
+    let componentWillUnmount = (component as any).componentWillUnmount as () => void;
+    (component as any).componentWillUnmount = function () {
+        item.remove(func);
+        componentWillUnmount();
+    }
 }

@@ -702,25 +702,22 @@ export class ShoppingCartService extends Service {
                 Object.assign(items[i], JSON.parse(items[i].Remark));
             }
         }
-        //==============================================
-        // Price >0 的为山商品，<= 0 的为赠品，折扣
-        let sum = 0;
-        items.filter(o => o.Price > 0).forEach(o => sum = sum + o.Count);
-        userData.productsCount.value = sum;
-        //==============================================
+
         return items;
     }
 
     addItem(productId: string, count?: number) {
         count = count || 1;
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/AddItem'), { productId, count })
-            .then((result) => this.processShoppingCartItems(result));
+            .then((result) => this.processShoppingCartItems(result))
+            .then((result) => userData.ShoppingCartItems.value = result);
     }
 
     updateItem(productId: string, count: number, selected: boolean) {
         let data = { productId: productId, count: count, selected: selected };
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UpdateItem'), data)
-            .then(items => this.processShoppingCartItems(items));
+            .then(items => this.processShoppingCartItems(items))
+            .then((result) => userData.ShoppingCartItems.value = result);
     }
 
     items() {
@@ -728,9 +725,9 @@ export class ShoppingCartService extends Service {
             .then(items => this.processShoppingCartItems(items));
     }
 
-    productsCount() {
-        return this.get<number>(this.url('ShoppingCart/GetProductsCount'));
-    }
+    // productsCount() {
+    //     return this.get<number>(this.url('ShoppingCart/GetProductsCount'));
+    // }
 
     // private _productsCount: chitu.Callback<ShopService, number>;
     // get productsCount() {
@@ -742,18 +739,21 @@ export class ShoppingCartService extends Service {
 
     selectAll = () => {
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/SelectAll'))
-            .then(items => this.processShoppingCartItems(items));
+            .then(items => this.processShoppingCartItems(items))
+            .then(items => userData.ShoppingCartItems.value = items);
     }
 
     unselectAll = () => {
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UnselectAll'))
-            .then(items => this.processShoppingCartItems(items));
+            .then(items => this.processShoppingCartItems(items))
+            .then(items => userData.ShoppingCartItems.value = items);
     }
 
     /*移除购物车中的多个产品*/
     removeItems(productIds: string[]): Promise<any> {
         var result = this.post<ShoppingCartItem[]>(this.url('ShoppingCart/RemoveItems'), { productIds })
-            .then((data) => this.processShoppingCartItems(data));
+            .then(items => this.processShoppingCartItems(items))
+            .then(items => userData.ShoppingCartItems.value = items);
 
         return result;
     }
@@ -840,38 +840,42 @@ export class AccountService extends Service {
     }
 }
 
-export class ValueCallback<T> {
+export class ValueStore<T> {
     private funcs = new Array<(args: T) => void>();
     private _value: T;
 
     constructor() {
     }
-    add(func: (args: T) => any): (args: T) => any {
+    add(func: (value: T) => any): (args: T) => any {
         this.funcs.push(func);
         return func;
     }
-    remove(func: (args: T) => any) {
+    remove(func: (value: T) => any) {
         this.funcs = this.funcs.filter(o => o != func);
     }
-    fire(args: T) {
-        this.funcs.forEach(o => o(args));
+    fire(value: T) {
+        this.funcs.forEach(o => o(value));
     }
     get value(): T {
         return this._value;
     }
     set value(value: T) {
+        if (this._value == value)
+            return;
+
         this._value = value;
         this.fire(value);
     }
 }
 
 class UserData {
-    private _productsCount = new ValueCallback<number>();
-    private _toEvaluateCount = new ValueCallback<number>();
-    private _sendCount = new ValueCallback<number>();
-    private _notPaidCount = new ValueCallback<number>();
-    private _balance = new ValueCallback<number>();
-    private _nickName = new ValueCallback<string>();
+    private _productsCount = new ValueStore<number>();
+    private _toEvaluateCount = new ValueStore<number>();
+    private _sendCount = new ValueStore<number>();
+    private _notPaidCount = new ValueStore<number>();
+    private _balance = new ValueStore<number>();
+    private _nickName = new ValueStore<string>();
+    private _shoppingCartItems = new ValueStore<ShoppingCartItem[]>();
 
     /** 购物车中的商品数 */
     get productsCount() {
@@ -901,13 +905,27 @@ class UserData {
         return this._nickName;
     }
 
+    get ShoppingCartItems() {
+        return this._shoppingCartItems;
+    }
+
     loadData() {
         if (!config.userToken)
             return;
 
         let ShoppingCart = new ShoppingCartService();
-        ShoppingCart.productsCount().then((value) => {
-            this.productsCount.value = value;
+        // ShoppingCart.productsCount().then((value) => {
+        //     this.productsCount.value = value;
+        // })
+
+        ShoppingCart.items().then((value) => {
+            this.ShoppingCartItems.value = value;
+            //==============================================
+            // Price >0 的为山商品，<= 0 的为赠品，折扣
+            let sum = 0;
+            value.filter(o => o.Price > 0).forEach(o => sum = sum + o.Count);
+            userData.productsCount.value = sum;
+            //==============================================
         })
 
         let member = new MemberService();
@@ -919,6 +937,8 @@ class UserData {
             this.nickName.value = o.NickName;
         })
     }
+
+
 }
 
 export let userData = new UserData();

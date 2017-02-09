@@ -1,5 +1,5 @@
 import { ShoppingCartService, ShopService, Product, Promotion, CustomProperty, userData } from 'services';
-import { Page, config, app } from 'site';
+import { Page, config, app, subscribe } from 'site';
 import { createStore } from 'redux';
 import cm = require('chitu.mobile');
 import BezierEasing = require('bezier-easing');
@@ -14,8 +14,6 @@ let productStore = createStore((product: Product, args: { product: Product, type
     }
     return product;
 });
-
-
 
 export default async function (page: Page) {
 
@@ -44,7 +42,6 @@ export default async function (page: Page) {
         private header: controls.PageHeader;
         private introduceView: HTMLElement;
         private productPanel: ProductPanel;
-        private productsCountSubscrbe: (value: number) => void;
         private isShowIntroduceView = false;
         private isShowProductView = false;
 
@@ -61,12 +58,10 @@ export default async function (page: Page) {
                 this.setState(this.state);
             });
 
-            this.productsCountSubscrbe = (value) => {
+            subscribe(this, userData.productsCount, (value) => {
                 this.state.productsCount = value;
                 this.setState(this.state);
-            }
-            userData.productsCount.add(this.productsCountSubscrbe);
-
+            })
             productStore.subscribe(() => {
                 let p = productStore.getState();
                 this.updateStateByProduct(p);
@@ -128,9 +123,9 @@ export default async function (page: Page) {
 
         }
 
-        protected componentWillUnmount() {
-            userData.productsCount.remove(this.productsCountSubscrbe);
-        }
+        // protected componentWillUnmount() {
+        //     userData.productsCount.remove(this.productsCountSubscrbe);
+        // }
 
         private favor() {
             let p: (productId: string) => Promise<any>
@@ -201,7 +196,7 @@ export default async function (page: Page) {
                                 prevent = true;
                             }
                             return prevent;
-                        }}>
+                        } }>
                         <div name="productImages" className="swiper-container">
                             <div className="swiper-wrapper">
                                 {p.ImageUrls.map(o => (
@@ -274,7 +269,7 @@ export default async function (page: Page) {
                             } distance={30}
                             initText="上拉查看商品详情" readyText="释放查看商品详情" />
                     </PageView>
-                    <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}
+                    <PageView ref={(o) => { o ? this.introduceView = o.element : null } } style={{ transform: 'translateY(100%)' }}
                         panEnd={() => {
                             let prevent = false;
                             if (this.isShowProductView) {
@@ -283,7 +278,7 @@ export default async function (page: Page) {
                                 prevent = true;
                             }
                             return prevent;
-                        }}>
+                        } }>
                         <PullDownIndicator
                             onRelease={() =>
                                 this.isShowProductView = true
@@ -438,7 +433,7 @@ export default async function (page: Page) {
                                 </div>
                             </div>
                             <div className="clearfix"></div>
-                            <button onClick={() => { this.props.parent.addToShoppingCart(); this.panel.hide() }} className="btn btn-primary btn-block"
+                            <button onClick={() => { this.props.parent.addToShoppingCart(); this.panel.hide() } } className="btn btn-primary btn-block"
                                 data-dialog="toast:'成功添加到购物车'">
                                 加入购物车
                         </button>
