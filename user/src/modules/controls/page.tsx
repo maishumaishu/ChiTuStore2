@@ -112,29 +112,33 @@ namespace controls {
                     }
                     else if (moving == 'moveup') {
                         scroller.style.transform = `translateY(-${distance}px)`;
+                        scroller.setAttribute('data-scrolltop', `${scroller.scrollTop + distance}`);
                     }
-                    else if (moving == 'overscroll') {
+                    else if (moving == 'overscroll') {//FOR IOS
                         scroller.setAttribute('data-scrolltop', `${scroller.scrollTop}`);
                     }
                 }
             });
-            hammer.on('panup', (event) => {
 
-            });
-            hammer.on('panend', () => {
+
+            let end = () => {
                 if (!moving) {
                     return;
                 }
 
                 moving = null;
                 this.element.style.touchAction = 'auto';
+                scroller.removeAttribute('data-scrolltop');
 
                 let preventDefault = this.props.panEnd != null ? this.props.panEnd() : false;
                 if (preventDefault) {
                     return;
                 }
                 scroller.style.removeProperty('transform');
-            });
+            }
+
+            hammer.on('pancancel', end);
+            hammer.on('panend', end);
 
             let startY: number;
             scroller.addEventListener('touchstart', (event) => {
@@ -151,7 +155,6 @@ namespace controls {
                     event.stopPropagation();
                 }
             })
-            //}
         }
 
         render() {
