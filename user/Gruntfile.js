@@ -37,8 +37,6 @@ module.exports = function (grunt) {
                         expand: true, cwd: src_user_root, dest: dest_user_root,
                         src: ['js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'ui/**/*.*', 'index.html'],
                     },
-                    //{ expand: true, cwd: src_user_root + '/modules', dest: dest_user_root + '/pages', src: ['**/*.html'] },
-                    //{ expand: true, cwd: 'build', dest: dest_user_root, src: ['**/*.js'] }
                 ],
             },
             ios: {
@@ -70,6 +68,16 @@ module.exports = function (grunt) {
                 dest: `${dest_user_root}/modules/controls.js`,
             }
         },
+        uglify: {
+            user: {
+                files: [{
+                    expand:true,
+                    cwd: `${dest_user_root}/modules.es5`,
+                    src: '**/*.js',
+                    dest: `../release/user/modules.es5`
+                }]
+            }
+        }
     });
 
     grunt.loadNpmTasks('grunt-babel');
@@ -78,6 +86,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-stylus');
     grunt.loadNpmTasks('grunt-contrib-less');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     grunt.registerTask('default', ['shell', 'less', 'concat', 'babel', 'copy']);
     //grunt.registerTask('default', ['concat']);

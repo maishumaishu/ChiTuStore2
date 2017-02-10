@@ -13,6 +13,7 @@
     "grunt-contrib-concat": "~1.0.0",
     "grunt-contrib-less": "~1.0.0",
     "grunt-contrib-stylus": "~1.2.0",
+    "grunt-contrib-uglify": "~1.0.0",
     "grunt-shell": "^2.1.0"
   },
   "dependencies": {

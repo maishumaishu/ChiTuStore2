@@ -85,7 +85,7 @@ export default function (page: Page) {
                             <div>
                                 <nav className="bg-primary" style={{ opacity: this.state.headerOpacity }}></nav>
                                 <nav>
-                                    <a href="#user_messages" className="left-icon">
+                                    <a href="#home_location" className="left-icon">
                                         <i className="icon-map-marker">
                                         </i>
                                         <div>上海</div>
@@ -104,11 +104,6 @@ export default function (page: Page) {
                         }
                     </PageHeader>
                     <PageView ref={(o) => this.dataView = o} className="main">
-                        <div className="pulldown-indicator">
-                            <span className="text">
-                                上面什么也没有
-                                </span>
-                        </div>
                         <div style={{ minHeight: '80px' }} name="ad-swiper" className="carousel slide">
                             <ol className="carousel-indicators">
                                 {this.state.advertItems.map(o =>
