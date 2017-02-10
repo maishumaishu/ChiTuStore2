@@ -1,7 +1,7 @@
 import { Page, Menu, app } from 'site';
 import { StationService, HomeProduct } from 'services';
 //import { PageComponent, PageHeader, PageFooter, ScrollView, ImageBox, DataList } from 'controls';
-let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList } = controls;
+let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList, createHammerManager } = controls;
 
 import Carousel = require('core/carousel');
 import Hammer = require('hammer');
@@ -31,7 +31,7 @@ export default function (page: Page) {
                 let e = page.element.querySelector('[name="ad-swiper"]') as HTMLElement;
                 console.assert(e != null);
                 let c = new Carousel(e, { autoplay: true });
-                let hammer = new Hammer.Manager(this.dataView.element);
+                let hammer = createHammerManager(this.dataView.element); 
                 var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_ALL });
                 hammer.add(pan);
                 hammer.on('panstart', function () {
@@ -62,7 +62,7 @@ export default function (page: Page) {
                 this.setState(this.state);
             });
             //======================================
-            var hammer = new Hammer.Manager(dataViewElement, { touchAction: 'auto' });
+            var hammer = createHammerManager(dataViewElement);
             var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_DOWN });
             hammer.add(pan);
             hammer.on('panstart', function (event) {
