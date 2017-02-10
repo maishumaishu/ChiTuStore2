@@ -67,8 +67,6 @@ namespace controls {
 
         element: HTMLElement;
 
-        //onPanEnd: () => boolean;
-
         iosAppComponentDidMount() {
 
         }
@@ -94,13 +92,14 @@ namespace controls {
             })
             hammer.on('panmove', (event) => {
                 console.log('deltaY:' + event.deltaY);
-                if (scroller.scrollTop == 0) {
+                if (scroller.scrollTop == 0 　&& (event.direction & Hammer.DIRECTION_DOWN) == Hammer.DIRECTION_DOWN) {
                     moving = 'movedown';
                 }
-                else if (scroller.scrollTop + scroller.clientHeight == scroller.scrollHeight) {
+                else if (scroller.scrollTop + scroller.clientHeight == scroller.scrollHeight &&
+                    (event.direction & Hammer.DIRECTION_UP) == Hammer.DIRECTION_UP) {
                     moving = 'moveup';
                 }
-                else if ((scroller.scrollTop + scroller.clientHeight > scroller.scrollHeight) || scroller.scrollTop < 0) {
+                else if ((scroller.scrollTop + scroller.clientHeight > scroller.scrollHeight) || scroller.scrollTop < 0) {//FOR IOS
                     moving = 'overscroll';
                 }
 
@@ -148,11 +147,11 @@ namespace controls {
                 let deltaY = event.touches[0].clientY - startY;
                 if (deltaY < 0 && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight) {
                     event.preventDefault();
-                    event.stopPropagation();
+                    //event.stopPropagation();
                 }
                 else if (deltaY > 0 && scroller.scrollTop <= 0) {
                     event.preventDefault();
-                    event.stopPropagation();
+                    //event.stopPropagation();
                 }
             })
         }
