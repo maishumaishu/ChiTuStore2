@@ -54,6 +54,9 @@ export default function (page: Page, hideMenu: boolean = false) {
             });
         }
         private decreaseCount(item: ShoppingCartItem) {
+            if (item.Count == 1) {
+                return;
+            }
             item.Count = item.Count - 1;
             this.setState(this.state);
         }
@@ -173,8 +176,8 @@ export default function (page: Page, hideMenu: boolean = false) {
                     </PageHeader>
                     <PageFooter>
                         {this.state.items.length > 0 ?
-                            <div className="settlement container" style={{ bottom: this.props.hideMenu ? 0 : null, paddingLeft: 0 }}>
-                                <div className="pull-left" style={{ paddingTop: 2 }}>
+                            <div className="settlement" style={{ bottom: this.props.hideMenu ? 0 : null, paddingLeft: 0 }}>
+                                <div className="pull-left" style={{ paddingTop: 3 }}>
                                     <Button className="select-all" onClick={() => this.checkAll()}>
                                         {this.isCheckedAll() ?
                                             <i className="icon-ok-sign"></i>
@@ -185,12 +188,12 @@ export default function (page: Page, hideMenu: boolean = false) {
                                     </Button>
                                 </div>
                                 {this.state.status == 'normal' ?
-                                    <div className="pull-right" style={{ textAlign: 'right', paddingRight: 0 }}>
+                                    <div className="pull-right" style={{ textAlign: 'right', paddingRight: 10 }}>
                                         <label style={{ paddingRight: 10 }}>
                                             总计：<span className="price">￥{this.state.totalAmount.toFixed(2)}</span>
                                         </label>
                                         <Button className="btn btn-primary" onClick={() => this.buy()} disabled={this.state.selectedCount == 0}>
-                                            结算{this.state.selectedCount > 0 ? (<span>（{this.state.selectedCount}）</span>) : null}
+                                            {this.state.selectedCount > 0 ? `结算（${this.state.selectedCount}）` : '结算'}
                                         </Button>
                                     </div>
                                     :
