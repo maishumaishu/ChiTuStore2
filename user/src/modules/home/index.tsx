@@ -90,7 +90,7 @@ export default function (page: Page) {
                                         </i>
                                         <div>上海</div>
                                     </a>
-                                    <a href="#user_messages" className="right-icon">
+                                    <a onClick={() => alert('hello')} href="#user_messages" className="right-icon">
                                         <i className="icon-comments-alt">
                                         </i>
                                         <div>消息</div>
@@ -157,7 +157,7 @@ export default function (page: Page) {
                         </div>
                         <DataList className="products" loadData={this.loadData} showCompleteText={true}
                             dataItem={(o: HomeProduct) =>
-                                <a key={o.Id} href={`#home_product?id=${o.ProductId}`} className="col-xs-6 text-center item">
+                                <a key={o.Id} onClick={() => app.redirect(`home_product?id=${o.ProductId}`)} className="col-xs-6 text-center item">
                                     <ImageBox src={o.ImagePath} />
                                     <div className="bottom">
                                         <div className="interception">{o.Name}</div>

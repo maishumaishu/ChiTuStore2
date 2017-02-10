@@ -147,7 +147,7 @@ export default async function (page: Page) {
                         </div>
 
                         <div className="list-group">
-                            <a data-bind="attr:{href:url}" className="list-group-item" href="#AccountSecurity_Index">
+                            <a className="list-group-item" href="#user_accountSecurity_index">
                                 <span className="icon-chevron-right pull-right"></span>
                                 <span data-bind="text: value,visible:value" className="pull-right value" style={{ display: 'none' }}></span>
                                 <strong>账户安全</strong>
