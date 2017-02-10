@@ -9,15 +9,22 @@ export default function (page: Page) {
     let orderListView: OrderListView;
     let shop = page.createService(ShopService);
 
+    let type = page.routeData.values.type;
+    let defaultActiveIndex = 0;
+    if (type == 'WaitingForPayment')
+        defaultActiveIndex = 1;
+    else if (type == 'Send')
+        defaultActiveIndex = 2;
+
     class OrderListView extends React.Component<{}, { activeIndex: number }>{
 
         private dataView: controls.PageView;
         private dataList: DataList;
-        // private tabs: HTMLElement;
 
         constructor(props) {
             super(props);
-            this.state = { activeIndex: 0 };
+
+            this.state = { activeIndex: defaultActiveIndex };
         }
 
         private loadData = (pageIndex: number) => {
@@ -61,7 +68,7 @@ export default function (page: Page) {
             let btnClassName = 'btn btn-small btn-primary pull-right';
             switch (order.Status) {
                 case 'WaitingForPayment':
-                    control = <Button className={btnClassName}>立即付款</Button>
+                    control = <a href={`#shopping_orderDetail?id=${order.Id}`} className={btnClassName}>立即付款</a>
                     break;
                 case 'Send':
                     control = <Button className={btnClassName} onClick={() => this.confirmReceived()}
@@ -92,7 +99,7 @@ export default function (page: Page) {
                 <PageComponent>
                     <PageHeader>
                         {defaultNavBar({ title: '我的订单' })}
-                        <Tabs className="tabs" onItemClick={(index) => this.activeItem(index)}
+                        <Tabs className="tabs" defaultActiveIndex={defaultActiveIndex} onItemClick={(index) => this.activeItem(index)}
                             scroller={() => this.dataView.element} >
                             <span>全部</span>
                             <span>待付款</span>
@@ -138,47 +145,6 @@ export default function (page: Page) {
                         )} />
                     </PageView>
                 </PageComponent>
-            );
-        }
-    }
-
-    class OrderListHeader extends React.Component<{}, { activeIndex: number }>{
-        constructor(props) {
-            super(props);
-            this.state = { activeIndex: 0 };
-        }
-
-        private activeItem(index: number) {
-            this.state.activeIndex = index;
-            this.setState(this.state);
-
-            orderListView.state.activeIndex = index;
-            orderListView.setState(orderListView.state);
-        }
-
-        private get tabs() {
-            return this.refs['tabs'] as HTMLElement;
-        }
-
-        render() {
-            return (
-                <div>
-                    {defaultNavBar({ title: '我的订单' })}
-                    <ul ref="tabs" className="tabs" style={{ transition: '0.4s' }}>
-                        <li onClick={() => this.activeItem(0)}
-                            className={this.state.activeIndex == 0 ? 'active' : ''}>
-                            全部
-                        </li>
-                        <li onClick={() => this.activeItem(1)}
-                            className={this.state.activeIndex == 1 ? 'active' : ''}>
-                            待付款
-                        </li>
-                        <li onClick={() => this.activeItem(2)}
-                            className={this.state.activeIndex == 2 ? 'active' : ''}>
-                            待收货
-                        </li>
-                    </ul>
-                </div>
             );
         }
     }

@@ -3,7 +3,8 @@ namespace controls {
         scroller?: () => HTMLElement,
         // items: Array<string>,
         onItemClick?: (index: number) => void,
-        className?: string
+        className?: string,
+        defaultActiveIndex?: number,
     }
 
 
@@ -14,7 +15,7 @@ namespace controls {
 
         constructor(props) {
             super(props);
-            this.state = { activeIndex: 0 };
+            this.state = { activeIndex: this.props.defaultActiveIndex || 0 };
         }
 
         protected componentDidMount() {
