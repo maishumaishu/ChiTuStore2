@@ -24,15 +24,15 @@ export default function (page: Page) {
                         <div className="container order" style={{ paddingTop: 10 }}>
                             <div className="list">
 
-                                <div>
+                                <div className="form-group">
                                     <label>订单状态：</label>
                                     <span style={{ color: '#f70' }}>{order.StatusText}</span>
                                 </div>
-                                <div>
+                                <div className="form-group">
                                     <label>订单编号：</label>
                                     <span>{order.Serial}</span>
                                 </div>
-                                <div>
+                                <div className="form-group">
                                     <label className="pull-left">
                                         订单总计：
                                         </label>
@@ -48,22 +48,22 @@ export default function (page: Page) {
                                     </div>
                                     <div className="clearfix"></div>
                                 </div>
-                                <div>
+                                <div className="form-group">
                                     <label className="pull-left">收货信息：</label>
                                     <div style={{ marginLeft: 70 }}>{order.ReceiptAddress}</div>
                                     <div className="clearfix"></div>
                                 </div>
-                                <div>
+                                <div className="form-group">
                                     <label>下单时间：</label>
                                     <span>{formatDate(order.OrderDate)}</span>
                                 </div>
 
                                 {order.Status == 'WaitingForPayment' ?
-                                    <div>
+                                    <div className="form-group">
                                         <Button onClick={() => this.purchase()} className="btn btn-block btn-primary">微信支付</Button>
                                     </div> : null}
                                 {order.Status == 'Send' ?
-                                    <div>
+                                    <div className="form-group">
                                         <Button onClick={() => this.confirmReceived()} confirm={'你确定收到货了吗？'} className="btn btn-primary btn-block">确认收货</Button>
                                     </div> : null}
                             </div>
@@ -85,7 +85,7 @@ export default function (page: Page) {
                                 {order.OrderDetails.map((o, i) => (
                                     <div>
                                         <hr key={i} className="row" />
-                                        <div key={i} className="row">
+                                        <div key={`OrderDetail${i}`} className="row">
                                             <div className="col-xs-4" style={{ paddingRight: 0 }}>
                                                 <a href={`#home_product?id=${o.ProductId}`}>
                                                     <ImageBox src={o.ImageUrl} className="img-responsive" />
