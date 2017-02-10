@@ -118,7 +118,7 @@ function load() {
         window['React'] = React;
         window['ReactDOM'] = ReactDOM;
 
-        requirejs(modules, function (site, exports1) {
+        requirejs(modules, function (site) {
             site.app.run();
             controls.imageBoxConfig.imageDisaplyText = '零食觅密';
         });
