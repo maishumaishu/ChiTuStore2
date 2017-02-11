@@ -199,7 +199,7 @@ export default function (page: Page, hideMenu: boolean = false) {
                                         <span className="text">全选</span>
                                     </Button>
                                     {this.state.status == 'normal' ?
-                                        <label className="pull-right" style={{ paddingRight: 10 }}>
+                                        <label className="pull-right" style={{ paddingRight: 10, paddingTop: 2 }}>
                                             总计：<span className="price">￥{this.state.totalAmount.toFixed(2)}</span>
                                         </label>
                                         : null
