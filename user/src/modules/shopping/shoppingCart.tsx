@@ -177,6 +177,40 @@ export default function (page: Page, hideMenu: boolean = false) {
                     <PageFooter>
                         {this.state.items.length > 0 ?
                             <div className="settlement" style={{ bottom: this.props.hideMenu ? 0 : null, paddingLeft: 0 }}>
+                                <div className="pull-right">
+                                    {this.state.status == 'normal' ?
+                                        <Button className="btn btn-primary" onClick={() => this.buy()} disabled={this.state.selectedCount == 0}>
+                                            {this.state.selectedCount > 0 ? `结算（${this.state.selectedCount}）` : '结算'}
+                                        </Button>
+                                        :
+                                        <Button className="btn btn-primary" onClick={() => this.deleteSelectedItems()} disabled={this.state.deleteItems.length == 0}
+                                            confirm={this.deleteConfirmText(this.state.deleteItems)}>
+                                            删除
+                                        </Button>
+                                    }
+                                </div>
+                                <div style={{ width: '100%', paddingTop: 8 }}>
+                                    <Button className="select-all pull-left" onClick={() => this.checkAll()}>
+                                        {this.isCheckedAll() ?
+                                            <i className="icon-ok-sign"></i>
+                                            :
+                                            <i className="icon-circle-blank"></i>
+                                        }
+                                        <span className="text">全选</span>
+                                    </Button>
+                                    {this.state.status == 'normal' ?
+                                        <label className="pull-right" style={{ paddingRight: 10 }}>
+                                            总计：<span className="price">￥{this.state.totalAmount.toFixed(2)}</span>
+                                        </label>
+                                        : null
+                                    }
+                                </div>
+
+                            </div>
+                            : null
+                        }
+                        {/*{this.state.items.length > 0 ?
+                            <div className="settlement" style={{ bottom: this.props.hideMenu ? 0 : null, paddingLeft: 0 }}>
                                 <div className="pull-left" style={{ paddingTop: 3 }}>
                                     <Button className="select-all" onClick={() => this.checkAll()}>
                                         {this.isCheckedAll() ?
@@ -205,7 +239,7 @@ export default function (page: Page, hideMenu: boolean = false) {
                                     </div>}
 
                             </div> : null
-                        }
+                        }*/}
                         {(!this.props.hideMenu ? <Menu pageName={this.props.pageName} /> : null)}
                     </PageFooter>
                     <PageView className="main container">
