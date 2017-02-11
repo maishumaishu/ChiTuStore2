@@ -90,9 +90,10 @@ namespace controls {
             hammer.on('panstart', (event) => {
                 scroller.style.transition = '0s';
             })
-            hammer.on('panmove', (event) => {
+
+            let panVertical = (event) => {
                 console.log('deltaY:' + event.deltaY);
-                if (scroller.scrollTop == 0 　&& (event.direction & Hammer.DIRECTION_DOWN) == Hammer.DIRECTION_DOWN) {
+                if (scroller.scrollTop == 0 && (event.direction & Hammer.DIRECTION_DOWN) == Hammer.DIRECTION_DOWN) {
                     moving = 'movedown';
                 }
                 else if (scroller.scrollTop + scroller.clientHeight == scroller.scrollHeight &&
@@ -117,8 +118,9 @@ namespace controls {
                         scroller.setAttribute('data-scrolltop', `${scroller.scrollTop}`);
                     }
                 }
-            });
-
+            };
+            hammer.on('panup', panVertical);
+            hammer.on('pandown', panVertical);
 
             let end = () => {
                 if (!moving) {
