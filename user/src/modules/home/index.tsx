@@ -90,7 +90,7 @@ export default function (page: Page) {
                                         </i>
                                         <div>上海</div>
                                     </a>
-                                    <a onClick={() => alert('hello')} href="#user_messages" className="right-icon">
+                                    <a href="#user_messages" className="right-icon">
                                         <i className="icon-comments-alt">
                                         </i>
                                         <div>消息</div>
