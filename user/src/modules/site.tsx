@@ -138,13 +138,18 @@ export class Page extends chitu.Page {
 
     private renderError() {
         ReactDOM.render(
-            <div className="norecords">
-                <div className="icon">
-                    <i className="icon-rss">
-                    </i>
-                </div>
-                <h4 className="text"></h4>
-                <button onClick={() => this.reload()} className="btn btn-default">点击重新加载页面</button>
+            <div>
+                {this.createHeader()}
+                <section>
+                    <div className="norecords">
+                        <div className="icon">
+                            <i className="icon-rss">
+                            </i>
+                        </div>
+                        <h4 className="text"></h4>
+                        <button onClick={() => this.reload()} className="btn btn-default">点击重新加载页面</button>
+                    </div>
+                </section>
             </div>, this.element
         );
     }
