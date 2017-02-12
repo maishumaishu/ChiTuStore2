@@ -122,7 +122,7 @@ export class Page extends chitu.Page {
                 {this.createHeader()}
                 <section className={loadingClassName}>
                     <div className="spin">
-                        <i className="icon-spinner"></i>
+                        <i className="icon-spinner icon-spin"></i>
                     </div>
                 </section>
                 {topLevelPages.indexOf(this.routeData.pageName) >= 0 ?
