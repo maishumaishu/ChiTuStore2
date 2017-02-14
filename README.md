@@ -11,7 +11,7 @@ VS Code
 
 ## 开发平台
 
-主要使用 Linux(Ubuntu 16), 偶尔也会使用 Windows 以及 Mac OS
+主要使用 Linux(Ubuntu 16), 有时候也会使用 Windows 以及 Mac OS
 
 ## 使用到技术
 
