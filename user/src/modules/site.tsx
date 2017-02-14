@@ -140,16 +140,16 @@ export class Page extends chitu.Page {
         ReactDOM.render(
             <div>
                 {this.createHeader()}
-                <section>
-                    <div className="norecords">
-                        <div className="icon">
-                            <i className="icon-rss">
-                            </i>
-                        </div>
-                        <h4 className="text"></h4>
-                        <button onClick={() => this.reload()} className="btn btn-default">点击重新加载页面</button>
+
+                <div className="norecords">
+                    <div className="icon">
+                        <i className="icon-rss">
+                        </i>
                     </div>
-                </section>
+                    <h4 className="text"></h4>
+                    <button onClick={() => this.reload()} className="btn btn-default">点击重新加载页面</button>
+                </div>
+
             </div>, this.element
         );
     }
