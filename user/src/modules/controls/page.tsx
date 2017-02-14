@@ -58,10 +58,19 @@ namespace controls {
 
     let easing = BezierEasing(0, 0, 1, 0.5);
 
+
+
+    interface PageViewProps extends React.Props<PageView> {
+        className?: string, style?: React.CSSProperties,
+        //panEnd?: () => boolean,
+        pullDownIndicator?: { initText: string, readyText: string, distance?: number, onRelease?: () => void }
+        pullUpIndicator?: { initText: string, readyText: string, distance?: number, onRelease?: () => void }
+    }
+
     /** 是否为安卓系统 */
-    export class PageView extends React.Component<React.Props<PageView> & {
-        className?: string, style?: React.CSSProperties, panEnd?: () => boolean
-    }, {}>{
+    export class PageView extends React.Component<PageViewProps, {}>{
+        private pullDownIndicator: PullDownIndicator;
+        private pullUpIndicator: PullUpIndicator;
 
         static tagName = 'SECTION';
 
@@ -127,15 +136,30 @@ namespace controls {
                     return;
                 }
 
-                moving = null;
                 this.element.style.touchAction = 'auto';
                 scroller.removeAttribute('data-scrolltop');
 
-                let preventDefault = this.props.panEnd != null ? this.props.panEnd() : false;
-                if (preventDefault) {
-                    return;
+                // let pullDownRelease: () => void;
+                // let pullUpRelease: () => void;
+                // if (moving == 'movedown' && this.props.pullDownIndicator) {
+                //     pullDownRelease = this.props.pullDownIndicator.onRelease;
+                // }
+                // else if (moving == 'moveup' && this.props.pullUpIndicator) {
+                //     pullUpRelease = this.props.pullUpIndicator.onRelease;
+                // }
+
+                if (moving == 'movedown' && this.pullDownIndicator != null && this.pullDownIndicator.status == 'ready') {
+                    this.onRelease('pullDown');
                 }
-                scroller.style.removeProperty('transform');
+                else if (moving == 'moveup' && this.pullUpIndicator != null && this.pullUpIndicator.status == 'ready') {
+                    this.onRelease('pullUp');
+                }
+                else {
+                    this.resetPosition();
+                }
+
+
+                moving = null;
             }
 
             hammer.on('pancancel', end);
@@ -149,20 +173,69 @@ namespace controls {
                 let deltaY = event.touches[0].clientY - startY;
                 if (deltaY < 0 && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight) {
                     event.preventDefault();
-                    //event.stopPropagation();
                 }
                 else if (deltaY > 0 && scroller.scrollTop <= 0) {
                     event.preventDefault();
-                    //event.stopPropagation();
                 }
             })
         }
 
+        private onRelease(action: 'pullDown' | 'pullUp') {
+            if (action == 'pullDown' && this.props.pullDownIndicator.onRelease != null) {
+                this.props.pullDownIndicator.onRelease();
+            }
+            else if (action == 'pullUp' && this.props.pullUpIndicator.onRelease != null) {
+                this.props.pullUpIndicator.onRelease();
+            }
+            else {
+                this.resetPosition();
+            }
+        }
+
+        resetPosition() {
+            this.element.style.removeProperty('transform');
+        }
+
+        slide(direction: 'up' | 'down' | 'origin') {
+            this.element.style.transition = `0.4s`;
+            if (direction == 'down') {
+                this.element.style.transform = `translateY(100%)`;
+            }
+            else if (direction == 'up') {
+                this.element.style.transform = `translateY(-100%)`;
+            }
+            else if (direction == 'origin') {
+                this.element.style.transform = `translateY(0)`;
+            }
+        }
+
         render() {
             let children = getChildren(this.props);
+            let pullDownIndicator: JSX.Element = null;
+            let pullUpIndicator: JSX.Element = null;
+            if (this.props.pullDownIndicator) {
+                let p = this.props.pullDownIndicator;
+                pullDownIndicator =
+                    <PullDownIndicator initText={p.initText}
+                        readyText={p.readyText}
+                        distance={p.distance}
+                        ref={(o) => this.pullDownIndicator = o}>
+                    </PullDownIndicator>
+            }
+            if (this.props.pullUpIndicator) {
+                let p = this.props.pullUpIndicator;
+                pullUpIndicator =
+                    <PullUpIndicator initText={p.initText}
+                        readyText={p.readyText}
+                        distance={p.distance}
+                        ref={(o) => this.pullUpIndicator = o}>
+                    </PullUpIndicator>
+            }
             return (
                 <section ref={(o: HTMLElement) => this.element = o} className={this.props.className} style={this.props.style}>
+                    {pullDownIndicator}
                     {children.map(o => (o))}
+                    {pullUpIndicator}
                 </section>
             );
         }

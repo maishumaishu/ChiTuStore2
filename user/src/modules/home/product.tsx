@@ -9,12 +9,6 @@ let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Pa
     PageComponent, PageHeader, PageFooter, PageView, Button } = controls;
 
 let productStore = new ValueStore<Product>();
-// createStore((product: Product, args: { product: Product, type: string }) => {
-//     if (args) {
-//         product = args.product;
-//     }
-//     return product;
-// });
 
 export default async function (page: Page) {
 
@@ -39,9 +33,9 @@ export default async function (page: Page) {
 
     class ProductPage extends React.Component<{ product: Product }, ProductPageState>{
 
-        private dataView: HTMLElement;
+        private productView: controls.PageView;
         private header: controls.PageHeader;
-        private introduceView: HTMLElement;
+        private introduceView: controls.PageView;
         private productPanel: ProductPanel;
         private isShowIntroduceView = false;
         private isShowProductView = false;
@@ -99,19 +93,15 @@ export default async function (page: Page) {
                 });
             }
 
-            this.dataView.style.transform = `translateY(-100%)`;
-            this.dataView.style.transition = `0.4s`;
-            setTimeout(() => {
-                this.introduceView.style.transform = `translateY(0)`;
-                this.introduceView.style.transition = `0.4s`;
-            }, 500);
+            this.productView.slide('up');
+            this.introduceView.slide('origin');
         }
 
         protected componentDidMount() {
             let buttons = this.header.element.querySelectorAll('nav button');
             let title = this.header.element.querySelector('nav.bg-primary') as HTMLElement;
 
-            this.dataView.addEventListener('scroll', function (event) {
+            this.productView.element.addEventListener('scroll', function (event) {
                 let p = this.scrollTop / 100;
                 p = p > 1 ? 1 : p;
 
@@ -126,10 +116,6 @@ export default async function (page: Page) {
             });
 
         }
-
-        // protected componentWillUnmount() {
-        //     userData.productsCount.remove(this.productsCountSubscrbe);
-        // }
 
         private favor() {
             let p: (productId: string) => Promise<any>
@@ -147,11 +133,15 @@ export default async function (page: Page) {
         }
 
         private showProductView() {
-            this.dataView.style.transform = `translateY(0)`;
-            this.dataView.style.transition = `0.4s`;
+            // //setTimeout(() => {
+            //     this.productView.element.style.transform = `translateY(0)`;
+            //     this.productView.element.style.transition = `0.4s`;
+            // //}, 100);
 
-            this.introduceView.style.transform = `translateY(100%)`;
-            this.introduceView.style.transition = `0.4s`;
+            // this.introduceView.style.transform = `translateY(568px)`;
+            // this.introduceView.style.transition = `0.4s`;
+            this.productView.slide('origin');
+            this.introduceView.slide('down');
         }
 
         addToShoppingCart() {
@@ -171,9 +161,24 @@ export default async function (page: Page) {
             this.setState(this.state);
         }
 
+        // panEnd={() => {
+        //                             let prevent = false;
+        //                             if (this.isShowIntroduceView) {
 
+        //                                 this.isShowIntroduceView = false;
+        //                                 prevent = true;
+        //                             }
+        //                             return prevent;
+        //                         }}
 
-
+        //  panEnd={() => {
+        //                             let prevent = false;
+        //                             if (this.isShowProductView) {
+        //                                 this.isShowProductView = false;
+        //                                 prevent = true;
+        //                             }
+        //                             return prevent;
+        //                         }}
         render() {
             let p = this.state.product;
             let productsCount = this.state.productsCount;
@@ -191,15 +196,10 @@ export default async function (page: Page) {
                             </Button>
                         </nav>
                     </PageHeader>
-                    <PageView ref={(o) => this.dataView = o ? o.element : null} className="main"
-                        panEnd={() => {
-                            let prevent = false;
-                            if (this.isShowIntroduceView) {
-
-                                this.isShowIntroduceView = false;
-                                prevent = true;
-                            }
-                            return prevent;
+                    <PageView ref={(o) => this.productView = o} className="main"
+                        pullUpIndicator={{
+                            initText: '上拉查看商品详情', readyText: '释放查看商品详情', distance: 30,
+                            onRelease: () => { this.showIntroduceView() }
                         }}>
                         <div name="productImages" className="swiper-container">
                             <div className="swiper-wrapper">
@@ -267,28 +267,20 @@ export default async function (page: Page) {
                             </div>
                         </div>
                         <hr />
-                        <PullUpIndicator
+                        {/*<PullUpIndicator
                             onRelease={() => {
                                 this.isShowIntroduceView = true;
                                 this.showIntroduceView();
                             }} distance={30}
-                            initText="上拉查看商品详情" readyText="释放查看商品详情" />
+                            initText="上拉查看商品详情" readyText="释放查看商品详情" />*/}
                     </PageView>
-                    <PageView ref={(o) => { o ? this.introduceView = o.element : null }} style={{ transform: 'translateY(100%)' }}
-                        panEnd={() => {
-                            let prevent = false;
-                            if (this.isShowProductView) {
-                                this.isShowProductView = false;
-                                prevent = true;
-                            }
-                            return prevent;
+                    <PageView ref={(o) => this.introduceView = o}
+                        style={{ transform: 'translateY(100%)' }}
+                        pullDownIndicator={{
+                            initText: '下拉查看商品详情',
+                            readyText: '释放查看商品详情',
+                            onRelease: () => this.showProductView()
                         }}>
-                        <PullDownIndicator
-                            onRelease={() => {
-                                this.isShowProductView = true;
-                                this.showProductView();
-                            }}
-                            initText="下拉查看商品详情" readyText="释放查看商品详情" />
                         {this.state.content ?
                             <HtmlView content={this.state.content} className="container" />
                             :

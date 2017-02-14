@@ -4,18 +4,15 @@ namespace controls {
 
     type IndicatorStatus = 'init' | 'ready';
     interface IndicatorProps {
-        //scroller: HTMLElement,
-        onRelease?: () => void,
         initText?: string,
         readyText?: string,
         distance?: number
     }
 
-    //const defaultDistance = 50;
     let defaultIndicatorProps = {} as IndicatorProps;
     defaultIndicatorProps.distance = 50;
 
-    export class PullUpIndicator extends React.Component<IndicatorProps, {}>{//, { status: IndicatorStatus }
+    export class PullUpIndicator extends React.Component<IndicatorProps & React.Props<PullUpIndicator>, {}>{//, { status: IndicatorStatus }
 
         private element: HTMLElement;
         private initElement: HTMLElement;
@@ -28,7 +25,7 @@ namespace controls {
             this.state = {};//
         }
 
-        private get status(): IndicatorStatus {
+        public get status(): IndicatorStatus {
             if (!this.initElement.style.display || this.initElement.style.display == 'block') {
                 return 'init';
             }
@@ -36,7 +33,7 @@ namespace controls {
             return 'ready';
         }
 
-        private set status(value: IndicatorStatus) {
+        public set status(value: IndicatorStatus) {
             if (this._status == value)
                 return;
 
@@ -88,7 +85,7 @@ namespace controls {
                     return;
                 }
 
-                let status = null;
+                let status: IndicatorStatus = null;
                 let deltaY = currentY - startY;
                 let distance = 0 - Math.abs(this.props.distance);
                 if (deltaY < distance && this.status != 'ready') {
@@ -114,20 +111,30 @@ namespace controls {
             });
 
             manager.on('panend', () => {
-                if (this.status == 'ready' && this.props.onRelease != null) {
-                    this.props.onRelease();
-                }
+                // if (this.onBottom) {
+                //     if (this.status == 'ready' && this.props.onRelease != null) {
+                //         this.props.onRelease();
+                //     }
+                //     else if (this.status == 'init' && this.props.onCancel != null) {
+                //         this.props.onCancel();
+                //     }
+                // }
+
                 //=================================
                 // 延时避免在 IOS 下闪烁
-                // window.setTimeout(() => {
-                preventDefault = false;
-                startY = null;
-                start = false;
-                this.status = 'init';
-                //     this.setState(this.state);
-                // }, 200);
+                window.setTimeout(() => {
+                    preventDefault = false;
+                    startY = null;
+                    start = false;
+                    this.status = 'init';
+                    //     this.setState(this.state);
+                }, 100);
                 //=================================
             });
+        }
+
+        private get onBottom() {
+            return this.element.scrollTop + this.element.clientHeight >= this.element.scrollHeight;
         }
         //style={{ display: this.state.status == 'init' ? 'block' : 'none' }}
         //style={{ display: this.state.status == 'ready' ? 'block' : 'none' }}
@@ -149,7 +156,7 @@ namespace controls {
 
     PullUpIndicator.defaultProps = defaultIndicatorProps;
     //{ status: IndicatorStatus }
-    export class PullDownIndicator extends React.Component<IndicatorProps, {}>{
+    export class PullDownIndicator extends React.Component<IndicatorProps & React.Props<PullDownIndicator>, {}>{
 
         private element: HTMLElement;
         private initElement: HTMLElement;
@@ -162,7 +169,7 @@ namespace controls {
             this.state = {};
         }
 
-        private get status(): IndicatorStatus {
+        public get status(): IndicatorStatus {
             if (!this.initElement.style.display || this.initElement.style.display == 'block') {
                 return 'init';
             }
@@ -170,7 +177,7 @@ namespace controls {
             return 'ready';
         }
 
-        private set status(value: IndicatorStatus) {
+        public set status(value: IndicatorStatus) {
             if (this._status == value)
                 return;
 
@@ -207,7 +214,7 @@ namespace controls {
                 }
 
                 let currentY = indicator.getBoundingClientRect().top;
-                let status = null;
+                let status: IndicatorStatus = null;
 
                 let distance = 0 - Math.abs(this.props.distance);
                 if (scrollTop < distance && this.status != 'ready') {
@@ -233,18 +240,19 @@ namespace controls {
             });
 
             manager.on('panend', () => {
-                if (this.status == 'ready' && this.props.onRelease != null) {
-                    this.props.onRelease();
-                }
                 //=================================
                 // 延时避免在 IOS 下闪烁
-                // window.setTimeout(() => {
-                //     preventDefault = false;
-                this.status = 'init';
-                //this.setState(this.state);
-                // }, 200);
+                window.setTimeout(() => {
+                    //     preventDefault = false;
+                    this.status = 'init';
+                    //this.setState(this.state);
+                }, 100);
                 //=================================
             });
+        }
+
+        private get onTop() {
+            return this.element.scrollTop <= 0;
         }
 
         render() {
