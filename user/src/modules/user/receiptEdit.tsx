@@ -1,6 +1,7 @@
-import { Page, defaultNavBar } from 'site';
+import { Page, defaultNavBar, app } from 'site';
 import { ReceiptInfo, ShopService } from 'services';
 import FormValidator = require('validate');
+import { RegionsPageRouteValues } from 'modules/user/regions';
 
 let { PageComponent, PageHeader, PageView, Button } = controls;
 
@@ -9,7 +10,6 @@ export default async function (page: Page) {
     let shop = page.createService(ShopService);
 
     class ReceiptEditPage extends React.Component<{ receiptInfo?: ReceiptInfo }, { receiptInfo: ReceiptInfo }>{
-        //private receiptInfo: ReceiptInfo;
         private validator: FormValidator;
         constructor(props) {
             super(props);
@@ -41,7 +41,7 @@ export default async function (page: Page) {
             else {
                 value = input.value;
             }
-            
+
             this.state.receiptInfo[input.name] = value;
             this.setState(this.state);
         }
@@ -49,9 +49,25 @@ export default async function (page: Page) {
             if (!this.validator.validateForm()) {
                 return Promise.reject<any>(null);
             }
-
-            return Promise.resolve<any>(null);
-            //return shop.saveReceiptInfo(this.receiptInfo);
+            return shop.saveReceiptInfo(this.state.receiptInfo);
+        }
+        changeRegion() {
+            let r = this.state.receiptInfo;
+            let routeValues: RegionsPageRouteValues = {
+                province: { Id: r.ProvinceId, Name: r.ProvinceName }, city: { Id: r.CityId, Name: r.CityName },
+                country: { Id: r.CountyId, Name: r.CountyName },
+                selecteRegion: (province, city, country) => {
+                    r.ProvinceName = province.Name;
+                    r.ProvinceId = province.Id;
+                    r.CityName = city.Name;
+                    r.CityId = city.Id;
+                    r.CountyName = country.Name;
+                    r.CountyId = country.Id;
+                    r.RegionId = country.Id;
+                    this.setState(this.state);
+                }
+            };
+            app.showPage('user_regions', routeValues);
         }
         render() {
             let ReceiptInfo = this.state.receiptInfo;
@@ -100,7 +116,8 @@ export default async function (page: Page) {
                                     <label className="col-xs-3" style={{ paddingRight: 0 }}>
                                         <span className="color-red">*</span> 所在地区
                                     </label>
-                                    <div className="col-xs-9 pull-right" style={{ textAlign: 'right' }}>
+                                    <div className="col-xs-9 pull-right" style={{ textAlign: 'right' }}
+                                        onClick={() => this.changeRegion()}>
                                         <span style={{ paddingRight: 10 }}>
                                             {receiptInfo.ProvinceName} {receiptInfo.CityName} {receiptInfo.CountyName}
                                             <input type="hidden" value={receiptInfo.RegionId || ''} readOnly={true} />
