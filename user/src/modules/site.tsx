@@ -253,16 +253,16 @@ if (!location.hash) {
 
 //============================================================
 // ui
-export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element }) {
+export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element, back?: () => void }) {
     options = options || {};
     let title = options.title || '';
     let showBackButton = options.showBackButton == null ? true : options.showBackButton;
-
+    let back = options.back || (() => app.back());
     return (
         <nav className="bg-primary">
             <div className="col-xs-3" style={{ padding: 0 }}>
                 {showBackButton ?
-                    <button name="back-button" onClick={() => app.back()} className="left-button" style={{ opacity: 1 }}>
+                    <button name="back-button" onClick={() => back()} className="left-button" style={{ opacity: 1 }}>
                         <i className="icon-chevron-left"></i>
                     </button> :
                     <span></span>
