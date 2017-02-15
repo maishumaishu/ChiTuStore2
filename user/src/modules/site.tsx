@@ -253,11 +253,11 @@ if (!location.hash) {
 
 //============================================================
 // ui
-export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element, back?: () => void }) {
+export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element, onBack?: () => void }) {
     options = options || {};
     let title = options.title || '';
     let showBackButton = options.showBackButton == null ? true : options.showBackButton;
-    let back = options.back || (() => app.back());
+    let back = options.onBack || (() => app.back());
     return (
         <nav className="bg-primary">
             <div className="col-xs-3" style={{ padding: 0 }}>
