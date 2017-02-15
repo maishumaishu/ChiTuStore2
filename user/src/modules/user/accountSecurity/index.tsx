@@ -8,7 +8,7 @@ export default function (page: Page) {
             return (
                 <PageComponent>
                     <PageHeader>
-                        {defaultNavBar({ title: '我的优惠券' })}
+                        {defaultNavBar({ title: '账户安全' })}
                     </PageHeader>
                     <PageView>
                         <h3 style={{ textAlign: 'center' }}>TODO</h3>
