@@ -26,16 +26,18 @@ module.exports = function (grunt) {
                     presets: ["es2015"],
                 },
                 files: [
-                    { expand: true, cwd: `${dest_user_root}/modules`, src: ['**/*.js'], dest: dest_user_root + '/modules.es5' },
+                    { expand: true, cwd: `${dest_user_root}`, src: [`modules/**/*.js`], dest: 'www_es5' },
+                    { expand: true, cwd: `${dest_user_root}`, src: [`js/chitu.js`], dest: 'www_es5' },
+                    { expand: true, cwd: `${dest_user_root}`, src: [`index.js`], dest: 'www_es5' },
                 ]
             }
         },
         copy: {
-            src_user: {
+            www: {
                 files: [
                     {
                         expand: true, cwd: src_user_root, dest: dest_user_root,
-                        src: ['js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'ui/**/*.*', 'index.html'],
+                        src: ['js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'index.html'],
                     },
                 ],
             },
@@ -44,6 +46,25 @@ module.exports = function (grunt) {
             },
             android: {
                 files: [{ expand: true, cwd: '.', src: 'www/**/*.*', dest: 'platforms/android/assets' }]
+            },
+            www_es5: {
+                files: [
+                    {
+                        expand: true, cwd: dest_user_root, dest: 'www_es5',
+                        src: ['js/**/*.js', '!js/chitu.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'index.html'],
+                    },
+                ],
+            },
+            release: {
+                files: [
+                    {
+                        expand: true, cwd: dest_user_root, dest: '../release/user',
+                        src: ['js/**/*.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'index.html'],
+                    },
+                ],
+            },
+            releaseToWWW: {
+                files: [{ expand: true, cwd: '../release/user', src: '**/*.js', dest: `${dest_user_root}` }]
             }
         },
         less: {
@@ -59,7 +80,6 @@ module.exports = function (grunt) {
             }
         },
         concat: {
-
             dest: {
                 options: {
 
@@ -71,10 +91,10 @@ module.exports = function (grunt) {
         uglify: {
             user: {
                 files: [{
-                    expand:true,
-                    cwd: `${dest_user_root}/modules.es5`,
+                    expand: true,
+                    cwd: `www_es5`,
                     src: '**/*.js',
-                    dest: `../release/user/modules.es5`
+                    dest: `../release/user`
                 }]
             }
         }
@@ -88,6 +108,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('default', ['shell', 'less', 'concat', 'babel', 'copy']);
-    //grunt.registerTask('default', ['concat']);
+    grunt.registerTask('default', ['shell', 'less', 'concat', 'copy:www']);
+    grunt.registerTask('es5', ['babel', 'copy:www_es5']);
+    grunt.registerTask('dist', ['uglify', 'copy:releaseToWWW']);
+    // grunt.registerTask('default', ['shell', 'less', 'concat', 'babel', 'copy:www', 'copy:www_es5', 'copy:ios', 'copy:android']);
+    // grunt.registerTask('release', ['shell']);
 }

@@ -1,6 +1,10 @@
 {
   "name": "chitu-store",
   "version": "2.0.0",
+  "scripts": {
+    "build": "NODE_ENV=development grunt",
+    "dist": "NODE_ENV=production grunt dist"
+  },
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-helper-vue-jsx-merge-props": "^1.0.0",
