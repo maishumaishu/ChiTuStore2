@@ -19,9 +19,6 @@ export default function (page: Page) {
                     <PageHeader>
                         {defaultNavBar({ title: '资讯详情' })}
                     </PageHeader>
-                    <PageFooter>
-                        <Menu pageName={page.name} />
-                    </PageFooter>
                     <PageView>
                         <div className="container">
                             <h2>{news.Title}</h2>
