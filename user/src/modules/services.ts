@@ -653,17 +653,18 @@ export class ShopService extends Service {
     cities(province: string): Promise<Region[]> {
         var guidRule = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (guidRule.test(province))
-            return this.get<Region[]>('Address/GetCities', { provinceId: province });
+            return this.get<Region[]>(ShopService.url('Address/GetCities'), { provinceId: province });
 
-        return this.get<Region[]>('Address/GetCities', { provinceName: province });;
+        return this.get<Region[]>(ShopService.url('Address/GetCities'), { provinceName: province });;
     }
     counties = (cityId: string) => {
-        var result = this.get<Region[]>('Address/GetCounties', { cityId: cityId });
+        var result = this.get<Region[]>(ShopService.url('Address/GetCounties'), { cityId: cityId });
         return result;
     }
     saveReceiptInfo(receiptInfo: ReceiptInfo) {
         var self = this;
-        var result = this.post<{ Id: string, IsDefault: boolean }>('Address/SaveReceiptInfo', receiptInfo);
+        let url = ShopService.url('Address/SaveReceiptInfo');
+        var result = this.post<{ Id: string, IsDefault: boolean }>(url, receiptInfo);
         return result;
     }
 }
