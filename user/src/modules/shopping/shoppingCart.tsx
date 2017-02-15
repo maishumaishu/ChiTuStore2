@@ -72,12 +72,20 @@ export default function (page: Page, hideMenu: boolean = false) {
             this.setState(this.state);
         }
         private onEditClick() {
-            if (this.state.status == 'normal')
+            if (this.state.status == 'normal') {
                 this.state.status = 'edit';
-            else
-                this.state.status = 'normal';
+                this.setState(this.state);
+                return Promise.resolve();
+            }
 
-            this.setState(this.state);
+            this.state.status = 'normal';
+            let productIds = this.state.items.filter(o => o.Price > 0).map(o => o.ProductId);
+            let quantities = this.state.items.filter(o => o.Price > 0).map(o => o.Count);
+            let result = shoppingCart.updateItems(productIds, quantities).then(o => {
+                this.setState(this.state);
+            });
+            showDialog(this.dialog, result);
+            return result;
         }
         private checkAll() {
             if (this.state.status == 'normal') {
@@ -209,37 +217,6 @@ export default function (page: Page, hideMenu: boolean = false) {
                             </div>
                             : null
                         }
-                        {/*{this.state.items.length > 0 ?
-                            <div className="settlement" style={{ bottom: this.props.hideMenu ? 0 : null, paddingLeft: 0 }}>
-                                <div className="pull-left" style={{ paddingTop: 3 }}>
-                                    <Button className="select-all" onClick={() => this.checkAll()}>
-                                        {this.isCheckedAll() ?
-                                            <i className="icon-ok-sign"></i>
-                                            :
-                                            <i className="icon-circle-blank"></i>
-                                        }
-                                        <span className="text">全选</span>
-                                    </Button>
-                                </div>
-                                {this.state.status == 'normal' ?
-                                    <div className="pull-right" style={{ textAlign: 'right', paddingRight: 10 }}>
-                                        <label style={{ paddingRight: 10 }}>
-                                            总计：<span className="price">￥{this.state.totalAmount.toFixed(2)}</span>
-                                        </label>
-                                        <Button className="btn btn-primary" onClick={() => this.buy()} disabled={this.state.selectedCount == 0}>
-                                            {this.state.selectedCount > 0 ? `结算（${this.state.selectedCount}）` : '结算'}
-                                        </Button>
-                                    </div>
-                                    :
-                                    <div className="pull-right">
-                                        <Button className="btn btn-primary" onClick={() => this.deleteSelectedItems()} disabled={this.state.deleteItems.length == 0}
-                                            confirm={this.deleteConfirmText(this.state.deleteItems)}>
-                                            删除
-                                        </Button>
-                                    </div>}
-
-                            </div> : null
-                        }*/}
                         {(!this.props.hideMenu ? <Menu pageName={this.props.pageName} /> : null)}
                     </PageFooter>
                     <PageView className="main container">
