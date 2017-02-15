@@ -1,6 +1,5 @@
 import { ShoppingCartService, ShopService, Product, Promotion, CustomProperty, userData, ValueStore } from 'services';
 import { Page, config, app, subscribe } from 'site';
-//import { createStore } from 'redux';
 import cm = require('chitu.mobile');
 import BezierEasing = require('bezier-easing');
 
@@ -60,10 +59,6 @@ export default async function (page: Page) {
             subscribe(this, productStore, (value) => {
                 this.updateStateByProduct(value);
             })
-            // productStore.subscribe(() => {
-            //     let p = productStore.getState();
-            //     this.updateStateByProduct(p);
-            // })
         }
 
         private showPanel() {
@@ -133,13 +128,6 @@ export default async function (page: Page) {
         }
 
         private showProductView() {
-            // //setTimeout(() => {
-            //     this.productView.element.style.transform = `translateY(0)`;
-            //     this.productView.element.style.transition = `0.4s`;
-            // //}, 100);
-
-            // this.introduceView.style.transform = `translateY(568px)`;
-            // this.introduceView.style.transition = `0.4s`;
             this.productView.slide('origin');
             this.introduceView.slide('down');
         }
@@ -161,24 +149,6 @@ export default async function (page: Page) {
             this.setState(this.state);
         }
 
-        // panEnd={() => {
-        //                             let prevent = false;
-        //                             if (this.isShowIntroduceView) {
-
-        //                                 this.isShowIntroduceView = false;
-        //                                 prevent = true;
-        //                             }
-        //                             return prevent;
-        //                         }}
-
-        //  panEnd={() => {
-        //                             let prevent = false;
-        //                             if (this.isShowProductView) {
-        //                                 this.isShowProductView = false;
-        //                                 prevent = true;
-        //                             }
-        //                             return prevent;
-        //                         }}
         render() {
             let p = this.state.product;
             let productsCount = this.state.productsCount;
@@ -267,12 +237,6 @@ export default async function (page: Page) {
                             </div>
                         </div>
                         <hr />
-                        {/*<PullUpIndicator
-                            onRelease={() => {
-                                this.isShowIntroduceView = true;
-                                this.showIntroduceView();
-                            }} distance={30}
-                            initText="上拉查看商品详情" readyText="释放查看商品详情" />*/}
                     </PageView>
                     <PageView ref={(o) => this.introduceView = o}
                         style={{ transform: 'translateY(100%)' }}
@@ -472,7 +436,7 @@ class PromotionComponent extends React.Component<
 
     render() {
         let type = this.props.promotion.Type;
-        let contents = this.props.promotion.Contents;//.map((o, i) => { o. })
+        let contents = this.props.promotion.Contents;
         let status = this.state.status;
         return (
             <div className="media">
