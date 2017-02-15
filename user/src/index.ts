@@ -1,7 +1,13 @@
 
 /** 是否为 APP */
 var isCordovaApp = location.protocol === 'file:';
-var es5 = true;
+/** 判断是否经 babel 转换为 es5 */
+let isBabelES5 = false;
+class testClass {
+}
+isBabelES5 = window['_classCallCheck'] != null;
+/** 判断是否使用 uglify 压缩 */
+let isUglify = testClass.name != 'testClass';
 
 var browser = function () {
     var browser = {
@@ -23,19 +29,9 @@ var browser = function () {
     return browser;
 }();
 
-// 通浏览器版本设定是否使用 es5
-if (isCordovaApp || browser.chrome && browser.version >= 48 || browser.safari && browser.version >= 10) {
-    es5 = false;
-}
 
 var modulesPath = 'modules';
-var chituPath = 'js/chitu';
 var services_deps = [];
-
-if (es5) {
-    chituPath = 'js/chitu.es5';
-    modulesPath = 'modules.es5';
-}
 
 if (!window['fetch']) {
     services_deps.push('fetch');
@@ -71,7 +67,7 @@ requirejs.config({
     },
     paths: {
         'bezier-easing': 'js/bezier-easing',
-        chitu: chituPath,
+        chitu: 'js/chitu',
         css: 'js/css',
         fetch: 'js/fetch',
         hammer: 'js/hammer',
@@ -92,13 +88,20 @@ requirejs.config({
 });
 
 var modules = [
-    'site',
-    // 'hammer', 'bezier-easing', 'controls/common', 
-    // 'controls/button', 'controls/dataList', 'controls/dialog', 'controls/htmlView',
-    // 'controls/imageBox', 'controls/indicators', 'controls/page', 'controls/panel',
-    // 'controls/tabs'
-    'controls'
+    'site'
 ];
+
+if (isUglify) {
+    modules.push('controls');
+}
+else {
+    modules.push(
+        'hammer', 'bezier-easing', 'controls/common',
+        'controls/button', 'controls/dataList', 'controls/dialog', 'controls/htmlView',
+        'controls/imageBox', 'controls/indicators', 'controls/page', 'controls/panel',
+        'controls/tabs'
+    );
+}
 
 if (isCordovaApp) {
     modules.push('cordova');
@@ -106,7 +109,7 @@ if (isCordovaApp) {
 }
 
 
-if (es5) {
+if (isBabelES5) {
     requirejs(['js/polyfill'], load)
 }
 else {
