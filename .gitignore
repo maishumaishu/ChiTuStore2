@@ -5,6 +5,7 @@ node_modules
 build
 release
 www
+user/www_es5
 TODO.txt
 .xcuserdata
 .temp
