@@ -17,7 +17,7 @@ let config = {
         return '584cfabb4918e4186a77ff1e';
     },
     /** 调用服务接口超时时间，单位为秒 */
-    ajaxTimeout: 10,
+    ajaxTimeout: 30,
     pageSize: 10
 }
 
