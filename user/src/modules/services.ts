@@ -1,18 +1,6 @@
 
 import chitu = require('chitu');
 
-export class AjaxError implements Error {
-    name: string;
-    message: string;
-    method: 'get' | 'post';
-
-    constructor(method) {
-        this.name = 'ajaxError';
-        this.message = 'Ajax Error';
-        this.method = method;
-    }
-}
-
 const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
 //const SERVICE_HOST = 'localhost:2800/UserServices';
 let config = {
@@ -33,17 +21,35 @@ let config = {
     pageSize: 10
 }
 
-function isError(data: any): Error {
-    if (data.Type == 'ErrorObject') {
-        if (data.Code == 'Success') {
+//==========================================================
+// 错误处理模块
+export class AjaxError implements Error {
+    name: string;
+    message: string;
+    method: 'get' | 'post';
+
+    constructor(method) {
+        this.name = 'ajaxError';
+        this.message = 'Ajax Error';
+        this.method = method;
+    }
+}
+
+/** 
+ * 判断服务端返回的数据是否为错误信息 
+ * @param responseData 服务端返回的数据
+ */
+function isError(responseData: any): Error {
+    if (responseData.Type == 'ErrorObject') {
+        if (responseData.Code == 'Success') {
             return null;
         }
-        let err = new Error(data.Message);
-        err.name = data.Code;
+        let err = new Error(responseData.Message);
+        err.name = responseData.Code;
         return err;
     }
 
-    let err: Error = data;
+    let err: Error = responseData;
     if (err.name !== undefined && err.message !== undefined && err['stack'] !== undefined) {
         return err;
     }
@@ -51,8 +57,8 @@ function isError(data: any): Error {
     return null;
 }
 
-
-//let token = '';
+//==========================================================
+// 公用函数 模块开始
 
 function userToken(value?: string) {
     /** ------ 测试代码 ------- */
@@ -87,8 +93,6 @@ function parseDate(value: string): Date {
 
 }
 
-//========================================================================================
-
 function imageUrl(path: string) {
     if (path.startsWith(`http://localhost:${location.port}`)) {
         path = path.substr(`http://localhost:${location.port}`.length);
@@ -111,10 +115,9 @@ function imageUrl(path: string) {
     return url;
 }
 
-
-function serviceUrl(baseUrl, path) {
-    return `${baseUrl}${path}?storeId=${storeId()}`;;
-}
+// 公用函数 模块结束
+//==========================================================
+// 服务以及实体类模块 开始
 
 interface DataSourceSelectArguments {
     startRowIndex?: number,
@@ -731,18 +734,6 @@ export class ShoppingCartService extends Service {
             .then(items => this.processShoppingCartItems(items));
     }
 
-    // productsCount() {
-    //     return this.get<number>(this.url('ShoppingCart/GetProductsCount'));
-    // }
-
-    // private _productsCount: chitu.Callback<ShopService, number>;
-    // get productsCount() {
-    //     if (!this._productsCount)
-    //         this._productsCount = chitu.Callbacks<ShopService, number>();
-
-    //     return this._productsCount;
-    // }
-
     selectAll = () => {
         return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/SelectAll'))
             .then(items => this.processShoppingCartItems(items))
@@ -800,7 +791,7 @@ export class MemberService extends Service {
 
     userInfo() {
         let url1 = this.url('Member/GetMember');
-        let url2 = serviceUrl(config.service.shop, 'User/GetUserInfo');
+        let url2 = ShopService.url('User/GetUserInfo');
         return Promise.all([this.get<UserInfo1>(url1), this.get<UserInfo2>(url2)]).then(result => {
             let userInfo = Object.assign(result[0], result[1]);
             return userInfo;
@@ -846,6 +837,10 @@ export class AccountService extends Service {
     }
 }
 
+// 服务以及实体类模块 结束
+//==========================================================
+
+/** 实现数据的存储，以及数据修改的通知 */
 export class ValueStore<T> {
     private funcs = new Array<(args: T) => void>();
     private _value: T;
@@ -874,6 +869,7 @@ export class ValueStore<T> {
     }
 }
 
+/** 与用户相关的数据 */
 class UserData {
     private _productsCount = new ValueStore<number>();
     private _toEvaluateCount = new ValueStore<number>();
@@ -920,9 +916,6 @@ class UserData {
             return;
 
         let ShoppingCart = new ShoppingCartService();
-        // ShoppingCart.productsCount().then((value) => {
-        //     this.productsCount.value = value;
-        // })
 
         ShoppingCart.items().then((value) => {
             this.shoppingCartItems.value = value;
