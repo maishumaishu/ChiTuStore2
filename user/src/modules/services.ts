@@ -726,7 +726,9 @@ export class ShoppingCartService extends Service {
 
     updateItems(productIds: string[], quantities: number[]) {
         let data = { productIds, quantities };
-        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UpdateItems'), data);
+        return this.post<ShoppingCartItem[]>(this.url('ShoppingCart/UpdateItems'), data)
+            .then(items => this.processShoppingCartItems(items))
+            .then((result) => userData.shoppingCartItems.value = result);
     }
 
     items() {

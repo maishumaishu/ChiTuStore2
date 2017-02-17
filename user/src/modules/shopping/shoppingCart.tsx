@@ -6,9 +6,9 @@ let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Pa
 
 
 export default function (page: Page, hideMenu: boolean = false) {
-
+    type MyShoppingCartItem = ShoppingCartItem & { InputCount: number };
     interface ShoppingCartState {
-        items?: ShoppingCartItem[], status?: 'normal' | 'edit',
+        items?: MyShoppingCartItem[], status?: 'normal' | 'edit',
         totalAmount?: number, selectedCount?: number,
         deleteItems: Array<ShoppingCartItem>
     }
@@ -53,22 +53,24 @@ export default function (page: Page, hideMenu: boolean = false) {
                 this.setState(this.state);
             });
         }
-        private decreaseCount(item: ShoppingCartItem) {
+        private decreaseCount(item: MyShoppingCartItem) {
             if (item.Count == 1) {
                 return;
             }
-            item.Count = item.Count - 1;
-            this.setState(this.state);
+            // item.Count = item.Count - 1;
+            // this.setState(this.state);
+            this.changeItemCount(item, `${(item.InputCount) - 1}`);
         }
-        private increaseCount(item: ShoppingCartItem) {
-            item.Count = item.Count + 1;
-            this.setState(this.state);
+        private increaseCount(item: MyShoppingCartItem) {
+            // item.Count = item.Count + 1;
+            // this.setState(this.state);
+            this.changeItemCount(item, `${item.InputCount + 1}`);
         }
-        private changeItemCount(item: ShoppingCartItem, value: string) {
+        private changeItemCount(item: MyShoppingCartItem, value: string) {
             let count = Number.parseInt(value);
             if (!count) return;
 
-            item.Count = count;
+            item.InputCount = count;
             this.setState(this.state);
         }
         private onEditClick() {
@@ -78,13 +80,31 @@ export default function (page: Page, hideMenu: boolean = false) {
                 return Promise.resolve();
             }
 
-            this.state.status = 'normal';
-            let productIds = this.state.items.filter(o => o.Price > 0).map(o => o.ProductId);
-            let quantities = this.state.items.filter(o => o.Price > 0).map(o => o.Count);
-            let result = shoppingCart.updateItems(productIds, quantities).then(o => {
+            let productIds = new Array<string>();
+            let quantities = new Array<number>();
+            for (let i = 0; i < this.state.items.length; i++) {
+                let item = this.state.items[i] as MyShoppingCartItem;
+                if (item.InputCount != null && item.InputCount != item.Count) {
+                    productIds.push(item.ProductId);
+                    quantities.push(item.InputCount);
+                }
+            }
+
+
+            let result: Promise<any>;
+            if (productIds.length > 0) {
+                result = shoppingCart.updateItems(productIds, quantities);
+                showDialog(this.dialog, result);
+            }
+            else {
+                result = Promise.resolve({});
+            }
+
+            result.then(o => {
+                this.state.status = 'normal';
                 this.setState(this.state);
             });
-            showDialog(this.dialog, result);
+
             return result;
         }
         private checkAll() {
@@ -132,13 +152,17 @@ export default function (page: Page, hideMenu: boolean = false) {
         }
         private setStateByItems(items: ShoppingCartItem[]) {
 
-            let state = this.state || { status: 'normal', deleteItems: [] } as ShoppingCartState;
+            let state: ShoppingCartState = this.state || { status: 'normal', deleteItems: [] };// as ShoppingCartState;
 
             let selectItems = items.filter(o => o.Selected);
 
             state.selectedCount = 0;
             selectItems.filter(o => !o.IsGiven).forEach(o => state.selectedCount = state.selectedCount + o.Count);
-            state.items = items;
+            state.items = items.map(o => {
+                let i = o as MyShoppingCartItem;
+                i.InputCount = i.Count;
+                return i;
+            });
 
             state.totalAmount = 0;
             selectItems.forEach(o => {
@@ -249,7 +273,7 @@ export default function (page: Page, hideMenu: boolean = false) {
                                                             <span onClick={() => this.decreaseCount(o)} className="input-group-addon">
                                                                 <i className="icon-minus"></i>
                                                             </span>
-                                                            <input value={`${o.Count}`} className="form-control" type="text" style={{ textAlign: 'center' }}
+                                                            <input value={`${o.InputCount}`} className="form-control" type="text" style={{ textAlign: 'center' }}
                                                                 onChange={(e) => (this.changeItemCount(o, (e.target as HTMLInputElement).value))} />
                                                             <span onClick={() => this.increaseCount(o)} className="input-group-addon">
                                                                 <i className="icon-plus"></i>
