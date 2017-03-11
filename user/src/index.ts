@@ -73,7 +73,6 @@ requirejs.config({
         hammer: 'js/hammer',
         react: 'js/react',
         'react-dom': 'js/react-dom',
-        redux: 'js/redux',
         text: 'js/text',
         controls: modulesPath + '/controls',
         core: modulesPath + '/core',
