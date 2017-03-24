@@ -2,7 +2,7 @@ import { Page, Menu, app } from 'site';
 import { StationService, HomeProduct } from 'services';
 //import { PageComponent, PageHeader, PageFooter, ScrollView, ImageBox, DataList } from 'controls';
 let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList, createHammerManager } = controls;
-
+import AutoLocation from './../controls/autoLocation'
 import Carousel = require('core/carousel');
 import Hammer = require('hammer');
 
@@ -12,7 +12,9 @@ export default function (page: Page) {
     interface IndexPageState {
         advertItems: Array<{ ImgUrl: string, Id: string }>,
         headerVisible: boolean,
-        headerOpacity: number
+        headerOpacity: number,
+        text: String,
+        status: Boolean
     }
 
     class IndexPage extends React.Component<{}, IndexPageState>{
@@ -22,7 +24,7 @@ export default function (page: Page) {
 
         constructor(props) {
             super(props);
-            this.state = { advertItems: [], headerVisible: true, headerOpacity: 0 };
+            this.state = { advertItems: [], headerVisible: true, headerOpacity: 0, text: '', status: false };
             station.advertItems().then(items => {
                 this.state.advertItems = items;
                 this.setState(this.state);
@@ -31,7 +33,7 @@ export default function (page: Page) {
                 let e = page.element.querySelector('[name="ad-swiper"]') as HTMLElement;
                 console.assert(e != null);
                 let c = new Carousel(e, { autoplay: true });
-                let hammer = createHammerManager(this.dataView.element); 
+                let hammer = createHammerManager(this.dataView.element);
                 var pan = new Hammer.Pan({ direction: Hammer.DIRECTION_ALL });
                 hammer.add(pan);
                 hammer.on('panstart', function () {
@@ -42,6 +44,18 @@ export default function (page: Page) {
                     c.play();
                 });
                 //===================================================
+            })
+            var autoLocation = new AutoLocation();
+            autoLocation.init().then((result) => {
+                console.log(result)
+                this.state.text = result.regeocode.addressComponent.district;
+                this.state.status = result.status;
+                this.setState(this.state)
+            }).catch((error) => {
+                console.log(error)
+                this.state.text = "定位失败，请手动选择位置";
+                this.state.status = false;
+                this.setState(this.state)
             })
         }
 
@@ -86,9 +100,10 @@ export default function (page: Page) {
                                 <nav className="bg-primary" style={{ opacity: this.state.headerOpacity }}></nav>
                                 <nav>
                                     <a href="#home_location" className="left-icon">
-                                        <i className="icon-map-marker">
+                                        {/*<i className="icon-map-marker">
                                         </i>
-                                        <div>上海</div>
+                                        <div>上海</div>*/}
+                                        <div>{this.state.text}</div>
                                     </a>
                                     <a href="#user_messages" className="right-icon">
                                         <i className="icon-comments-alt">

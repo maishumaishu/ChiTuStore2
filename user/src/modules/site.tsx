@@ -310,7 +310,6 @@ export function subscribe<T>(component: React.Component<any, any>, item: ValueSt
     let componentWillUnmount = (component as any).componentWillUnmount as () => void;
     (component as any).componentWillUnmount = function () {
         item.remove(func);
-        if (componentWillUnmount)
-            componentWillUnmount();
+        componentWillUnmount();
     }
 }

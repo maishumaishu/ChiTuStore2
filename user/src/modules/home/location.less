@@ -1,4 +1,49 @@
 @import "../common.less";
 .home-location {
     .padding-top();
+    background-color: #F7F7F7;
+    section {
+        width: 100%;
+    }
+    ul {
+        list-style: none;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        li {
+            list-style: none;
+        }
+    }
+    .autoLocation {
+        p {
+            margin: 0px;
+        }
+        .location {
+            width: 100%;
+            padding: 10px;
+            text-indent: 20px;
+            background-color: #fff;
+        }
+    }
+    .provinces {
+        .provinces-item:first-child {
+            border-top: 1px solid #f2f2f2;
+        }
+        .provinces-item {
+            border-bottom: 1px solid #f2f2f2;
+            line-height: 30px;
+            span {
+                margin-left: 30px;
+            }
+            .citys {
+                display: block;
+                overflow: hidden;
+                li {
+                    display: block;
+                    width: 25%;
+                    float: left;
+                }
+            }
+        }
+    }
 }
