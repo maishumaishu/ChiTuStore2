@@ -7,7 +7,7 @@ import Carousel = require('core/carousel');
 import Hammer = require('hammer');
 
 export default function (page: Page) {
-
+    const DEFAULT_LOCATION = '上海';
     let station = page.createService(StationService);
     interface IndexPageState {
         advertItems: Array<{ ImgUrl: string, Id: string }>,
@@ -24,7 +24,7 @@ export default function (page: Page) {
 
         constructor(props) {
             super(props);
-            this.state = { advertItems: [], headerVisible: true, headerOpacity: 0, text: '', status: false };
+            this.state = { advertItems: [], headerVisible: true, headerOpacity: 0, text: DEFAULT_LOCATION, status: false };
             station.advertItems().then(items => {
                 this.state.advertItems = items;
                 this.setState(this.state);
@@ -53,9 +53,9 @@ export default function (page: Page) {
                 this.setState(this.state)
             }).catch((error) => {
                 console.log(error)
-                this.state.text = "定位失败，请手动选择位置";
-                this.state.status = false;
-                this.setState(this.state)
+                // this.state.text = "定位失败，请手动选择位置";
+                // this.state.status = false;
+                // this.setState(this.state)
             })
         }
 
@@ -100,9 +100,9 @@ export default function (page: Page) {
                                 <nav className="bg-primary" style={{ opacity: this.state.headerOpacity }}></nav>
                                 <nav>
                                     <a href="#home_location" className="left-icon">
-                                        {/*<i className="icon-map-marker">
+                                        <i className="icon-map-marker">
                                         </i>
-                                        <div>上海</div>*/}
+                                        {/*<div>上海</div>*/}
                                         <div>{this.state.text}</div>
                                     </a>
                                     <a href="#user_messages" className="right-icon">

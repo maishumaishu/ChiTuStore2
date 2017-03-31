@@ -88,7 +88,7 @@ function get<T>(url: string, data?: any) {
 
     data = data || {};
     let headers = {
-        'application-token': config.appToken,
+        'application-key': config.appToken,
         'user-token': userToken(),
     };
 
@@ -113,7 +113,7 @@ function post<T>(url: string, contentType: ContentType, data?: any) {
 
     data = data || {};
     let headers = {
-        'application-token': config.appToken,
+        'application-key': config.appToken,
         'user-token': userToken(),
         'content-type': 'application/json'
     };
@@ -136,7 +136,7 @@ export module user {
     export function register(model: RegisterModel) {
         let options = {
             headers: {
-                'application-token': config.appToken,
+                'application-key': config.appToken,
                 'content-type': 'application/json'
             },
             body: JSON.stringify(model),
@@ -152,7 +152,7 @@ export module user {
     export function sendVerifyCode(mobile: string): Promise<{ smsId: string }> {
         let options = {
             headers: {
-                'application-token': config.appToken,
+                'application-key': config.appToken,
                 'content-type': 'application/json'
             },
             body: JSON.stringify({ mobile, type: 'register' }),
@@ -165,7 +165,7 @@ export module user {
     export function login(username: string, password: string) {
         let options = {
             headers: {
-                'application-token': config.appToken,
+                'application-key': config.appToken,
             },
             method: 'get'
         }

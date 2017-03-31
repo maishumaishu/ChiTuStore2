@@ -1,16 +1,29 @@
 
 import chitu = require('chitu');
 
-const SERVICE_HOST = 'service.alinq.cn:2800/UserServices';
+const SERVICE_HOST = 'service.alinq.cn:2800';//'localhost:2800';//
 //const SERVICE_HOST = 'localhost:2800/UserServices';
-let config = {
-    service: {
-        shop: `http://${SERVICE_HOST}/Shop/`,
-        site: `http://${SERVICE_HOST}/Site/`,
-        member: `http://${SERVICE_HOST}/Member/`,
-        weixin: `http://${SERVICE_HOST}/WeiXin/`,
-        account: `http://${SERVICE_HOST}/Account/`,
+
+var services = {
+    local: {
+        shop: `http://${SERVICE_HOST}/UserShopTest/`,
+        site: `http://${SERVICE_HOST}/UserSiteTest/`,
+        member: `http://${SERVICE_HOST}/UserMemberTest/`,
+        weixin: `http://${SERVICE_HOST}/UserWeiXinTest/`,
+        account: `http://${SERVICE_HOST}/UserAccountTest/`,
     },
+    server: {
+        shop: `http://${SERVICE_HOST}/UserShop/`,
+        site: `http://${SERVICE_HOST}/UserSite/`,
+        member: `http://${SERVICE_HOST}/UserMember/`,
+        weixin: `http://${SERVICE_HOST}/UserWeiXin/`,
+        account: `http://${SERVICE_HOST}/UserAccount/`,
+    }
+}
+
+
+let config = {
+    service: services.server,
     appToken: '58424776034ff82470d06d3d',
     storeId: '58401d1906c02a2b8877bd13',
     get userToken() {
@@ -111,7 +124,7 @@ function imageUrl(path: string) {
     else {
         url = path;
     }
-    url = url + `?application-token=${config.appToken}&storeId=${storeId()}`;
+    url = url + `?application-key=${config.appToken}&storeId=${storeId()}`;
     return url;
 }
 
@@ -257,7 +270,7 @@ export abstract class Service {
 
         data = data || {};
         let headers = {
-            'application-token': config.appToken,
+            'application-key': config.appToken,
         };
 
         if (userToken()) {
@@ -286,7 +299,7 @@ export abstract class Service {
 
         data = data || {};
         let headers = {
-            'application-token': config.appToken,
+            'application-key': config.appToken,
             'user-token': userToken(),
         };
 
