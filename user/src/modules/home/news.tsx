@@ -23,7 +23,7 @@ export default function (page: Page) {
                         <div className="container">
                             <h2>{news.Title}</h2>
                             <div className="small">
-                                {news.Date.toLocaleDateString()}
+                                {news.Date}
                             </div>
                             <HtmlView content={news.Content} />
                         </div>
