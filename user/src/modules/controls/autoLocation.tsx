@@ -5,22 +5,26 @@ export default class AutoLocation {
     init() {
         return new Promise<any>((resolve, reject) => {
             var location = {};
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    this.locationSuccess(resolve, reject, position);
-                }, (error) => {
-                    this.locationError(reject, error)
-                }, {
-                        // 指示浏览器获取高精度的位置，默认为false
-                        enableHighAccuracy: true,
-                        // 指定获取地理位置的超时时间，默认不限时，单位为毫秒
-                        timeout: 10000,
-                        // 最长有效期，在重复获取地理位置时，此参数指定多久再次获取位置。
-                        maximumAge: 0
-                    });
-            } else {
+            if (!navigator.geolocation) {
                 reject({ text: "Your browser does not support Geolocation!", status: false });
+                return;
             }
+            // {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    this.locationSuccess(resolve, reject, position);
+                },
+                (error) => {
+                    this.locationError(reject, error)
+                },
+                {
+                    // 指示浏览器获取高精度的位置，默认为false
+                    enableHighAccuracy: true,
+                    // 指定获取地理位置的超时时间，默认不限时，单位为毫秒
+                    timeout: 10000,
+                    // 最长有效期，在重复获取地理位置时，此参数指定多久再次获取位置。
+                    maximumAge: 0
+                });
         });
     }
     locationError(reject, error) {
@@ -42,11 +46,7 @@ export default class AutoLocation {
         // return location;
     }
     locationSuccess(resolve, reject, position) {
-        requirejs.config({
-            paths: {
-                "AMap": "http://webapi.amap.com/maps?v=1.3&key=739831be4da5a88706d6dfaaf2da62d7"
-            }
-        });
+        let AMP = "http://webapi.amap.com/maps?v=1.3&key=739831be4da5a88706d6dfaaf2da62d7";
         requirejs(['AMap'], () => {
             var mapObj = new window['AMap'].Map('iCenter');
             var geocoder;
