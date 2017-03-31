@@ -1,6 +1,6 @@
 import { Page, defaultNavBar } from 'site';
 import { LocationService, Provinces, Cities } from 'services';
-import AutoLocation from './../controls/autoLocation'
+import AutoLocation from 'modules/controls/autoLocation'
 let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList } = controls;
 
 export default function (page: Page) {
@@ -29,7 +29,7 @@ export default function (page: Page) {
                 this.state.text = "定位失败，请手动选择位置";
                 this.state.status = false;
                 this.setState(this.state)
-            })
+            });
         }
         render() {
             return (
