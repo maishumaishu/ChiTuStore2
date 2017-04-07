@@ -38,39 +38,31 @@ export default function (page: Page) {
                         {defaultNavBar({ title: '我的位置' })}
                     </PageHeader>
                     <PageView>
-                        <div className="autoLocation"><p className="location-name">当前位置:</p><p className="location">{this.state.text}</p></div>
-                        <div><p>选择位置:</p></div>
-                        <ul className="provinces">
-                            {this.props.provincesProps.map((o, k) => (
-                                <li key={k} className="provinces-item" onClick={() => this.GetCities(o.Id, k)}><span>{o.Name}</span>
-                                    <div className="citys">
-                                        <ul>
+                        <div className="location-content">
+                            <div className="autoLocation"><p className="location-text">当前位置:{this.state.text}</p></div>
+                            <div><p>选择位置:</p></div>
+                            <div className="location-box">
+                                {this.props.provincesProps.map((o, k) => (
+                                    <div className="list" key={k}>
+                                        <ul className="provinces">
+                                            <p>{o.Name}</p>
                                             {
-                                                this.state.key == k ?
-                                                    this.state.cities.map((item, index) => (
-                                                        <li key={index}><span>{item.Name}</span></li>)
-                                                    ) : ""
+                                                o.Cities.map((item, index) => (
+                                                    <li key={index}><a>{item.Name}</a></li>)
+                                                )
                                             }
                                         </ul>
                                     </div>
-                                </li>
-                            ))}
-
-                        </ul>
+                                ))}
+                            </div>
+                        </div>
                     </PageView>
                 </PageComponent>
             )
         }
-        GetCities(provinceId, key) {
-            station.getCities(provinceId).then(o => {
-                this.state.cities = o;
-                this.state.key = key;
-                this.setState(this.state);
-            })
-        }
     }
     function init() {
-        station.getProvinces().then(o => {
+        station.getProvincesAndCities().then(o => {
             ReactDOM.render(<LocationPage provincesProps={o} />, page.element);
         })
     }

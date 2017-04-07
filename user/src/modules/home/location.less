@@ -1,47 +1,96 @@
 @import "../common.less";
 .home-location {
     .padding-top();
-    background-color: #F7F7F7;
+    background-color: #f0efed;
     section {
         width: 100%;
     }
-    ul {
-        list-style: none;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        li {
+    .location-content {
+        overflow: hidden;
+        padding: 0 10px;
+        ul {
             list-style: none;
-        }
-    }
-    .autoLocation {
-        p {
-            margin: 0px;
-        }
-        .location {
             width: 100%;
-            padding: 10px;
-            text-indent: 20px;
-            background-color: #fff;
-        }
-    }
-    .provinces {
-        .provinces-item:first-child {
-            border-top: 1px solid #f2f2f2;
-        }
-        .provinces-item {
-            border-bottom: 1px solid #f2f2f2;
-            line-height: 30px;
-            span {
-                margin-left: 30px;
+            margin: 0;
+            padding: 0;
+            li {
+                list-style: none;
             }
-            .citys {
-                display: block;
-                overflow: hidden;
-                li {
-                    display: block;
-                    width: 25%;
-                    float: left;
+        }
+        .autoLocation {
+            margin-top: .2rem;
+            margin-bottom: .4rem;
+            overflow: hidden;
+            border: 1px solid #DDD8CE;
+            border-radius: .06rem;
+            p {
+                margin: 0px;
+            }
+            .location-text {
+                width: 100%;
+                padding: 10px;
+                background-color: #fff;
+            }
+        }
+        .location-box {
+            margin-top: .2rem;
+            border: 1px solid #DDD8CE;
+            border-radius: .06rem;
+            overflow: hidden;
+            background-color: #FDFDFC;
+            padding: 0;
+            margin-bottom: 30px;
+            .list:first-child {
+                border-top: none;
+            }
+            .list {
+                border-top: 1px solid #ddd8ce;
+                clear: both;
+                .provinces {
+                    min-height: .8rem;
+                    position: relative;
+                    overflow: hidden;
+                    z-index: 0;
+                    margin: 0;
+                    padding: 0;
+                    list-style-type: none;
+                    p {
+                        display: inline-block;
+                        margin: 0;
+                        margin-bottom: -1px;
+                        line-height: 72px;
+                        color: #B7B7B7;
+                        font-size: .8rem;
+                        width: 25%;
+                        text-align: center;
+                        border-bottom: 1px solid #ddd8ce;
+                        border-right: 1px solid #ddd8ce;
+                        float: left;
+                        position: relative;
+                        z-index: 10;
+                    }
+                    li {
+                        display: inline-block;
+                        width: 25%;
+                        height: 37px;
+                        line-height: 37px;
+                        font-size: .28rem;
+                        text-align: center;
+                        border-bottom: 1px solid #ddd8ce;
+                        border-right: 1px solid #ddd8ce;
+                        margin-bottom: -1px;
+                        float: left;
+                        position: relative;
+                        z-index: 10;
+                        a {
+                            display: block;
+                            color: inherit;
+                            height: 100%;
+                            text-decoration: none;
+                            outline: 0;
+                            overflow: hidden;
+                        }
+                    }
                 }
             }
         }

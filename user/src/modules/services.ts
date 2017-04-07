@@ -964,6 +964,7 @@ userData.loadData();
 export interface Provinces {
     Id: string,
     Name: string
+    Cities: Array<Cities>
 }
 export interface Cities {
     Id: string,
@@ -987,6 +988,12 @@ export class LocationService extends Service {
 
     getCities = (provinceId) => {
         return this.get<Cities[]>(this.url('Address/GetCities'), { provinceId: provinceId }).then((result) => {
+            return result;
+        });
+    }
+
+    getProvincesAndCities = () => {
+        return this.get<any>(this.url('Address/GetProvinces'), { includeCities: true }).then(function (result) {
             return result;
         });
     }
