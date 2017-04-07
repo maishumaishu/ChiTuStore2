@@ -44,8 +44,8 @@ export default function (page: Page) {
                             <div className="location-box">
                                 {this.props.provincesProps.map((o, k) => (
                                     <div className="list" key={k}>
+                                        <p><span>{o.Name}</span></p>
                                         <ul className="provinces">
-                                            <p>{o.Name}</p>
                                             {
                                                 o.Cities.map((item, index) => (
                                                     <li key={index}><a>{item.Name}</a></li>)
