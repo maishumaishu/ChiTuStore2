@@ -46,8 +46,8 @@ export default class AutoLocation {
         // return location;
     }
     locationSuccess(resolve, reject, position) {
-        let AMP = "http://webapi.amap.com/maps?v=1.3&key=739831be4da5a88706d6dfaaf2da62d7";
-        requirejs(['AMap'], () => {
+        let AMap = "http://webapi.amap.com/maps?v=1.3&key=739831be4da5a88706d6dfaaf2da62d7";
+        requirejs([AMap], () => {
             var mapObj = new window['AMap'].Map('iCenter');
             var geocoder;
             var lnglatXY = new window['AMap'].LngLat(position.coords.longitude, position.coords.latitude);
