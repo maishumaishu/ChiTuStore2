@@ -1,8 +1,7 @@
 import { Page, Menu, app } from 'site';
 import { StationService, HomeProduct } from 'services';
-//import { PageComponent, PageHeader, PageFooter, ScrollView, ImageBox, DataList } from 'controls';
 let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList, createHammerManager } = controls;
-import AutoLocation from './../controls/autoLocation'
+import AutoLocation from 'controls/autoLocation'
 import Carousel = require('core/carousel');
 import Hammer = require('hammer');
 
