@@ -84,7 +84,7 @@ module.exports = function (grunt) {
                 options: {
 
                 },
-                src: [`${src_user_root}/js/hammer.js`, `${src_user_root}/js/bezier-easing.js`, `${dest_user_root}/modules/controls/*.js`],
+                src: [`${src_user_root}/js/hammer.js`, `${src_user_root}/js/bezier-easing.js`, `${dest_user_root}/modules/controls/share/*.js`],
                 dest: `${dest_user_root}/modules/controls.js`,
             }
         },
