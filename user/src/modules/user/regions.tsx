@@ -1,5 +1,5 @@
 import { Page, defaultNavBar, app } from 'site';
-import { ShopService, Region } from 'services';
+import { ShoppingService, Region } from 'services';
 let { PageComponent, PageHeader, PageFooter, PageView, Button, DataList } = controls;
 
 export interface RegionsPageRouteValues {
@@ -9,7 +9,7 @@ export interface RegionsPageRouteValues {
     selecteRegion: (province: Region, city: Region, country: Region) => void
 }
 export default function (page: Page) {
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
     let routeValues = (page.routeData.values || {}) as RegionsPageRouteValues;
     interface RegiosPageState {
         title: string, cities: Region[], countries: Region[],

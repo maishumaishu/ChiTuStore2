@@ -1,4 +1,53 @@
 @import "../common.less";
 .user-coupon {
-    .padding-top();
+    .padding-top(40);
+
+    hr {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        /*margin: 0;*/
+        height: 6px;
+        background-color: @gray-lighter;
+
+        &:first-child, &:last-child {
+            height: 12px;
+        }
+    }
+
+    .coupon {
+        @width: 80px;
+        @height: 80px;
+
+        padding: 0;
+        height: @height;
+        .pull-left {
+            width:  @width;
+            height: @height;
+            padding: 20px 0px 0px 10px;
+            background-color: @gray;
+            color: white;
+
+            .text {
+                font-size: 24px;
+            }
+        }
+        .main {
+            padding: 14px 0px 0px 20px;
+            font-size: 16px;
+            margin-left:  @width;
+
+            .date {
+                margin-top: 10px;
+            }
+        }
+    }
+
+    .norecords {
+        .icon {
+            i {
+                top: 33px;
+                font-size: 100px;
+            }
+        }
+    }
 }

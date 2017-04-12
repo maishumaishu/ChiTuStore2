@@ -1,11 +1,11 @@
 import { Page, defaultNavBar, app, formatDate } from 'site';
-import { ShopService, AccountService, Order } from 'services';
+import { ShoppingService, AccountService, Order } from 'services';
 
 let { PageComponent, PageHeader, PageFooter, PageView, Dialog, Button } = controls;
 
 export default function (page: Page) {
 
-    let shop = page.createService(ShopService);
+    let shopping = page.createService(ShoppingService);
 
     class PurchasePage extends React.Component<{ order: Order }, {}> {
         private purchase() {
@@ -29,7 +29,7 @@ export default function (page: Page) {
                             <div className="row" style={{ paddingBottom: 10 }}>
                                 <label className="col-xs-3" style={{ paddingRight: 0 }}>订单状态</label>
                                 <div className="col-xs-9" style={{ color: '#f70' }}>
-                                    {order.StatusText}
+                                    {shopping.orderStatusText(order.Status)}
                                 </div>
                             </div>
                             <div className="row" style={{ paddingBottom: 10 }}>
@@ -72,7 +72,7 @@ export default function (page: Page) {
         }
     }
 
-    shop.order(page.routeData.values.id).then(order => {
+    shopping.order(page.routeData.values.id).then(order => {
         ReactDOM.render(<PurchasePage order={order} />, page.element);
     })
 }

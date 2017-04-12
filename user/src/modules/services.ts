@@ -1,33 +1,45 @@
 
 import chitu = require('chitu');
 
-const SERVICE_HOST = 'service.alinq.cn:2800';//'localhost:2800';//
-//const SERVICE_HOST = 'localhost:2800/UserServices';
+const REMOTE_HOST = 'service.alinq.cn:2800';//'localhost:2800';//
+const LOCAL_HOST = 'localhost:2800';
 
 var services = {
     local: {
-        shop: `http://${SERVICE_HOST}/UserShopTest/`,
-        site: `http://${SERVICE_HOST}/UserSiteTest/`,
-        member: `http://${SERVICE_HOST}/UserMemberTest/`,
-        weixin: `http://${SERVICE_HOST}/UserWeiXinTest/`,
-        account: `http://${SERVICE_HOST}/UserAccountTest/`,
+        host: LOCAL_HOST,
+        shop: `http://${LOCAL_HOST}/UserShopTest/`,
+        site: `http://${LOCAL_HOST}/UserSiteTest/`,
+        member: `http://${LOCAL_HOST}/UserMemberTest/`,
+        weixin: `http://${LOCAL_HOST}/UserWeiXinTest/`,
+        account: `http://${LOCAL_HOST}/UserAccountTest/`,
     },
     server: {
-        shop: `http://${SERVICE_HOST}/UserShop/`,
-        site: `http://${SERVICE_HOST}/UserSite/`,
-        member: `http://${SERVICE_HOST}/UserMember/`,
-        weixin: `http://${SERVICE_HOST}/UserWeiXin/`,
-        account: `http://${SERVICE_HOST}/UserAccount/`,
+        host: REMOTE_HOST,
+        shop: `http://${REMOTE_HOST}/UserShop/`,
+        site: `http://${REMOTE_HOST}/UserSite/`,
+        member: `http://${REMOTE_HOST}/UserMember/`,
+        weixin: `http://${REMOTE_HOST}/UserWeiXin/`,
+        account: `http://${REMOTE_HOST}/UserAccount/`,
     }
 }
 
 
+
 let config = {
-    service: services.server,
+    service: services.local,
     appToken: '58424776034ff82470d06d3d',
     storeId: '58401d1906c02a2b8877bd13',
     get userToken() {
-        return '584cfabb4918e4186a77ff1e';
+        // return localStorage.getItem('userToken');
+        return userData.userToken.value;
+    },
+    set userToken(value) {
+        // if (!value) {
+        //     localStorage.removeItem('userToken');
+        //     return;
+        // }
+        // localStorage.setItem('userToken', value);
+        userData.userToken.value = value;
     },
     /** 调用服务接口超时时间，单位为秒 */
     ajaxTimeout: 30,
@@ -72,21 +84,6 @@ function isError(responseData: any): Error {
 
 //==========================================================
 // 公用函数 模块开始
-
-function userToken(value?: string) {
-    /** ------ 测试代码 ------- */
-    if (config.userToken) {
-        return config.userToken;
-    }
-    //==========================
-
-    if (value !== undefined) {
-        localStorage.setItem('userToken', value);
-        return;
-    }
-    return localStorage.getItem('userToken');
-}
-
 function storeId() {
     return '58401d1906c02a2b8877bd13';
 }
@@ -151,6 +148,48 @@ export abstract class Service {
     private datePrefix = '/Date(';
     error = chitu.Callbacks<Service, Error>();
     ajax<T>(url: string, options: FetchOptions): Promise<T> {
+
+        let _ajax = async (url: string, options: FetchOptions): Promise<T> => {
+            let user_token = config.userToken;
+            if (user_token) {
+                options.headers['user-token'] = user_token;
+            }
+
+            try {
+                let response = await fetch(url, options);
+                if (response.status >= 300) {
+                    let err = new AjaxError(options.method);
+                    err.name = `${response.status}`;
+                    err.message = response.statusText;
+                    throw err
+                }
+                let responseText = response.text();
+                let p: Promise<string>;
+                if (typeof responseText == 'string') {
+                    p = new Promise<string>((reslove, reject) => {
+                        reslove(responseText);
+                    })
+                }
+                else {
+                    p = responseText as Promise<string>;
+                }
+
+                let text = await responseText;
+                let textObject = JSON.parse(text);
+                let err = isError(textObject);
+                if (err)
+                    throw err;
+
+                textObject = this.travelJSON(textObject);
+                return textObject;
+            }
+            catch (err) {
+                this.error.fire(this, err);
+                throw err;
+            }
+        }
+
+
         return new Promise<T>((reslove, reject) => {
             let timeId: number;
             if (options.method == 'get') {
@@ -164,7 +203,7 @@ export abstract class Service {
                 }, config.ajaxTimeout * 1000)
             }
 
-            this._ajax<T>(url, options)
+            _ajax(url, options)
                 .then(data => {
                     reslove(data);
                     if (timeId)
@@ -224,46 +263,6 @@ export abstract class Service {
         return result;
     }
 
-    private async _ajax<T>(url: string, options: FetchOptions): Promise<T> {
-        let user_token = userToken();
-        if (user_token) {
-            options.headers['user-token'] = user_token;
-        }
-
-        try {
-            let response = await fetch(url, options);
-            if (response.status >= 300) {
-                let err = new AjaxError(options.method);
-                err.name = `${response.status}`;
-                err.message = response.statusText;
-                throw err
-            }
-            let responseText = response.text();
-            let p: Promise<string>;
-            if (typeof responseText == 'string') {
-                p = new Promise<string>((reslove, reject) => {
-                    reslove(responseText);
-                })
-            }
-            else {
-                p = responseText as Promise<string>;
-            }
-
-            let text = await responseText;
-            let textObject = JSON.parse(text);
-            let err = isError(textObject);
-            if (err)
-                throw err;
-
-            textObject = this.travelJSON(textObject);
-            return textObject;
-        }
-        catch (err) {
-            this.error.fire(this, err);
-            throw err;
-        }
-    }
-
     get<T>(url: string, data?: any) {
 
         console.assert(storeId() != null);
@@ -273,8 +272,8 @@ export abstract class Service {
             'application-key': config.appToken,
         };
 
-        if (userToken()) {
-            headers['user-token'] = userToken();
+        if (config.userToken) {
+            headers['user-token'] = config.userToken;
         }
 
         let urlParams = '';
@@ -293,24 +292,31 @@ export abstract class Service {
     }
 
     post<T>(url: string, data?: Object) {
-
-        console.assert(userToken() != null);
-        console.assert(storeId() != null);
+        return this.ajaxByJSON<T>(url, data, 'post');
+    }
+    delete<T>(url: string, data?: Object) {
+        return this.ajaxByJSON<T>(url, data, 'delete');
+    }
+    put<T>(url: string, data?: Object) {
+        return this.ajaxByJSON<T>(url, data, 'put');
+    }
+    private ajaxByJSON<T>(url: string, data?: Object, method?: string) {
 
         data = data || {};
         let headers = {
             'application-key': config.appToken,
-            'user-token': userToken(),
         };
 
-        headers['content-type'] = 'application/json';
+        if (config.userToken)
+            headers['user-token'] = config.userToken;
 
+        headers['content-type'] = 'application/json';
         let body: any;
         body = JSON.stringify(data);
         let options = {
             headers,
             body,
-            method: 'post'
+            method
         }
         return this.ajax<T>(url, options);
     }
@@ -425,10 +431,11 @@ export interface Order {
     Remark: string,
     Serial: string,
     Status: string,
-    StatusText: string,
+    // StatusText: string,
     Sum: number,
 }
 export interface OrderDetail {
+    Id: string,
     ImageUrl: string,
     ProductId: string,
     ProductName: string,
@@ -465,22 +472,37 @@ export interface ProductComent {
     Status: 'Evaluated' | 'ToEvaluate',
     OrderDetailId: string,
 }
-export class ShopService extends Service {
+export interface CouponCode {
+    Id: string,
+    Amount: number,
+    Discount: number,
+    CouponId: string,
+    Picture: string,
+    Remark: string,
+    ReceiveBegin: Date,
+    ReceiveEnd: Date,
+    Title: string,
+    ValidBegin: Date,
+    ValidEnd: Date,
+    UsedDateTime: Date,
+    CreateDateTime: Date,
+}
+export class ShoppingService extends Service {
     constructor() {
         super();
     }
-    static url(path: string) {
+    private url(path: string) {
         return `${config.service.shop}${path}?storeId=${storeId()}`;
     }
     product(productId): Promise<Product> {
-        let url = ShopService.url('Product/GetProduct');
+        let url = this.url('Product/GetProduct');
         return this.get<Product>(url, { productId })
             .then(product => this.processProduct(product));
     }
     productByProperies(groupId: string, properties: { [propName: string]: string }): Promise<Product> {
         type t = { key: string };
         var d = { groupId, filter: JSON.stringify(properties) };
-        return this.get<Product>(ShopService.url('Product/GetProductByPropertyFilter'), d)
+        return this.get<Product>(this.url('Product/GetProductByPropertyFilter'), d)
             .then(o => this.processProduct(o));
     }
     private processProduct(product: Product): Product {
@@ -494,11 +516,11 @@ export class ShopService extends Service {
         return product;
     }
     productIntroduce(productId: string): Promise<string> {
-        let url = ShopService.url('Product/GetProductIntroduce');
+        let url = this.url('Product/GetProductIntroduce');
         return this.get<{ Introduce: string }>(url, { productId }).then(o => o.Introduce);
     }
     products(categoryId: string, pageIndex: number) {
-        let url = ShopService.url('Product/GetProducts');
+        let url = this.url('Product/GetProducts');
         return this.get<{ Products: Array<Product> }>(url, {
             filter: `ProductCategoryId=Guid.Parse('${categoryId}')`,
             startRowIndex: pageIndex * 20
@@ -510,18 +532,18 @@ export class ShopService extends Service {
         });
     }
     category(categoryId: string) {
-        let url = ShopService.url('Product/GetCategory');
+        let url = this.url('Product/GetCategory');
         return this.get<ProductCategory>(url, { categoryId });
     }
     cateories() {
-        let url = ShopService.url('Product/GetCategories');
+        let url = this.url('Product/GetCategories');
         return this.get<ProductCategory[]>(url).then(items => {
             items.forEach(o => o.ImagePath = imageUrl(o.ImagePath));
             return items;
         });
     }
     toCommentProducts() {
-        var result = this.get<ProductComent[]>(ShopService.url('Product/GetToCommentProducts'))
+        var result = this.get<ProductComent[]>(this.url('Product/GetToCommentProducts'))
             .then(items => {
                 items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
                 return items;
@@ -529,7 +551,7 @@ export class ShopService extends Service {
         return result;
     }
     commentedProducts() {
-        var result = this.get<ProductComent[]>(ShopService.url('Product/GetCommentedProducts'))
+        var result = this.get<ProductComent[]>(this.url('Product/GetCommentedProducts'))
             .then(items => {
                 items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl));
                 return items;
@@ -539,29 +561,29 @@ export class ShopService extends Service {
     //=====================================================================
     // 收藏夹
     favorProducts() {
-        return this.get<FavorProduct[]>(ShopService.url('Product/GetFavorProducts')).then(items => {
+        return this.get<FavorProduct[]>(this.url('Product/GetFavorProducts')).then(items => {
             items.forEach(o => o.ImageUrl = imageUrl(o.ImageUrl))
             return items;
         });
     }
     unfavorProduct(productId: string) {
-        return this.post(ShopService.url('Product/UnFavorProduct'), { productId });
+        return this.post(this.url('Product/UnFavorProduct'), { productId });
     }
     isFavored(productId: string) {
-        return this.get<boolean>(ShopService.url('Product/IsFavored'), { productId });
+        return this.get<boolean>(this.url('Product/IsFavored'), { productId });
     }
     favorProduct(productId: string) {
-        return this.post(ShopService.url('Product/FavorProduct'), { productId });
+        return this.post(this.url('Product/FavorProduct'), { productId });
     }
     //=====================================================================
     // 订单
     balancePay(orderId: string, amount: number) {
         type TResult = { Id: string, Amount: number, BalanceAmount: number };
-        return this.post<TResult>(ShopService.url('Order/BalancePay'), { orderId: orderId, amount: amount });
+        return this.post<TResult>(this.url('Order/BalancePay'), { orderId: orderId, amount: amount });
     }
     confirmOrder(orderId: string, remark: string, invoice: string) {
         let args = { orderId, remark, invoice };
-        var result = this.post<Order>(ShopService.url('Order/ConfirmOrder'), args);
+        var result = this.post<Order>(this.url('Order/ConfirmOrder'), args);
         return result;
     }
     myOrderList(pageIndex, type?: 'WaitingForPayment' | 'Send') {
@@ -571,7 +593,7 @@ export class ShopService extends Service {
         if (type)
             args.filter = `Status="${type}"`
 
-        return this.get<Order[]>(ShopService.url('Order/GetMyOrderList'), args)
+        return this.get<Order[]>(this.url('Order/GetMyOrderList'), args)
             .then(orders => {
                 orders.forEach(o => {
                     o.OrderDetails.forEach(c => c.ImageUrl = imageUrl(c.ImageUrl));
@@ -580,21 +602,76 @@ export class ShopService extends Service {
             });
     }
     order(orderId: string) {
-        return this.get<Order>(ShopService.url('Order/GetOrder'), { orderId }).then(o => {
+        return this.get<Order>(this.url('Order/GetOrder'), { orderId }).then(o => {
             o.OrderDetails.forEach(c => c.ImageUrl = imageUrl(c.ImageUrl));
             return o;
         });
     }
     createOrder(productIds: string[], quantities: number[]) {
-        var result = this.post<Order>(ShopService.url('Order/CreateOrder'), { productIds: productIds, quantities: quantities })
+        var result = this.post<Order>(this.url('Order/CreateOrder'), { productIds: productIds, quantities: quantities })
             .then(function (order) {
                 return order;
             });
         return result;
     }
+    cancelOrder(orderId: string) {
+        let url = this.url('Order/CancelOrder');
+        return this.put<{ Id, Status }>(url, { orderId });
+    }
+    ordersSummary() {
+        type OrdersSummaryResult = { NotPaidCount: number, SendCount: number, ToEvaluateCount: number };
+        return this.get<OrdersSummaryResult>(this.url('Order/GetOrdersSummary'));
+    }
+
     changeReceipt(orderId, receiptId) {
-        var result = this.post<Order>(ShopService.url('Order/ChangeReceipt'), { orderId, receiptId });
+        var result = this.post<Order>(this.url('Order/ChangeReceipt'), { orderId, receiptId });
         return result;
+    }
+    orderStatusText(status: string) {
+        switch (status) {
+            case 'Created':
+                return '已创建';
+            case 'WaitingForPayment':
+                return '待付款';
+            case 'Paid':
+                return '已付款';
+            case 'Send':
+                return '已发货';
+            case 'Received':
+                return '已收货';
+            case 'Canceled':
+                return '已取消';
+            case 'WaitingForSend':
+                return '待发货';
+            case 'Evaluated':
+                return '已评价';
+        }
+    }
+
+    //=====================================================================
+    // 优惠券
+    couponStatusText(status: string) {
+        switch (status) {
+            case 'available':
+                return '未使用'
+            case 'used':
+                return '已使用';
+            case 'exprired':
+                return '已过期';
+            default:
+                return ''
+        }
+    }
+    /** 获取个人优惠码 */
+    getMyCoupons(pageIndex: number, status: string) {
+        let url = this.url('Coupon/GetMyCoupons');
+        return this.get<CouponCode[]>(url, { pageIndex, status }).then(items => {
+            items.forEach(o => {
+                o.ValidBegin = new Date(o.ValidBegin);
+                o.ValidEnd = new Date(o.ValidEnd);
+            })
+            return items;
+        });
     }
 
     private resizeImage(img: HTMLImageElement, max_width: number, max_height: number): string {
@@ -647,41 +724,49 @@ export class ShopService extends Service {
             imageDatas: imageDatas.join(','),
             imageThumbs: imageThumbs.join(','),
         };
-        var result = this.post<any>(ShopService.url('Product/EvaluateProduct'), data)
+        var result = this.post<any>(this.url('Product/EvaluateProduct'), data)
         return result;
     }
     //=====================================================================
     // Address
     receiptInfos() {
-        return this.get<ReceiptInfo[]>(ShopService.url('Address/GetReceiptInfos'));
+        return this.get<ReceiptInfo[]>(this.url('Address/GetReceiptInfos'));
     }
     receiptInfo(id: string) {
-        return this.get<ReceiptInfo>(ShopService.url('Address/GetReceiptInfo'), { id })
+        return this.get<ReceiptInfo>(this.url('Address/GetReceiptInfo'), { id })
             .then(o => {
                 o.RegionId = o.CountyId;
                 return o;
             });
     }
     provinces(): Promise<Region[]> {
-        var result = this.get<Region[]>(ShopService.url('Address/GetProvinces'))
+        var result = this.get<Region[]>(this.url('Address/GetProvinces'))
         return result;
     }
     cities(province: string): Promise<Region[]> {
         var guidRule = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (guidRule.test(province))
-            return this.get<Region[]>(ShopService.url('Address/GetCities'), { provinceId: province });
+            return this.get<Region[]>(this.url('Address/GetCities'), { provinceId: province });
 
-        return this.get<Region[]>(ShopService.url('Address/GetCities'), { provinceName: province });;
+        return this.get<Region[]>(this.url('Address/GetCities'), { provinceName: province });;
     }
     counties = (cityId: string) => {
-        var result = this.get<Region[]>(ShopService.url('Address/GetCounties'), { cityId: cityId });
+        var result = this.get<Region[]>(this.url('Address/GetCounties'), { cityId: cityId });
         return result;
     }
     saveReceiptInfo(receiptInfo: ReceiptInfo) {
         var self = this;
-        let url = ShopService.url('Address/SaveReceiptInfo');
+        let url = this.url('Address/SaveReceiptInfo');
         var result = this.post<{ Id: string, IsDefault: boolean }>(url, receiptInfo);
         return result;
+    }
+    setDefaultReceiptInfo(receiptInfoId: string) {
+        let url = this.url('Address/SetDefaultReceiptInfo');
+        return this.put(url, { receiptInfoId });
+    }
+    deleteReceiptInfo(receiptInfoId: string) {
+        let url = this.url('Address/DeleteReceiptInfo');
+        return this.delete(url, { receiptInfoId });
     }
 }
 
@@ -704,10 +789,6 @@ export type ShoppingCartItem = {
 export class ShoppingCartService extends Service {
     constructor() {
         super();
-        let _userToken = userToken();
-        if (_userToken) {
-
-        }
     }
     private url(path: string) {
         return `${config.service.shop}${path}?storeId=${storeId()}`;
@@ -792,6 +873,12 @@ interface UserInfo2 {
     ToEvaluateCount: number,
 }
 
+export interface RegisterModel {
+    user: { mobile: string, password: string },
+    smsId: string,
+    verifyCode: string
+}
+
 export type UserInfo = UserInfo1 & UserInfo2;
 
 
@@ -806,13 +893,48 @@ export class MemberService extends Service {
 
     userInfo() {
         let url1 = this.url('Member/GetMember');
-        let url2 = ShopService.url('User/GetUserInfo');
-        return Promise.all([this.get<UserInfo1>(url1), this.get<UserInfo2>(url2)]).then(result => {
-            let userInfo = Object.assign(result[0], result[1]);
-            return userInfo;
+        // let url2 = this.url('User/GetUserInfo');
+        return this.get<UserInfo1>(url1);
+    }
+
+    logout() {
+        config.userToken = '';
+    }
+
+
+    /** 发送验证码到指定的手机 */
+    sentRegisterVerifyCode(mobile: string): Promise<{ smsId: string }> {
+        console.assert(mobile != null);
+        let url = `http://${config.service.host}/sms/sendVerifyCode`;
+        return this.get(url, { mobile, type: 'register' });
+    }
+
+    /** 用户注册 */
+    register(data: RegisterModel) {
+        console.assert(data != null);
+        let url = `http://${config.service.host}/user/register`;
+        return this.post<{ token: string, userId: string }>(url, data).then((data) => {
+            config.userToken = data.token;
+            return data;
         });
     }
 
+    login(username: string, password: string): Promise<{ token: string, userId: string }> {
+        let url = `http://${config.service.host}/user/login`;
+        return this.post<{ token: string, userId: string }>(url, { username, password }).then((result) => {
+            config.userToken = result.token;
+            return result;
+        });
+    }
+
+    resetPassword(data: RegisterModel) {
+        console.assert(data != null);
+        let url = `http://${config.service.host}/user/resetPassword`;
+        return this.post(url, data).then(data => {
+            debugger;
+            return data;
+        });
+    }
 }
 
 export interface BalanceDetail {
@@ -893,6 +1015,24 @@ class UserData {
     private _balance = new ValueStore<number>();
     private _nickName = new ValueStore<string>();
     private _shoppingCartItems = new ValueStore<ShoppingCartItem[]>();
+    private _userToken = new ValueStore<string>();
+
+    constructor() {
+        this.userToken.add((value) => {
+            if (!value) {
+                localStorage.removeItem('userToken');
+                //TODO:ClearData
+                return;
+            }
+
+            localStorage.setItem('userToken', value);
+            //=================================
+            // window.setTimeout(() => {
+            //     this.loadData();
+            // }, 100);
+            //=================================
+        });
+    }
 
     /** 购物车中的商品数 */
     get productsCount() {
@@ -926,40 +1066,47 @@ class UserData {
         return this._shoppingCartItems;
     }
 
-    loadData() {
-        if (!config.userToken)
-            return;
 
-        let ShoppingCart = new ShoppingCartService();
-
-        ShoppingCart.items().then((value) => {
-            this.shoppingCartItems.value = value;
-        })
-
-        let member = new MemberService();
-        member.userInfo().then(o => {
-            this.toEvaluateCount.value = o.ToEvaluateCount;
-            this.sendCount.value = o.SendCount;
-            this.notPaidCount.value = o.NotPaidCount;
-            this.balance.value = o.Balance;
-            this.nickName.value = o.NickName;
-        })
-
-        this.shoppingCartItems.add(value => {
-            //==============================================
-            // Price >0 的为山商品，<= 0 的为赠品，折扣
-            let sum = 0;
-            value.filter(o => o.Price > 0).forEach(o => sum = sum + o.Count);
-            userData.productsCount.value = sum;
-            //==============================================
-        })
+    get userToken() {
+        return this._userToken;
     }
-
-
 }
 
-export let userData = new UserData();
-userData.loadData();
+export let userData = new UserData();;
+userData.userToken.add(() => {
+    let ShoppingCart = new ShoppingCartService();
+
+    ShoppingCart.items().then((value) => {
+        userData.shoppingCartItems.value = value;
+    })
+
+    let member = new MemberService();
+    // member.userInfo().then(o => {
+    //     userData.toEvaluateCount.value = o.ToEvaluateCount;
+    //     userData.sendCount.value = o.SendCount;
+    //     userData.notPaidCount.value = o.NotPaidCount;
+    //     userData.balance.value = o.Balance;
+    //     userData.nickName.value = o.NickName;
+    // })
+
+    let shopping = new ShoppingService();
+    shopping.ordersSummary().then(data => {
+        userData.toEvaluateCount.value = data.ToEvaluateCount;
+        userData.sendCount.value = data.SendCount;
+        userData.notPaidCount.value = data.NotPaidCount;
+    });
+
+    userData.shoppingCartItems.add(value => {
+        //==============================================
+        // Price >0 的为山商品，<= 0 的为赠品，折扣
+        let sum = 0;
+        value.filter(o => o.Price > 0).forEach(o => sum = sum + o.Count);
+        userData.productsCount.value = sum;
+        //==============================================
+    })
+});
+
+userData.userToken.value = localStorage.getItem('userToken');
 
 export interface Provinces {
     Id: string,

@@ -1,22 +1,32 @@
 import { Page, defaultNavBar, app, formatDate } from 'site';
-import { ShopService, AccountService, Order } from 'services';
-import { SetAddress, RouteValue } from 'modules/user/receiptList';
+import { ShoppingService, AccountService, Order } from 'services';
+import { SetAddress, ReceiptListRouteValues } from 'modules/user/receiptList';
+import * as ui from 'ui';
 
 let { PageComponent, PageHeader, PageFooter, PageView, Button, ImageBox } = controls;
 
 export default function (page: Page) {
-    class OrderDetailPage extends React.Component<{ order: Order }, {}> {
+    let shopping = page.createService(ShoppingService);
+    class OrderDetailPage extends React.Component<{ order: Order }, { order: Order }> {
+        constructor(props) {
+            super(props);
+            this.state = { order: this.props.order };
+        }
         private purchase() {
             return Promise.reject<any>(null);
         }
         private confirmReceived() {
             return Promise.reject<any>(null);
         }
-        private cancelOrder() {
-            return Promise.reject<any>(null);
+        private cancelOrder(order: Order) {
+            return shopping.cancelOrder(order.Id).then((data) => {
+                debugger;
+                order.Status = data.Status;
+                this.setState(this.state);
+            });
         }
         render() {
-            let order = this.props.order;
+            let order = this.state.order;
             return (
                 <PageComponent>
                     <PageHeader>{defaultNavBar({ title: '订单详情' })}</PageHeader>
@@ -26,7 +36,7 @@ export default function (page: Page) {
 
                                 <div className="form-group">
                                     <label>订单状态：</label>
-                                    <span style={{ color: '#f70' }}>{order.StatusText}</span>
+                                    <span style={{ color: '#f70' }}>{shopping.orderStatusText(order.Status)}</span>
                                 </div>
                                 <div className="form-group">
                                     <label>订单编号：</label>
@@ -38,7 +48,7 @@ export default function (page: Page) {
                                         </label>
                                     <div>
                                         <span className="price">¥{order.Sum.toFixed(2)}</span>
-                                        <span style={{ paddingLeft: 10 }}>(邮费：¥{order.Freight.toFixed(2)})</span>
+                                        <span style={{ paddingLeft: 10 }}>(运费：¥{order.Freight.toFixed(2)})</span>
                                         {order.Status == 'WaitingForPayment' && order.BalanceAmount > 0 ?
                                             <div>
                                                 <strong>已付：</strong><span>¥{order.BalanceAmount.toFixed(2)}</span>
@@ -83,9 +93,9 @@ export default function (page: Page) {
                             </div>
                             <div name="orderDetails" className="list">
                                 {order.OrderDetails.map((o, i) => (
-                                    <div>
-                                        <hr key={i} className="row" />
-                                        <div key={`OrderDetail${i}`} className="row">
+                                    <div key={o.Id}>
+                                        <hr className="row" />
+                                        <div className="row">
                                             <div className="col-xs-4" style={{ paddingRight: 0 }}>
                                                 <a href={`#home_product?id=${o.ProductId}`}>
                                                     <ImageBox src={o.ImageUrl} className="img-responsive" />
@@ -106,8 +116,14 @@ export default function (page: Page) {
 
                         {order.Status == 'WaitingForPayment' ?
                             <div data-bind="with:order" className="container" style={{ paddingTop: 10, paddingBottom: 20 }}>
-                                <Button onClick={() => this.cancelOrder()} confirm={"你取消该定单吗？"}
-                                    className="btn btn-block btn-default">取消订单</Button>
+                                <button onClick={() => this.cancelOrder(order)}
+                                    ref={(o: HTMLButtonElement) => {
+                                        if (!o) return;
+                                        o.onclick = ui.buttonOnClick(() => {
+                                            return shopping.cancelOrder(order.Id);
+                                        }, { confirm: '确定取消该定单吗', toast: '订单已经取消' });
+                                    }}
+                                    className="btn btn-block btn-default">取消订单</button>
                             </div> : null}
                     </PageView>
                     <PageFooter>
@@ -117,7 +133,7 @@ export default function (page: Page) {
         }
     }
 
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
     shop.order(page.routeData.values.id).then(order => {
         ReactDOM.render(<OrderDetailPage order={order} />, page.element);
     })

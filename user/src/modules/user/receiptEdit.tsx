@@ -1,13 +1,17 @@
 import { Page, defaultNavBar, app } from 'site';
-import { ReceiptInfo, ShopService } from 'services';
+import { ReceiptInfo, ShoppingService } from 'services';
 import FormValidator = require('validate');
 import { RegionsPageRouteValues } from 'modules/user/regions';
+import * as ui from 'modules/ui';
 
 let { PageComponent, PageHeader, PageView, Button } = controls;
-
+export interface ReceiptEditRouteValues {
+    id?: string,
+    onSaved: (receipt: ReceiptInfo) => void
+}
 export default async function (page: Page) {
 
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
 
     class ReceiptEditPage extends React.Component<{ receiptInfo?: ReceiptInfo }, { receiptInfo: ReceiptInfo }>{
         private validator: FormValidator;
@@ -49,7 +53,13 @@ export default async function (page: Page) {
             if (!this.validator.validateForm()) {
                 return Promise.reject<any>(null);
             }
-            return shop.saveReceiptInfo(this.state.receiptInfo);
+            return shop.saveReceiptInfo(this.state.receiptInfo).then(data => {
+                if (routeValues.onSaved) {
+                    routeValues.onSaved(this.state.receiptInfo);
+                    app.back();
+                }
+                return data;
+            });
         }
         changeRegion() {
             let r = this.state.receiptInfo;
@@ -171,7 +181,14 @@ export default async function (page: Page) {
                                 <span className="color-red">*</span>为必填项目
                             </div>
                             <div className="form-group">
-                                <a className="btn btn-primary btn-block" onClick={() => this.saveReceipt()}>保存</a>
+                                <button className="btn btn-primary btn-block"
+                                    ref={(o: HTMLButtonElement) => {
+                                        if (!o) return;
+                                        o.onclick = ui.buttonOnClick(() => {
+                                            return this.saveReceipt();
+                                        }, { toast: '保存地址成功' });
+
+                                    }}>保存</button>
                             </div>
                         </div>
                     </PageView>
@@ -181,9 +198,13 @@ export default async function (page: Page) {
     }
 
     let receiptInfo: ReceiptInfo;
-    let id = page.routeData.values.id;
+    let routeValues = page.routeData.values as ReceiptEditRouteValues;
+    let id = routeValues.id;
     if (id) {
         receiptInfo = await shop.receiptInfo(id);
+    }
+    else {
+        receiptInfo = {} as ReceiptInfo;
     }
     ReactDOM.render(<ReceiptEditPage receiptInfo={receiptInfo} />, page.element);
 

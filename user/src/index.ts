@@ -82,7 +82,8 @@ requirejs.config({
         validate: modulesPath + '/core/validate',
         'chitu.mobile': modulesPath + '/core/chitu.mobile',
         carousel: modulesPath + '/core/carousel',
-        modules: modulesPath
+        modules: modulesPath,
+        ui: modulesPath + '/ui'
     }
 });
 
@@ -94,11 +95,12 @@ if (isUglify) {
     modules.push('controls');
 }
 else {
+    let controlsPath = 'controls/share'
     modules.push(
-        'hammer', 'bezier-easing', 'controls/common',
-        'controls/button', 'controls/dataList', 'controls/dialog', 'controls/htmlView',
-        'controls/imageBox', 'controls/indicators', 'controls/page', 'controls/panel',
-        'controls/tabs'
+        'hammer', 'bezier-easing', `${controlsPath}/common`,
+        `${controlsPath}/button`, `${controlsPath}/dataList`, `${controlsPath}/dialog`, `${controlsPath}/htmlView`,
+        `${controlsPath}/imageBox`, `${controlsPath}/indicators`, `${controlsPath}/page`, `${controlsPath}/panel`,
+        `${controlsPath}/tabs`
     );
 }
 

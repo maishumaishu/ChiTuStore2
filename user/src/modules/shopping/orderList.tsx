@@ -1,5 +1,5 @@
 import { Page, defaultNavBar } from 'site';
-import { ShopService, Order } from 'services';
+import { ShoppingService, Order } from 'services';
 
 let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox, Tabs, Button } = controls;
 type DataList = controls.DataList;
@@ -7,7 +7,7 @@ type DataList = controls.DataList;
 export default function (page: Page) {
 
     let orderListView: OrderListView;
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
 
     let type = page.routeData.values.type;
     let defaultActiveIndex = 0;

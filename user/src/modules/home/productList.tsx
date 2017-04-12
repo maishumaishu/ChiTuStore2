@@ -1,12 +1,12 @@
 import { Page, defaultNavBar } from 'site';
-import { ShopService, Product } from 'services';
+import { ShoppingService, Product } from 'services';
 
 let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, DataList, Panel,
     PageComponent, PageHeader, PageFooter, PageView, Tabs } = controls;
 
 export default function (page: Page) {
 
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
     let categoryId = page.routeData.values.categoryId;
 
     class ProductListView extends React.Component<{ title: string }, {}>{

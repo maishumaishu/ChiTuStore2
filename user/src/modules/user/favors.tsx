@@ -1,12 +1,12 @@
 import { Page, defaultNavBar } from 'site';
-import { ShopService, FavorProduct } from 'services';
+import { ShoppingService, FavorProduct } from 'services';
 import { app } from 'site';
 
 let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox } = controls;
 
 
 export default function (page: Page) {
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
 
     class FavorPage extends React.Component<{}, {}>{
         private unfavor: Function;
@@ -66,7 +66,17 @@ export default function (page: Page) {
                                 </div>
                                 <hr className="row" />
                             </div>
-                        )} />
+                        )}
+                            emptyItem={
+                                <div className="norecords">
+                                    <div className="icon">
+                                        <i className="icon-heart-empty">
+
+                                        </i>
+                                    </div>
+                                    <h4 className="text">你还没有添加收藏哦</h4>
+                                </div>
+                            } />
                     </PageView>
                 </PageComponent>
             );

@@ -1,11 +1,11 @@
 import { Page, defaultNavBar } from 'site';
-import { ShopService } from 'services';
+import { ShoppingService } from 'services';
 let { PageComponent, PageHeader, PageFooter, PageView, Button, ImageFileSelector, ImageBox } = controls;
 
 export type RouteValues = { orderDetailId: string, productImageUrl: string };
 export default function (page: Page) {
 
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
 
     class Start extends React.Component<React.Props<Start> & { selected: boolean }, { selected: boolean }>{
         constructor(props) {

@@ -1,9 +1,9 @@
 import { Page, Menu, defaultNavBar, app } from 'site';
-import { ShoppingCartService, ShopService, ProductComent } from 'services';
+import { ShoppingCartService, ShoppingService, ProductComent } from 'services';
 let {PageComponent, PageHeader, PageFooter, PageView, Button, Dialog, Tabs, DataList, ImageBox } = controls;
 
 export default function (page: Page) {
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
     const commented = 1, toComment = 0;
     class EvaluationComponent extends React.Component<{}, { activeTab }>{
         //private currentTab = 0;

@@ -13,7 +13,7 @@ declare module 'validate' {
     export = m;
 }
 
-declare module 'ui' {
-    import m = require('modules/core/ui');
-    export = m;
-}
+// declare module 'ui' {
+//     import m = require('modules/core/ui');
+//     export = m;
+// }

@@ -439,15 +439,15 @@ export class PageViewGesture {
     }
 }
 
-export function buttonOnClick(callback: (event: Event, ...args: any[]) => Promise<any>) {
-    return function (event: Event, ...args: any[]) {
-        let button = (event.target as HTMLButtonElement);
-        button.setAttribute('disabled', '');
-        let p = callback(event, ...args);
-        p.then(() => button.removeAttribute('disabled'))
-            .catch(() => button.removeAttribute('disabled'));
-    }
-}
+// export function buttonOnClick(callback: (event: Event, ...args: any[]) => Promise<any>) {
+//     return function (event: Event, ...args: any[]) {
+//         let button = (event.target as HTMLButtonElement);
+//         button.setAttribute('disabled', '');
+//         let p = callback(event, ...args);
+//         p.then(() => button.removeAttribute('disabled'))
+//             .catch(() => button.removeAttribute('disabled'));
+//     }
+// }
 
 //export const imageText = '';
 

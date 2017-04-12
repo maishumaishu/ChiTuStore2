@@ -1,13 +1,13 @@
 import { Page, defaultNavBar, app } from 'site';
-import { ShopService, ShoppingCartService, AccountService, Order } from 'services';
-import { SetAddress, RouteValue } from 'modules/user/receiptList';
+import { ShoppingService, ShoppingCartService, AccountService, Order } from 'services';
+import { SetAddress, ReceiptListRouteValues } from 'modules/user/receiptList';
 
 export default function (page: Page) {
 
     let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
         PageComponent, PageHeader, PageFooter, PageView, Dialog } = controls;
 
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
     let shoppingCart = page.createService(ShoppingCartService)
     let account = page.createService(AccountService);
 
@@ -80,7 +80,7 @@ export default function (page: Page) {
             }
         }
         private showReceiptList() {
-            let routeValue: RouteValue = { callback: this.setAddress, orderId: this.state.order.Id };
+            let routeValue: ReceiptListRouteValues = { callback: this.setAddress, orderId: this.state.order.Id };
             app.showPage('user_receiptList', routeValue);
         }
         // private onAddressSelect(address: string) {

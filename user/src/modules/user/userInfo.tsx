@@ -1,5 +1,5 @@
 import { Page, defaultNavBar, app } from 'site';
-import { ShopService, ReceiptInfo, Order, MemberService } from 'services';
+import { ShoppingService, ReceiptInfo, Order, MemberService } from 'services';
 let { PageComponent, PageHeader, PageView, Button, DataList } = controls;
 
 export default function (page: Page) {

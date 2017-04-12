@@ -1,4 +1,4 @@
-import { ShoppingCartService, ShopService, Product, Promotion, CustomProperty, userData, ValueStore } from 'services';
+import { ShoppingCartService, ShoppingService, Product, Promotion, CustomProperty, userData, ValueStore } from 'services';
 import { Page, config, app, subscribe } from 'site';
 import cm = require('chitu.mobile');
 import BezierEasing = require('bezier-easing');
@@ -21,7 +21,7 @@ export default async function (page: Page) {
         product: Product;
     }
 
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
     let shoppingCart = page.createService(ShoppingCartService);
     let { id } = page.routeData.values
 

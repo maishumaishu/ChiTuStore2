@@ -1,4 +1,4 @@
-import { Page, Menu } from 'site';
+import { Page, Menu, app } from 'site';
 import { MemberService, UserInfo, userData } from 'services';
 let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox, Tabs } = controls;
 
@@ -57,6 +57,11 @@ export default async function (page: Page) {
             })
         }
 
+        private logout() {
+            member.logout();
+            app.redirect('home_index');
+        }
+
         render() {
             let userInfo = this.state.userInfo;
             return (
@@ -98,21 +103,21 @@ export default async function (page: Page) {
                             </div>
                             <div className="col-xs-3 ">
                                 <a href="#shopping_orderList?type=WaitingForPayment" style={{ color: 'black' }}>
-                                    {userInfo.NotPaidCount != null ? <sub className="sub">{userInfo.NotPaidCount}</sub> : null}
+                                    {userInfo.NotPaidCount ? <sub className="sub">{userInfo.NotPaidCount}</sub> : null}
                                     <i className="icon-credit-card icon-3x"></i>
                                     <div className="name">待付款</div>
                                 </a>
                             </div>
                             <div className="col-xs-3">
                                 <a href="#shopping_orderList?type=Send" style={{ color: 'black' }}>
-                                    {userInfo.SendCount != null ? <sub className="sub">{userInfo.SendCount}</sub> : null}
+                                    {userInfo.SendCount ? <sub className="sub">{userInfo.SendCount}</sub> : null}
                                     <i className="icon-truck icon-3x"></i>
                                     <div className="name">待收货</div>
                                 </a>
                             </div>
                             <div className="col-xs-3">
                                 <a href="#shopping_evaluation" style={{ color: 'black' }}>
-                                    {userInfo.ToEvaluateCount != null && userInfo.ToEvaluateCount != 0 ?
+                                    {userInfo.ToEvaluateCount ?
                                         <sub className="sub">{userInfo.ToEvaluateCount}</sub> : null}
                                     <i className="icon-star icon-3x"></i>
                                     <div className="name">待评价</div>
@@ -153,9 +158,10 @@ export default async function (page: Page) {
                                 <strong>账户安全</strong>
                             </a>
 
-                            <a data-bind="attr:{href:url}" className="list-group-item" href="#User_Index_Logout">
+                            <a className="list-group-item" href="javascript:"
+                                onClick={() => this.logout()}>
                                 <span className="icon-chevron-right pull-right"></span>
-                                <span data-bind="text: value,visible:value" className="pull-right value" style={{ display: 'none' }}></span>
+                                <span className="pull-right value" style={{ display: 'none' }}></span>
                                 <strong>退出</strong>
                             </a>
                         </div>

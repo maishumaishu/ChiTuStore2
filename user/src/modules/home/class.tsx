@@ -1,11 +1,11 @@
 import { Page, defaultNavBar, Menu } from 'site';
-import { ShopService, StationService, ProductCategory } from 'services';
+import { ShoppingService, StationService, ProductCategory } from 'services';
 // import { ImageBox } from 'controls/imageBox';
 // import { PageComponent, PageHeader, PageFooter } from 'controls/page';
 let { PageComponent, PageHeader, PageFooter, PageView, ImageBox } = controls;
 
 export default function (page: Page) {
-    let shop = page.createService(ShopService);
+    let shop = page.createService(ShoppingService);
 
     class ClassPage extends React.Component<{ cateories: ProductCategory[] }, {}>{
         constructor(props) {

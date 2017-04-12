@@ -180,12 +180,16 @@ export class Page extends chitu.Page {
     createService<T extends Service>(serviceType: { new (): T }): T {
         let result = new serviceType();
         result.error.add((sender, error) => {
-            this.showError(error);
+            this.processError(error);
         })
         return result;
     }
 
-    private showError(err: Error) {
+    private processError(err: Error) {
+        if (err.name == 'HeaderRequiredExeption' && err.message.indexOf('user-id') > 0) {
+            app.redirect('user_login');
+            return;
+        }
         let loadingElement = this.element.querySelector(`.${loadingClassName}`) as HTMLElement;
         if (loadingElement) {
             this.renderError();
@@ -300,6 +304,9 @@ export function searchNavBar() {
 }
 //============================================================
 export function formatDate(date: Date) {
+    if (!date.getFullYear)
+        return date;
+
     let d = date;
     return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours() + 1}:${d.getMinutes()}`;
 }
