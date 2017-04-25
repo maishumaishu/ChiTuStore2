@@ -185,9 +185,21 @@ export class Page extends chitu.Page {
         return result;
     }
 
+    private showLoginPage = false;
     private processError(err: Error) {
         if (err.name == 'HeaderRequiredExeption' && err.message.indexOf('user-id') > 0) {
-            app.redirect('user_login');
+            // app.pages.pop();
+            if (this.showLoginPage) {
+                return;
+            }
+
+            this.showLoginPage = true;
+            var currentPage = app.currentPage;
+            app.showPage('user_login', { return: currentPage.routeData.routeString });
+            setTimeout(() => {
+                this.showLoginPage = false;
+                currentPage.close();
+            }, 800);
             return;
         }
         let loadingElement = this.element.querySelector(`.${loadingClassName}`) as HTMLElement;
@@ -256,11 +268,11 @@ if (!location.hash) {
 
 //============================================================
 // ui
-export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element, onBack?: () => void }) {
+export function defaultNavBar(options?: { title?: string, showBackButton?: boolean, right?: JSX.Element, back?: () => void }) {
     options = options || {};
     let title = options.title || '';
     let showBackButton = options.showBackButton == null ? true : options.showBackButton;
-    let back = options.onBack || (() => app.back());
+    let back = options.back || (() => app.back());
     return (
         <nav className="bg-primary">
             <div className="col-xs-3" style={{ padding: 0 }}>
