@@ -40,9 +40,9 @@ namespace controls {
 
             var scale = (img_height / img_width).toFixed(2);
             var img_name = 'img_log' + scale;
-            var img_src = localStorage.getItem(img_name);
-            if (img_src)
-                return img_src;
+            // var img_src = localStorage.getItem(img_name);
+            // if (img_src)
+            //     return img_src;
 
             var MAX_WIDTH = 320;
             var width = MAX_WIDTH;
@@ -65,8 +65,8 @@ namespace controls {
             // 设置字体内容，以及在画布上的位置
             ctx.fillText(imageText, canvas.width / 2 - 75, canvas.height / 2);
 
-            img_src = canvas.toDataURL('/png');
-            localStorage.setItem(img_name, img_src);
+            var img_src = canvas.toDataURL('/png');
+            // localStorage.setItem(img_name, img_src);
             return img_src;
         }
 
@@ -74,18 +74,19 @@ namespace controls {
 
 
     export class ImageBox extends React.Component<
-        { src: string, className?: string },
+        { src: string, className?: string, style?: React.CSSProperties, text?: string },
         { width: string, height: string, src: string }> {
 
         private unmount = false;
+        private element: HTMLImageElement;
 
         constructor(props) {
             super(props);
         }
 
         protected componentDidMount() {
-            let img = this.refs['img'] as HTMLImageElement;
-            imageDelayLoad(img, config.imageDisaplyText);
+            let img = this.element;
+            imageDelayLoad(img, this.props.text || config.imageDisaplyText);
         }
 
         private componentWillUnmount() {
@@ -93,8 +94,16 @@ namespace controls {
         }
 
         render() {
+            var props = {};
+            for (let key in this.props) {
+                if (key == 'text')
+                    continue;
+
+                props[key] = this.props[key];
+            }
+
             return (
-                <img ref="img" src={this.props.src} className={this.props.className}></img>
+                <img ref={(o: HTMLImageElement) => this.element = o || this.element} {...props} ></img>
             );
         }
     }
