@@ -112,7 +112,7 @@ export default function (page: Page) {
             return (
                 <PageComponent>
                     <PageHeader>
-                        {defaultNavBar({ title: this.state.title, onBack: () => this.back() })}
+                        {defaultNavBar({ title: this.state.title, back: () => this.back() })}
                     </PageHeader>
                     <PageFooter></PageFooter>
                     <PageView ref={o => this.provincesView = o}>
