@@ -11,6 +11,9 @@ export default function (page: Page) {
     let passwordInput: HTMLInputElement;
     let formElement: HTMLFormElement;
     let validator: FormValidator;
+
+    let returnString = page.routeData.values.reutrn || 'user_index';
+
     var jsx =
         <PageComponent>
             <PageHeader>
@@ -52,7 +55,7 @@ export default function (page: Page) {
                                             return;
 
                                         await member.login(usernameInput.value, passwordInput.value);
-                                        app.redirect('user_index');
+                                        app.redirect(returnString);
                                     });
                                 }}>立即登录</button>
                         </div>
