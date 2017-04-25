@@ -1,5 +1,6 @@
 import { Page, defaultNavBar } from 'site';
 import { ShoppingService, Order } from 'services';
+import { app } from 'site';
 
 let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox, Tabs, Button } = controls;
 type DataList = controls.DataList;
@@ -68,7 +69,7 @@ export default function (page: Page) {
             let btnClassName = 'btn btn-small btn-primary pull-right';
             switch (order.Status) {
                 case 'WaitingForPayment':
-                    control = <a href={`#shopping_orderDetail?id=${order.Id}`} className={btnClassName}>立即付款</a>
+                    control = <a href={`#shopping_purchase?id=${order.Id}`} className={btnClassName}>立即付款</a>
                     break;
                 case 'Send':
                     control = <Button className={btnClassName} onClick={() => this.confirmReceived()}
@@ -98,7 +99,7 @@ export default function (page: Page) {
             return (
                 <PageComponent>
                     <PageHeader>
-                        {defaultNavBar({ title: '我的订单' })}
+                        {defaultNavBar({ title: '我的订单', back: () => app.redirect('user_index') })}
                         <Tabs className="tabs" defaultActiveIndex={defaultActiveIndex} onItemClick={(index) => this.activeItem(index)}
                             scroller={() => this.dataView.element} >
                             <span>全部</span>
@@ -107,42 +108,53 @@ export default function (page: Page) {
                         </Tabs>
                     </PageHeader>
                     <PageView ref={o => this.dataView = o}>
-                        <DataList ref={o => this.dataList = o} loadData={(pageIndex) => this.loadData(pageIndex)} dataItem={(o: Order) => (
-                            <div key={o.Id} className="order-item">
-                                <hr />
-                                <div className="header">
-                                    <a href={`#shopping_orderDetail?id=${o.Id}`}>
-                                        <h4>订单编号：{o.Serial}</h4>
+                        <DataList ref={o => this.dataList = o} loadData={(pageIndex) => this.loadData(pageIndex)}
+                            dataItem={(o: Order) => (
+                                <div key={o.Id} className="order-item">
+                                    <hr />
+                                    <div className="header">
+                                        <a href={`#shopping_orderDetail?id=${o.Id}`}>
+                                            <h4>订单编号：{o.Serial}</h4>
+                                            <div className="pull-right">
+                                                <i className="icon-chevron-right"></i>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div className="body">
+                                        <ul>
+                                            {o.OrderDetails.map((c, i) => (
+                                                <li key={i}>
+                                                    <ImageBox src={c.ImageUrl} className="img-responsive img-thumbnail img-full" />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        {o.OrderDetails.length == 1 ?
+                                            <div className="pull-right" style={{ width: '75%', fontSize: '16px', paddingLeft: '16px', paddingTop: '4px' }}>
+                                                {o.OrderDetails[0].ProductName}
+                                            </div>
+                                            : null}
+                                        <div className="clearfix"></div>
+                                    </div>
+                                    <div className="footer">
+                                        <h4 className="pull-left">
+                                            实付款：<span className="price">￥{o.Amount.toFixed(2)}</span>
+                                        </h4>
                                         <div className="pull-right">
-                                            <i className="icon-chevron-right"></i>
+                                            {this.statusControl(o)}
                                         </div>
-                                    </a>
-                                </div>
-                                <div className="body">
-                                    <ul>
-                                        {o.OrderDetails.map((c, i) => (
-                                            <li key={i}>
-                                                <ImageBox src={c.ImageUrl} className="img-responsive img-thumbnail img-full" />
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    {o.OrderDetails.length == 1 ?
-                                        <div className="pull-right" style={{ width: '75%', fontSize: '16px', paddingLeft: '16px', paddingTop: '4px' }}>
-                                            {o.OrderDetails[0].ProductName}
-                                        </div>
-                                        : null}
-                                    <div className="clearfix"></div>
-                                </div>
-                                <div className="footer">
-                                    <h4 className="pull-left">
-                                        实付款：<span className="price">￥{o.Amount.toFixed(2)}</span>
-                                    </h4>
-                                    <div className="pull-right">
-                                        {this.statusControl(o)}
                                     </div>
                                 </div>
-                            </div>
-                        )} />
+                            )}
+                            emptyItem={
+                                <div className="norecords">
+                                    <div className="icon">
+                                        <i className="icon-list">
+
+                                        </i>
+                                    </div>
+                                    <h4 className="text">暂无此类订单</h4>
+                                </div>
+                            } />
                     </PageView>
                 </PageComponent>
             );
