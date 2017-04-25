@@ -6,9 +6,9 @@ let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList, Tabs 
 export default function (page: Page) {
     let shopping = page.createService(ShoppingService);
 
-    let defaultIndex = 1;
-    type Status = 'available' | 'used' | 'exprired';
-    let statuses: Status[] = ['available', 'used', 'exprired'];
+    let defaultIndex = 0;
+    type Status = 'available' | 'used' | 'expired';
+    let statuses: Status[] = ['available', 'used', 'expired'];
     class CouponPage extends React.Component<{}, { status: Status }>{
         private dataView: controls.PageView;
         private dataList: controls.DataList;
@@ -23,7 +23,7 @@ export default function (page: Page) {
             this.setState(this.state);
         }
         loadData(pageIndex: number, status: string) {
-            return shopping.getMyCoupons(pageIndex, status);
+            return shopping.myCoupons(pageIndex, status);
         }
         componentDidUpdate() {
             this.dataList.reset();
@@ -43,26 +43,25 @@ export default function (page: Page) {
                         </Tabs>
                     </PageHeader>
                     <PageView ref={o => this.dataView = o}>
+                        <hr />
                         <DataList ref={o => this.dataList = o}
                             loadData={(pageIndex) => this.loadData(pageIndex, status)}
                             dataItem={(o: CouponCode) => (
                                 <div key={o.Id}>
-                                    <hr />
                                     <div className="coupon">
-                                        <div className="pull-left">
+                                        <div className={`pull-left ${status}`}>
                                             ￥<span className="text">{o.Discount}</span>
                                         </div>
                                         <div className="main">
                                             <div>
                                                 {o.Title}
                                             </div>
-                                            {/*<div dangerouslySetInnerHTML={{ __html: o.Remark }}>
-                                            </div>*/}
                                             <div className="date">
                                                 {`有效期 ${o.ValidBegin.toLocaleDateString()} 至 ${o.ValidEnd.toLocaleDateString()}`}
                                             </div>
                                         </div>
                                     </div>
+                                    <hr />
                                 </div>
                             )}
                             emptyItem={
