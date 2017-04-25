@@ -1,0 +1,66 @@
+@import "../common.less";
+.shopping-storeCoupons {
+    .padding-top();
+
+    hr {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        /*margin: 0;*/
+        height: 6px;
+        background-color: @gray-lighter;
+
+        &:first-child, &:last-child {
+            height: 12px;
+        }
+    }
+
+    .coupon {
+        @width: 100px;
+        @height: 90px;
+
+        padding: 0;
+        height: @height;
+
+        .expired {
+            background-color: #dcdcdc;
+        }
+
+        .used {
+             background-color: #dcdcdc;
+        }
+
+        .available {
+            background-color: #78acc5;
+        }
+
+        .receive {
+            width:  @width;
+            height: @height;
+            // padding: 30px 0px 0px 0px;
+            // background-color: #78acc5;
+            color: white;
+            text-align: center;
+            border: none;
+            font-size: 18px;
+        }
+        .main {
+            padding: 12px 0px 0px 20px;
+            font-size: 16px;
+            margin-right:  @width;
+
+            .date {
+                margin-top: 6px;
+                font-size: 14px;
+            }
+        }
+    }
+
+    .norecords {
+        .icon {
+            i {
+                top: 33px;
+                font-size: 100px;
+            }
+        }
+    }
+}
