@@ -19,6 +19,7 @@ export default async function (page: Page) {
         content: string,
         count: number,
         product: Product;
+        couponsCount?: number
     }
 
     let shop = page.createService(ShoppingService);
@@ -52,13 +53,18 @@ export default async function (page: Page) {
                 this.setState(this.state);
             });
 
+            shop.storeCouponsCount().then(count => {
+                this.state.couponsCount = count;
+                this.setState(this.state);
+            })
+
             subscribe(this, userData.productsCount, (value) => {
                 this.state.productsCount = value;
                 this.setState(this.state);
-            })
+            });
             subscribe(this, productStore, (value) => {
                 this.updateStateByProduct(value);
-            })
+            });
         }
 
         private showPanel() {
@@ -151,7 +157,7 @@ export default async function (page: Page) {
 
         render() {
             let p = this.state.product;
-            let productsCount = this.state.productsCount;
+            let { productsCount, couponsCount } = this.state;
             return (
                 <PageComponent>
                     <PageHeader style={{ position: 'fixed' }} ref={(o) => this.header = o}>
@@ -186,12 +192,12 @@ export default async function (page: Page) {
                                 <h4 className="text-left" style={{ fontWeight: 'bold', paddingLeft: '20px' }}>{p.Name}</h4>
                             </div>
 
-                            <div className="col-xs-12 box" style={{ padding: '10px 0px 10px 0px' }}>
+                            <div className="col-xs-12 box">
                                 <span>类别：</span>
                                 <a href="">{p.ProductCategoryName}</a>
                             </div>
 
-                            <div className="col-xs-12 box" style={{ padding: '10px 0px 10px 0px' }}>
+                            <div className="col-xs-12 box">
                                 <span className="pull-left">价格：<strong className="price">￥{p.Price.toFixed(2)}</strong></span>
                                 <span className="pull-left" style={{ display: p.Score == null ? 'none' : 'block' }}>积分：<strong className="price">{this.props.product.Score}</strong></span>
                                 <span className="pull-right">{p.Unit}</span>
@@ -201,7 +207,7 @@ export default async function (page: Page) {
                                 </p>
                             </div>
 
-                            <div onClick={() => this.showPanel()} className="col-xs-12 box" style={{ padding: '10px 0px 10px 0px' }}>
+                            <div onClick={() => this.showPanel()} className="col-xs-12 box">
                                 <div className="pull-left">
                                     <span>已选：</span>
                                     <span>{this.state.productSelectedText}</span>
@@ -218,6 +224,17 @@ export default async function (page: Page) {
                                     ))}
                                 </div> : null
                             }
+
+                            {couponsCount ?
+                                <a className="col-xs-12" style={{ padding: '0px 0px 10px 0px' }} href="#shopping_storeCoupons">
+                                    <div className="pull-left">
+                                        店铺优惠劵
+                                </div>
+                                    <div className="pull-right">
+                                        <span className="badge bg-primary" style={{ marginRight: 10 }}>{couponsCount}</span>
+                                        <i className="icon-chevron-right"></i>
+                                    </div>
+                                </a> : null}
                         </div>
                         <hr />
                         <div className="container">
