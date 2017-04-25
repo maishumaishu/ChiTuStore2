@@ -1,5 +1,5 @@
 import { Page, defaultNavBar, app } from 'site';
-import { ShoppingService, ShoppingCartService, AccountService, Order } from 'services';
+import { ShoppingService, ShoppingCartService, AccountService, Order, userData } from 'services';
 import { SetAddress, ReceiptListRouteValues } from 'modules/user/receiptList';
 
 export default function (page: Page) {
@@ -13,17 +13,16 @@ export default function (page: Page) {
 
     interface OrderPageState {
         order: Order,
-        maxOrderBalance: number
+        // maxOrderBalance: number
     }
 
     class OrderPage extends React.Component<{ order: Order, balance: number }, OrderPageState>{
         private setAddress: SetAddress;
         constructor(props) {
             super(props);
-            this.setStateByOrder(this.props.order);
+            // this.setStateByOrder(this.props.order);
+            this.state = { order: this.props.order };
             this.setAddress = (address: string, order: Order) => {
-                this.state.order.ReceiptAddress = address;
-                this.setStateByOrder(this.state.order);
                 Object.assign(this.state.order, order);
                 this.setState(this.state);
             }
@@ -34,14 +33,14 @@ export default function (page: Page) {
         private showInvoice() {
 
         }
-        private balancePay() {
-            let order = this.state.order;
-            let balanceAmount = order.BalanceAmount > 0 ? 0 : this.state.maxOrderBalance;
-            shop.balancePay(order.Id, balanceAmount).then(o => {
-                order.BalanceAmount = o.BalanceAmount;
-                this.setStateByOrder(order);
-            });
-        }
+        // private balancePay() {
+        //     let order = this.state.order;
+        //     // let balanceAmount = order.BalanceAmount > 0 ? 0 : this.state.maxOrderBalance;
+        //     shop.balancePay(order.Id, balanceAmount).then(o => {
+        //         order.BalanceAmount = o.BalanceAmount;
+        //         this.setStateByOrder(order);
+        //     });
+        // }
         private confirmOrder() {
 
             let order = this.props.order;
@@ -56,45 +55,41 @@ export default function (page: Page) {
                 // 进入后订单列表，按返回键可以进入到个人中心
                 //app.setLocationHash('user_index');
                 //================================================
-                let actualPaid = order.Sum - order.BalanceAmount;
-                if (actualPaid > 0) {
-                    app.redirect(`shopping_purchase?id=${order.Id}`);
-                }
-                else {
-                    app.redirect('shopping_orderList');
-                }
+                // let actualPaid = order.Sum - order.BalanceAmount;
+                // if (actualPaid > 0) {
+                app.redirect(`shopping_purchase?id=${order.Id}`);
+                // }
+                // else {
+                //     app.redirect('shopping_orderList');
+                // }
             });
         }
-        private setStateByOrder(order: Order) {
-            let balance = this.props.balance;
-            let maxOrderBalance = order.BalanceAmount || (balance >= order.Sum ? order.Sum : balance);
+        // private setStateByOrder(order: Order) {
+        //     let balance = this.props.balance;
+        //     // let maxOrderBalance = order.BalanceAmount || (balance >= order.Sum ? order.Sum : balance);
 
-            let state = {} as OrderPageState;
-            state.order = order;
-            state.maxOrderBalance = maxOrderBalance;
-            if (this.state == null) {
-                this.state = state;
-            }
-            else {
-                this.setState(this.state);
-            }
-        }
+        //     let state = {} as OrderPageState;
+        //     state.order = order;
+        //     // state.maxOrderBalance = maxOrderBalance;
+        //     if (this.state == null) {
+        //         this.state = state;
+        //     }
+        //     else {
+        //         this.setState(this.state);
+        //     }
+        // }
         private showReceiptList() {
             let routeValue: ReceiptListRouteValues = { callback: this.setAddress, orderId: this.state.order.Id };
             app.showPage('user_receiptList', routeValue);
         }
-        // private onAddressSelect(address: string) {
-        //     this.state.order.ReceiptAddress = address;
-        //     this.setStateByOrder(this.state.order);
-        // }
         render() {
             let order = this.state.order;
-            let balance = this.props.balance;
+            // let balance = this.props.balance;
 
             return (
                 <PageComponent>
                     <PageHeader>
-                        {defaultNavBar({ title: '确认订单' })}
+                        {defaultNavBar({ title: '确认订单', back: () => app.back() })}
                     </PageHeader>
                     <PageFooter>
                         <div className="container" style={{ paddingTop: 10, paddingBottom: 10 }}>
@@ -163,7 +158,9 @@ export default function (page: Page) {
                             <div onClick={() => this.showCoupons()} className="container">
                                 <h4 className="pull-left">优惠券</h4>
                                 <div className="pull-right" style={{ paddingTop: 6 }}>
-                                    <span data-bind="html:order.CouponTitle" style={{ paddingRight: 4 }}></span>
+                                    <span style={{ paddingRight: 4 }}>
+                                        {order.CouponTitle}
+                                    </span>
                                     <i className="icon-chevron-right"></i>
                                 </div>
                             </div> : null}
@@ -214,7 +211,7 @@ export default function (page: Page) {
                                 </div>
                             </div>
                             <div className="col-xs-12" style={{ padding: 0, paddingTop: 8 }}>
-
+                                {/*
                                 {(balance > 0 ?
                                     <label className="pull-left" style={{ fontWeight: 'normal' }}>
                                         <input type="checkbox" checked={order.BalanceAmount > 0} onChange={() => this.balancePay()} />
@@ -222,12 +219,12 @@ export default function (page: Page) {
                                         <span className="price">
                                             ￥{this.state.maxOrderBalance.toFixed(2)}
                                         </span>
-                                    </label> : null)}
+                                    </label> : null)}*/}
 
                                 <div className="pull-right">
                                     <span>总计：
                                     <span className="price">
-                                            <strong>￥{(order.Sum - order.BalanceAmount).toFixed(2)}</strong></span>
+                                            <strong>￥{order.Sum.toFixed(2)}</strong></span>
                                     </span>
                                 </div>
                             </div>
@@ -239,10 +236,10 @@ export default function (page: Page) {
     }
 
     let id = page.routeData.values.id;
-    Promise.all([shop.order(id), account.balance()]).then(data => {
+    Promise.all([shop.order(id)]).then(data => {
         let order = data[0];
-        let balance = data[1];
-        ReactDOM.render(<OrderPage order={order} balance={balance} />, page.element)
+        // let balance = data[1];
+        ReactDOM.render(<OrderPage order={order} balance={userData.balance.value} />, page.element)
     })
 
 }
