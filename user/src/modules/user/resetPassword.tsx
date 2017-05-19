@@ -2,7 +2,7 @@ import { Page, defaultNavBar, app } from 'site';
 let { PageComponent, PageHeader, PageFooter, PageView, Button, DataList } = controls;
 import FormValidator = require('core/formValidator');
 import * as services from 'services';
-import * as ui from 'modules/ui';
+import * as ui from 'ui';
 
 export default function (page: Page) {
     let member = page.createService(services.MemberService);  //new services.MemberService();

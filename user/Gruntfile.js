@@ -69,14 +69,23 @@ module.exports = function (grunt) {
         },
         less: {
             user: {
-                files: [{
-                    expand: true,
-                    cwd: src_user_root + `/modules`,
-                    src: ['**/*.less'],
-                    dest: `${dest_user_root}/content/app`,
-                    ext: '.css'
-                },
-                { expand: false, src: `${src_user_root}/content/bootstrap-3.3.5/bootstrap.less`, dest: `${dest_user_root}/content/css/bootstrap.css` }]
+                files: [
+                    {
+                        expand: true,
+                        cwd: src_user_root + `/modules`,
+                        src: ['**/*.less'],
+                        dest: `${dest_user_root}/content/app`,
+                        ext: '.css'
+                    },
+                    {
+                        expand: true,
+                        cwd: src_user_root,
+                        src: [`*.less`],
+                        dest: `${dest_user_root}/content/app`,
+                        ext: '.css'
+                    },
+                    { expand: false, src: `${src_user_root}/content/bootstrap-3.3.5/bootstrap.less`, dest: `${dest_user_root}/content/css/bootstrap.css` }
+                ]
             }
         },
         concat: {
@@ -84,8 +93,8 @@ module.exports = function (grunt) {
                 options: {
 
                 },
-                src: [`${src_user_root}/js/hammer.js`, `${src_user_root}/js/bezier-easing.js`, `${dest_user_root}/modules/controls/share/*.js`],
-                dest: `${dest_user_root}/modules/controls.js`,
+                src: [`${src_user_root}/js/hammer.js`, `${src_user_root}/js/bezier-easing.js`, `${dest_user_root}/controls/share/*.js`],
+                dest: `${dest_user_root}/controls.js`,
             }
         },
         uglify: {

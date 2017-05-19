@@ -74,16 +74,16 @@ requirejs.config({
         react: 'js/react',
         'react-dom': 'js/react-dom',
         text: 'js/text',
-        controls: modulesPath + '/controls',
-        core: modulesPath + '/core',
-        device: modulesPath + '/device',
-        services: modulesPath + '/services',
-        site: modulesPath + '/site',
-        validate: modulesPath + '/core/validate',
-        'chitu.mobile': modulesPath + '/core/chitu.mobile',
-        carousel: modulesPath + '/core/carousel',
+        // controls: 'controls',
+        // core: modulesPath + '/core',
+        // device: modulesPath + '/device',
+        // services: modulesPath + '/services',
+        // site: modulesPath + '/site',
+        // validate: modulesPath + '/core/validate',
+        'chitu.mobile': 'core/chitu.mobile',
+        carousel: 'core/carousel',
         modules: modulesPath,
-        ui: modulesPath + '/ui'
+        // ui: 'ui'
     }
 });
 

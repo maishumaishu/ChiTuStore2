@@ -1,6 +1,6 @@
 import { Page, defaultNavBar, app } from 'site';
 import { ReceiptInfo, ShoppingService } from 'services';
-import FormValidator = require('validate');
+import FormValidator = require('core/formValidator');
 import { RegionsPageRouteValues } from 'modules/user/regions';
 import * as ui from 'ui';
 
@@ -23,18 +23,26 @@ export default async function (page: Page) {
         }
         componentDidMount() {
             let fromElement = page.element.querySelector('form') as HTMLElement;
-            this.validator = new FormValidator(fromElement, [
-                { name: 'Name', display: '地址名称', rules: 'required' },
-                { name: 'Consignee', display: '收货人', rules: 'required' },
-                { name: 'Mobile', display: '手机号码', rules: 'required' },
-                { name: 'Address', display: '详细地址', rules: 'required' },
-                { name: 'RegionId', display: '地区', rules: 'required' },
-            ]);
-            this.validator.setMessage('Name.required', '请输入地址名称');
-            this.validator.setMessage('Consignee.required', '请输入收货人姓名');
-            this.validator.setMessage(`Mobile.required`, '请输入手机号码');
-            this.validator.setMessage('Address.required', '请输入详细地址');
-            this.validator.setMessage('RegionId.required', '请选择地区');
+            this.validator = new FormValidator(fromElement, {
+                Name: { rules: ['required'], display: '地址名称', messages: { required: '请输入地址名称' } },
+                Consignee: { rules: ['required'], display: '收货人', messages: { required: '请输入收货人姓名' } },
+                Mobile: { rules: ['required'], display: '手机号码', messages: { required: '请输入手机号码' } },
+                Address: { rules: ['required'], display: '详细地址', messages: { required: '请输入详细地址' } },
+                RegionId: { rules: ['required'], display: '地区', messages: { required: '请选择地区' } },
+            });
+            //  [
+            //     { name: 'Name', display: '地址名称', rules: 'required' },
+            //     { name: 'Consignee', display: '收货人', rules: 'required' },
+            //     { name: 'Mobile', display: '手机号码', rules: 'required' },
+            //     { name: 'Address', display: '详细地址', rules: 'required' },
+            //     { name: 'RegionId', display: '地区', rules: 'required' },
+            // ]
+
+            // this.validator.messages ('Name.required', '请输入地址名称');
+            // this.validator.setMessage('Consignee.required', '请输入收货人姓名');
+            // this.validator.setMessage(`Mobile.required`, '请输入手机号码');
+            // this.validator.setMessage('Address.required', '请输入详细地址');
+            // this.validator.setMessage('RegionId.required', '请选择地区');
         }
         onInputChange(event: React.FormEvent) {
             let input = event.target as HTMLInputElement;

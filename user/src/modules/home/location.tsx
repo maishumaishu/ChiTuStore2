@@ -1,6 +1,6 @@
 import { Page, defaultNavBar } from 'site';
 import { LocationService, Provinces, Cities } from 'services';
-import AutoLocation from 'modules/controls/autoLocation'
+import AutoLocation from 'controls/autoLocation'
 let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList } = controls;
 
 export default function (page: Page) {
