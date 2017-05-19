@@ -4,7 +4,7 @@ import cm = require('chitu.mobile');
 import BezierEasing = require('bezier-easing');
 
 
-let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
+let { loadImage, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
     PageComponent, PageHeader, PageFooter, PageView, Button } = controls;
 
 let productStore = new ValueStore<Product>();

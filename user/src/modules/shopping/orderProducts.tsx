@@ -4,7 +4,7 @@ import { SetAddress, ReceiptListRouteValues } from 'modules/user/receiptList';
 
 export default function (page: Page) {
 
-    let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
+    let { loadImage, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
         PageComponent, PageHeader, PageFooter, PageView, Dialog } = controls;
 
     let shop = page.createService(ShoppingService);
@@ -64,20 +64,6 @@ export default function (page: Page) {
                 // }
             });
         }
-        // private setStateByOrder(order: Order) {
-        //     let balance = this.props.balance;
-        //     // let maxOrderBalance = order.BalanceAmount || (balance >= order.Sum ? order.Sum : balance);
-
-        //     let state = {} as OrderPageState;
-        //     state.order = order;
-        //     // state.maxOrderBalance = maxOrderBalance;
-        //     if (this.state == null) {
-        //         this.state = state;
-        //     }
-        //     else {
-        //         this.setState(this.state);
-        //     }
-        // }
         private showReceiptList() {
             let routeValue: ReceiptListRouteValues = { callback: this.setAddress, orderId: this.state.order.Id };
             app.showPage('user_receiptList', routeValue);
@@ -99,7 +85,8 @@ export default function (page: Page) {
                     <PageView>
                         <div className="container">
                             <h4 className="text-primary">收货信息</h4>
-                            <a href={`#user_receiptList`} style={{ minHeight: 40, display: order.ReceiptAddress ? 'none' : 'block' }}>
+                            <a style={{ minHeight: 40, display: order.ReceiptAddress ? 'none' : 'block' }}
+                                         onClick={() => this.showReceiptList()}>
                                 <div className="alert alert-danger text-center">
                                     点击这里设置收货信息
                                 </div>

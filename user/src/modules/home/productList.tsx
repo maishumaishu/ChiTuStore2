@@ -1,7 +1,7 @@
 import { Page, defaultNavBar } from 'site';
 import { ShoppingService, Product } from 'services';
 
-let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, DataList, Panel,
+let { loadImage, ImageBox, PullDownIndicator, PullUpIndicator, DataList, Panel,
     PageComponent, PageHeader, PageFooter, PageView, Tabs } = controls;
 
 export default function (page: Page) {

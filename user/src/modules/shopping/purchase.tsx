@@ -27,7 +27,7 @@ export default function (page: Page) {
                         {defaultNavBar({
                             title: '订单概况',
                             back: () => {
-                                if (page.previous.name == 'shopping.orderList') {
+                                if (page.previous != null && page.previous.name == 'shopping.orderList') {
                                     app.back();
                                     return;
                                 }
@@ -87,15 +87,17 @@ export default function (page: Page) {
                     <PageFooter>
                         {order.Status == 'WaitingForPayment' ?
                             <div className="container">
-                                <button className="btn btn-block btn-primary"
-                                    ref={(o: HTMLButtonElement) => {
-                                        if (!o) return;
-                                        o.onclick = ui.buttonOnClick(() => {
-                                            return this.balancePurchase(order).then(() => {
-                                                app.redirect('shopping_orderList');
-                                            });
-                                        })
-                                    }}>立即支付</button>
+                                <div className="form-group">
+                                    <button className="btn btn-block btn-primary"
+                                        ref={(o: HTMLButtonElement) => {
+                                            if (!o) return;
+                                            o.onclick = ui.buttonOnClick(() => {
+                                                return this.balancePurchase(order).then(() => {
+                                                    app.redirect('shopping_orderList');
+                                                });
+                                            })
+                                        }}>立即支付</button>
+                                </div>
                             </div> : null}
                     </PageFooter>
                 </PageComponent >

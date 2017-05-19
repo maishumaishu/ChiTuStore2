@@ -6,8 +6,16 @@ let { PageComponent, PageHeader, PageFooter, PageView, DataList, ImageBox, Tabs 
 export default async function (page: Page) {
 
     let member = page.createService(MemberService);
-
-    class UserIndexPage extends React.Component<{}, { userInfo: UserInfo }>{
+    let userInfo = await member.userInfo();
+    interface PageState {
+        userInfo: UserInfo;
+        notPaidCount: number;
+        sendCount: number;
+        toEvaluateCount: number;
+        balance: number;
+        nickName: string;
+    }
+    class UserIndexPage extends React.Component<{}, PageState>{
         private notPaidCountSubscribe: (value: number) => void;
         private sendCountSubscribe: (value: number) => void;
         private toEvaluateCountSubscribe: (value: number) => void;
@@ -18,13 +26,14 @@ export default async function (page: Page) {
             super(props);
 
             this.state = {
-                userInfo: {
-                    NotPaidCount: userData.notPaidCount.value,
-                    SendCount: userData.sendCount.value,
-                    ToEvaluateCount: userData.toEvaluateCount.value,
-                    Balance: userData.balance.value,
-                    NickName: userData.nickName.value
-                } as UserInfo
+                // userInfo: {
+                notPaidCount: userData.notPaidCount.value,
+                sendCount: userData.sendCount.value,
+                toEvaluateCount: userData.toEvaluateCount.value,
+                balance: userData.balance.value,
+                nickName: userData.nickName.value,
+                // }
+                userInfo,
             };
 
             this.createSubscribes();
@@ -32,27 +41,27 @@ export default async function (page: Page) {
 
         private createSubscribes() {
             this.notPaidCountSubscribe = userData.notPaidCount.add((value) => {
-                this.state.userInfo.NotPaidCount = value;
+                this.state.notPaidCount = value;
                 this.setState(this.state);
             })
 
             this.sendCountSubscribe = userData.sendCount.add((value) => {
-                this.state.userInfo.SendCount = value;
+                this.state.sendCount = value;
                 this.setState(this.state);
             })
 
             this.toEvaluateCountSubscribe = userData.toEvaluateCount.add(value => {
-                this.state.userInfo.ToEvaluateCount = value;
+                this.state.toEvaluateCount = value;
                 this.setState(this.state);
             })
 
             this.balanceSubscribe = userData.balance.add(value => {
-                this.state.userInfo.Balance = value;
+                this.state.balance = value;
                 this.setState(this.state);
             })
 
             this.nickNameSubscribe = userData.nickName.add(value => {
-                this.state.userInfo.NickName = value;
+                this.state.nickName = value;
                 this.setState(this.state);
             })
         }
@@ -64,12 +73,18 @@ export default async function (page: Page) {
 
         render() {
             let userInfo = this.state.userInfo;
+            let balance = this.state.balance;
+            let notPaidCount = this.state.notPaidCount;
+            let sendCount = this.state.sendCount;
+            let toEvaluateCount = this.state.toEvaluateCount;
+
             return (
                 <PageComponent>
                     <PageView>
                         <div className="user-info">
                             <a href="#user_userInfo" className="pull-left" style={{ margin: '-8px 20px 0px 0px' }}>
-                                <ImageBox src={userInfo.HeadImageUrl} className="img-circle img-full" />
+                                <ImageBox src={userInfo.HeadImageUrl} className="img-circle img-full"
+                                    text="上传头像" />
                             </a>
 
                             <div>
@@ -81,11 +96,11 @@ export default async function (page: Page) {
                                 <div className="pull-left">
                                     <h5 style={{ color: 'white' }}>普通用户</h5>
                                 </div>
-                                {userInfo.Balance != null ?
+                                {balance != null ?
                                     <div className="pull-right">
                                         <a href="#user_rechargeList" style={{ color: 'white' }}>
                                             <h5>余额&nbsp;&nbsp;
-                                        <span className="price">￥{userInfo.Balance.toFixed(2)}</span>&nbsp;&nbsp;
+                                        <span className="price">￥{balance.toFixed(2)}</span>&nbsp;&nbsp;
                                         <span className="icon-chevron-right"></span>
                                             </h5>
                                         </a>
@@ -103,22 +118,22 @@ export default async function (page: Page) {
                             </div>
                             <div className="col-xs-3 ">
                                 <a href="#shopping_orderList?type=WaitingForPayment" style={{ color: 'black' }}>
-                                    {userInfo.NotPaidCount ? <sub className="sub">{userInfo.NotPaidCount}</sub> : null}
+                                    {notPaidCount ? <sub className="sub">{notPaidCount}</sub> : null}
                                     <i className="icon-credit-card icon-3x"></i>
                                     <div className="name">待付款</div>
                                 </a>
                             </div>
                             <div className="col-xs-3">
                                 <a href="#shopping_orderList?type=Send" style={{ color: 'black' }}>
-                                    {userInfo.SendCount ? <sub className="sub">{userInfo.SendCount}</sub> : null}
+                                    {sendCount ? <sub className="sub">{sendCount}</sub> : null}
                                     <i className="icon-truck icon-3x"></i>
                                     <div className="name">待收货</div>
                                 </a>
                             </div>
                             <div className="col-xs-3">
                                 <a href="#shopping_evaluation" style={{ color: 'black' }}>
-                                    {userInfo.ToEvaluateCount ?
-                                        <sub className="sub">{userInfo.ToEvaluateCount}</sub> : null}
+                                    {toEvaluateCount ?
+                                        <sub className="sub">{toEvaluateCount}</sub> : null}
                                     <i className="icon-star icon-3x"></i>
                                     <div className="name">待评价</div>
                                 </a>

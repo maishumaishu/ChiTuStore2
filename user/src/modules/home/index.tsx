@@ -1,7 +1,6 @@
 import { Page, Menu, app } from 'site';
 import { StationService, HomeProduct } from 'services';
 let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList, createHammerManager } = controls;
-import AutoLocation from 'controls/autoLocation'
 import Carousel = require('core/carousel');
 import Hammer = require('hammer');
 
@@ -44,18 +43,18 @@ export default function (page: Page) {
                 });
                 //===================================================
             })
-            var autoLocation = new AutoLocation();
-            autoLocation.init().then((result) => {
-                console.log(result)
-                this.state.text = result.regeocode.addressComponent.district;
-                this.state.status = result.status;
-                this.setState(this.state)
-            }).catch((error) => {
-                console.log(error)
-                // this.state.text = "定位失败，请手动选择位置";
-                // this.state.status = false;
-                // this.setState(this.state)
-            })
+            // var autoLocation = new AutoLocation();
+            // autoLocation.init().then((result) => {
+            //     console.log(result)
+            //     this.state.text = result.regeocode.addressComponent.district;
+            //     this.state.status = result.status;
+            //     this.setState(this.state)
+            // }).catch((error) => {
+            //     console.log(error)
+            //     // this.state.text = "定位失败，请手动选择位置";
+            //     // this.state.status = false;
+            //     // this.setState(this.state)
+            // })
         }
 
         private loadData(pageIndex): Promise<HomeProduct[]> {

@@ -3,7 +3,7 @@ namespace controls {
         componentDidMount() {
             let imgs = (this.refs['content'] as HTMLElement).querySelectorAll('img');
             for (let i = 0; i < imgs.length; i++) {
-                imageDelayLoad(imgs[i] as HTMLImageElement, this.props.imageText);
+                loadImage(imgs[i] as HTMLImageElement, this.props.imageText);
             }
         }
         render() {

@@ -49,12 +49,12 @@ export default function (page: Page) {
                                     <div>
                                         <span className="price">¥{order.Sum.toFixed(2)}</span>
                                         <span style={{ paddingLeft: 10 }}>(运费：¥{order.Freight.toFixed(2)})</span>
-                                        {order.Status == 'WaitingForPayment' && order.BalanceAmount > 0 ?
+                                        {/*{order.Status == 'WaitingForPayment' && order.BalanceAmount > 0 ?
                                             <div>
                                                 <strong>已付：</strong><span>¥{order.BalanceAmount.toFixed(2)}</span>
                                                 &nbsp;&nbsp;
                                                 <strong>待付：</strong><span>¥{(order.Sum - order.BalanceAmount).toFixed(2)}</span>
-                                            </div> : null}
+                                            </div> : null}*/}
                                     </div>
                                     <div className="clearfix"></div>
                                 </div>
@@ -93,7 +93,7 @@ export default function (page: Page) {
                             </div>
                             <div name="orderDetails" className="list">
                                 {order.OrderDetails.map((o, i) => (
-                                    <div key={o.Id}>
+                                    <div key={o.ProductId}>
                                         <hr className="row" />
                                         <div className="row">
                                             <div className="col-xs-4" style={{ paddingRight: 0 }}>

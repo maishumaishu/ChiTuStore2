@@ -8,12 +8,14 @@ namespace controls {
     }
 
     let config = imageBoxConfig;
-    export function imageDelayLoad(element: HTMLImageElement, imageText?: string) {
-        imageText = imageText || config.imageDisaplyText;
+
+    /** 加载图片到 HTMLImageElement */
+    export function loadImage(element: HTMLImageElement, imageUrl: string, imageText?: string): Promise<string> {
+        // imageText = imageText || config.imageDisaplyText;
         var PREVIEW_IMAGE_DEFAULT_WIDTH = 200;
         var PREVIEW_IMAGE_DEFAULT_HEIGHT = 200;
 
-        var src = element.getAttribute('src') || '';
+        let src = imageUrl;
         var img_width = PREVIEW_IMAGE_DEFAULT_WIDTH;
         var img_height = PREVIEW_IMAGE_DEFAULT_HEIGHT;
         var match = src.match(/_\d+_\d+/);
@@ -26,23 +28,10 @@ namespace controls {
         element.setAttribute('width', img_width + 'px');
         element.setAttribute('height', img_height + 'px');
 
-
-        var src_replace = getPreviewImage(img_width, img_height);
-        element.setAttribute('src', src_replace);
-
-        var image: HTMLImageElement = new Image();
-        image.onload = function () {
-            element.src = (this as HTMLImageElement).src;
-        };
-        image.src = src;
-
-        function getPreviewImage(img_width, img_height) {
+        function getPreviewImage(imageText: string, img_width: number, img_height: number) {
 
             var scale = (img_height / img_width).toFixed(2);
             var img_name = 'img_log' + scale;
-            // var img_src = localStorage.getItem(img_name);
-            // if (img_src)
-            //     return img_src;
 
             var MAX_WIDTH = 320;
             var width = MAX_WIDTH;
@@ -70,40 +59,52 @@ namespace controls {
             return img_src;
         }
 
+        //设置默认的图片
+        var src_replace = getPreviewImage(imageText || config.imageDisaplyText, img_width, img_height);
+        element.setAttribute('src', src_replace);
+
+        return new Promise((resolve, reject) => {
+            var image: HTMLImageElement = new Image();
+            image.onload = function () {
+                element.src = (this as HTMLImageElement).src;
+                resolve(element.src);
+            };
+            image.src = src;
+        })
+
+
     }
 
 
     export class ImageBox extends React.Component<
-        { src: string, className?: string, style?: React.CSSProperties, text?: string },
-        { width: string, height: string, src: string }> {
+        React.Props<ImageBox> & {
+            src: string, className?: string, style?: React.CSSProperties,
+            text?: string, onChange?: (base64Data: string) => void
+        },
+        { src: string }> {
 
         private unmount = false;
-        private element: HTMLImageElement;
 
         constructor(props) {
             super(props);
+            this.state = { src: this.props.src };
         }
 
-        protected componentDidMount() {
-            let img = this.element;
-            imageDelayLoad(img, this.props.text || config.imageDisaplyText);
-        }
-
-        private componentWillUnmount() {
+        componentWillUnmount() {
             this.unmount = true;
         }
 
         render() {
-            var props = {};
-            for (let key in this.props) {
-                if (key == 'text')
-                    continue;
-
-                props[key] = this.props[key];
-            }
-
             return (
-                <img ref={(o: HTMLImageElement) => this.element = o || this.element} {...props} ></img>
+                <img className={this.props.className} style={this.props.style}
+                    ref={(o: HTMLImageElement) => {
+                        if (!o) return;
+                        loadImage(o, this.state.src || '', this.props.text || config.imageDisaplyText)
+                            .then(data => {
+                                if (!this.props.onChange) return;
+                                this.props.onChange(data);
+                            });
+                    }} ></img>
             );
         }
     }

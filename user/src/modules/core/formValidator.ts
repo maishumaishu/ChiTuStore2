@@ -1,15 +1,5 @@
 /*
- * validate.js 2.0.1
- * Copyright (c) 2011 - 2015 Rick Harrison, http://rickharrison.me
- * validate.js is open sourced under the MIT license.
- * Portions of validate.js are inspired by CodeIgniter.
- * http://rickharrison.github.com/validate.js
- */
-
-// (function (window, document, undefined) {
-/*
- * If you would like an application-wide config, change these defaults.
- * Otherwise, use the setMessage() function to configure form specific messages.
+ * version 1.0
  */
 
 function guid() {
@@ -60,13 +50,13 @@ interface ValidateField {
 
 var defaults = {
     messages: {
-        required: 'The %s field is required.',
-        matches: 'The %s field does not match the %s field.',
+        required: '%s 不允许为空',
+        matches: '%s 与 %s 不匹配',
         "default": 'The %s field is still set to default, please change.',
-        valid_email: 'The %s field must contain a valid email address.',
+        valid_email: '%s 不是有效的邮箱地址',
         valid_emails: 'The %s field must contain all valid email addresses.',
-        min_length: 'The %s field must be at least %s characters in length.',
-        max_length: 'The %s field must not exceed %s characters in length.',
+        min_length: '%s 至少包含 %s 个字符',
+        max_length: '%s 不能超过 %s 字符',
         exact_length: 'The %s field must be exactly %s characters in length.',
         greater_than: 'The %s field must contain a number greater than %s.',
         less_than: 'The %s field must contain a number less than %s.',
@@ -87,7 +77,7 @@ var defaults = {
         less_than_date: 'The %s field must contain an older date than %s.',
         greater_than_or_equal_date: 'The %s field must contain a date that\'s at least as recent as %s.',
         less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
-        mobile: 'The %s field is a invalid mobile phone number.'
+        mobile: '%s 不是有效的手机号码'
     } as { [name: string]: string },
 
     hooks: {
@@ -304,7 +294,6 @@ var defaults = {
             var value = field.value as string;
             return value.length == 11 && /^1[34578]\d{9}$/.test(value);
         }
-
     } as { [name: string]: (...params) => boolean },
     errorClassName: 'validationMessage',
     callback: function (errors: ValidatorError[], fields: ValidateField[], evt: Environment) {
@@ -410,19 +399,17 @@ class FormValidator {
         this.callback = callback || defaults.callback;
         this.fields = fields;
         this.form = form;
-        // this.messages = {};
         this.handlers = {};
         this.conditionals = {};
 
         for (var name in fields) {
             fields[name].name = name;
-            fields[name].display = fields[name].display || name;
             fields[name].messages = fields[name].messages || {};
+            fields[name].display = fields[name].display || name;
         }
 
         this.hooks = Object.assign({}, defaults.hooks);
         this.messages = Object.assign({}, defaults.messages);
-        // this.setRules(fields);
     }
 
     clearErrors(...fieldNames: string[]) {
@@ -591,7 +578,7 @@ class FormValidator {
 
             let params: any[] = [field];
             if (rule.params) {
-                var arr = rule.params;//.split(',');
+                var arr = rule.params;
                 for (let i = 0; i < arr.length; i++) {
                     var value: string | boolean;
                     for (let j = 0; j < rule.params.length; j++) {
@@ -676,12 +663,6 @@ class FormValidator {
 
 }
 
-
-
 export = FormValidator;
 
 
-//===============================================================================
-// TODO: 汉化
-
-//===============================================================================

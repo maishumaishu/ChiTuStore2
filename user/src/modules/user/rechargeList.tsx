@@ -45,7 +45,7 @@ export default function (page: Page) {
                     </PageHeader>
                     <PageView>
                         <DataList loadData={(i) => this.loadData(i)} pageSize={10000}
-                            dataItem={(o: BalanceDetail, i: number) => (
+                            dataItem={(o: BalanceDetail, i: number) =>
                                 <div key={i} className="container">
                                     <div className="row" style={{ padding: '0px 10px 0px 10px' }}>
                                         <div className="pull-left">{formatDate(o.CreateDateTime)}</div>
@@ -61,7 +61,15 @@ export default function (page: Page) {
                                     </div>
                                     <hr className="row" style={{ marginTop: 10, marginBottom: 10 }} />
                                 </div>
-                            )} />
+                            }
+                            emptyItem={
+                                <div className="norecords">
+                                    <div className="icon">
+                                        <i className="icon-money">
+                                        </i>
+                                    </div>
+                                    <h4 className="text">暂无充值记录</h4>
+                                </div>} />
                     </PageView>
                 </PageComponent>
             );

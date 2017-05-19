@@ -1,7 +1,7 @@
 import { Page, defaultNavBar, app } from 'site';
 import { ShoppingService, ReceiptInfo, Order } from 'services';
 import { ReceiptEditRouteValues } from 'modules/user/receiptEdit';
-let { PageComponent, PageHeader, PageView, Button } = controls;
+let { PageComponent, PageHeader, PageView, PageFooter, Button } = controls;
 export type SetAddress = (address: string, order: Order) => void;
 export interface ReceiptListRouteValues {
     callback: SetAddress,
@@ -84,7 +84,6 @@ export default function (page: Page) {
         private setAddress(receipt: ReceiptInfo) {
             shop.changeReceipt(routeValue.orderId, receipt.Id)
                 .then((order) => {
-                    // order.Freight = 100;
                     routeValue.callback(this.detail(receipt), order);
                     app.back();
                 });
@@ -149,12 +148,17 @@ export default function (page: Page) {
                                     <h4 className="text">暂无收货地址</h4>
                                 </div> : null}
                         </div>
-                        <div className="container navbar-fixed-bottom">
-                            <button onClick={() => this.newReceipt()} className="btn btn-primary btn-block">
-                                添加新的收货地址
-                            </button>
-                        </div>
+
                     </PageView>
+                    <PageFooter>
+                        <div className="container navbar-fixed-bottom">
+                            <div className="form-group">
+                                <button onClick={() => this.newReceipt()} className="btn btn-primary btn-block">
+                                    添加新的收货地址
+                                </button>
+                            </div>
+                        </div>
+                    </PageFooter>
                 </PageComponent>
             );
         }

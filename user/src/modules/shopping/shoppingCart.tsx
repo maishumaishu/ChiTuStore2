@@ -1,7 +1,7 @@
 import { Page, Menu, defaultNavBar, app } from 'site';
 import { ShoppingCartService, ShoppingService, ShoppingCartItem, userData } from 'services';
 
-let { imageDelayLoad, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
+let { loadImage, ImageBox, PullDownIndicator, PullUpIndicator, HtmlView, Panel,
     PageComponent, PageHeader, PageFooter, PageView, Button, Dialog } = controls;
 
 

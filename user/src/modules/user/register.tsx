@@ -1,7 +1,8 @@
-import { Page, defaultNavBar, app } from 'site';
+import { Page, defaultNavBar, app, config } from 'site';
 let { PageComponent, PageHeader, PageFooter, PageView, Button, DataList } = controls;
 import FormValidator = require('core/formValidator');
 import * as services from 'services';
+import * as ui from 'ui';
 
 export default function (page: Page) {
     let member = page.createService(services.MemberService);  //new services.MemberService();
@@ -42,10 +43,6 @@ export default function (page: Page) {
                 return;
             }
 
-            await member.sentRegisterVerifyCode(this.formElement['mobile'].value)
-                .then((data) => {
-                    this.smsId = data.smsId;
-                });
 
             this.state.letfSeconds = 60;
             this.setState(this.state);
@@ -58,6 +55,15 @@ export default function (page: Page) {
                 }
 
             }, 1000);
+
+            await member.sentRegisterVerifyCode(this.formElement['mobile'].value)
+                .then((data) => {
+                    this.smsId = data.smsId;
+                })
+                .catch(()=>{
+                    this.state.letfSeconds = 0;
+                    this.setState(this.state);
+                });
         }
         register() {
             if (!this.validator.validateForm())
@@ -70,6 +76,8 @@ export default function (page: Page) {
                 user: { mobile, password },
                 smsId: this.smsId,
                 verifyCode
+            }).then(() => {
+                app.redirect(config.defaultUrl);
             });
         }
         render() {
@@ -116,7 +124,11 @@ export default function (page: Page) {
                                 <div className="form-group">
                                     <div className="col-xs-12">
                                         <button type="button" className="btn btn-primary btn-block"
-                                            onClick={() => this.register()}>立即注册</button>
+                                            ref={(e: HTMLButtonElement) => {
+                                                if (!e) return;
+                                                e.onclick = ui.buttonOnClick(() => this.register(), { toast: '注册成功' });
+
+                                            }}>立即注册</button>
                                     </div>
                                 </div>
                             </form>

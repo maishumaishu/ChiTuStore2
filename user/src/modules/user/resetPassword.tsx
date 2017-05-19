@@ -67,11 +67,7 @@ export default function (page: Page) {
             let mobile = this.formElement['mobile'].value;
             let password = this.formElement['password'].value;
             let verifyCode = this.formElement['verifyCode'].value;
-            return member.resetPassword({
-                user: { mobile, password },
-                smsId: this.smsId,
-                verifyCode
-            });
+            return member.resetPassword(mobile, password, this.smsId, verifyCode);
         }
         render() {
             return (

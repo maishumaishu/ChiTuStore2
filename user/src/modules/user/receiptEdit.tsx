@@ -2,7 +2,7 @@ import { Page, defaultNavBar, app } from 'site';
 import { ReceiptInfo, ShoppingService } from 'services';
 import FormValidator = require('validate');
 import { RegionsPageRouteValues } from 'modules/user/regions';
-import * as ui from 'modules/ui';
+import * as ui from 'ui';
 
 let { PageComponent, PageHeader, PageView, Button } = controls;
 export interface ReceiptEditRouteValues {
@@ -54,6 +54,9 @@ export default async function (page: Page) {
                 return Promise.reject<any>(null);
             }
             return shop.saveReceiptInfo(this.state.receiptInfo).then(data => {
+                Object.assign(this.state.receiptInfo, data);
+                this.setState(this.state);
+
                 if (routeValues.onSaved) {
                     routeValues.onSaved(this.state.receiptInfo);
                     app.back();
@@ -171,8 +174,12 @@ export default async function (page: Page) {
                                         设为默认
                                     </label>
                                     <div className="col-xs-9 pull-right" style={{ textAlign: 'right' }}>
-                                        <input type="checkbox" name="IsDefault" checked={receiptInfo.IsDefault}
-                                            onChange={(e) => this.onInputChange(e)} />
+                                        <input type="checkbox" name="IsDefault"
+                                            onChange={(e) => this.onInputChange(e)}
+                                            ref={(e: HTMLInputElement) => {
+                                                if (!e) return;
+                                                e.checked = receiptInfo.IsDefault;
+                                            }} />
                                     </div>
                                 </div>
                             </form>
