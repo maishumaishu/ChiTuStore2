@@ -3,7 +3,7 @@ import { UserInfo, MemberService } from 'services';
 import * as ui from 'ui';
 import FormValidator = require('core/formValidator');
 import WizardComponent = require('modules/user/accountSecurity/wizard');
-import VerifyCodeButton = require('controls/verifyCodeButton');
+import VerifyCodeButton = require('components/verifyCodeButton');
 
 let { PageComponent, PageHeader, PageFooter, PageView, ImageBox, DataList } = controls;
 export interface MobileBindingPageArguments {

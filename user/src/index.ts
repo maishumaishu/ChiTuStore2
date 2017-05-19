@@ -95,7 +95,7 @@ if (isUglify) {
     modules.push('controls');
 }
 else {
-    let controlsPath = 'controls/share'
+    let controlsPath = 'controls'
     modules.push(
         'hammer', 'bezier-easing', `${controlsPath}/common`,
         `${controlsPath}/button`, `${controlsPath}/dataList`, `${controlsPath}/dialog`, `${controlsPath}/htmlView`,

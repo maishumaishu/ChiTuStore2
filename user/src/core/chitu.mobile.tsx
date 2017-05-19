@@ -4,7 +4,7 @@ import * as chitu from 'chitu';
  * 某些MVVM框架，可能会用到虚拟 DOM，把页面中的元素改写了。
  */
 
-export const viewTagName = 'SECTION';
+// export const viewTagName = 'SECTION';
 
 
 export class Page extends chitu.Page {

@@ -3,7 +3,7 @@ import { UserInfo, MemberService } from 'services';
 import * as ui from 'ui';
 
 import FormValidator = require('core/formValidator');
-import VerifyCodeButton = require('controls/verifyCodeButton');
+import VerifyCodeButton = require('components/verifyCodeButton');
 
 let member = new MemberService();
 requirejs(['css!content/app/user/accountSecurity/wizard']);
