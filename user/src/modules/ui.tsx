@@ -34,13 +34,6 @@ export function buttonOnClick(callback: (event: MouseEvent) => Promise<any>,
         }
         else {
             confirmPromise = new Promise((reslove, reject) => {
-                // bootbox.confirm(args.confirm, (result) => {
-                //     if (!result) {
-                //         reject();
-                //         return
-                //     };
-                //     reslove();
-                // });
                 ReactDOM.render(
                     <div className="modal-dialog">
                         <div className="modal-content">
@@ -72,9 +65,6 @@ export function buttonOnClick(callback: (event: MouseEvent) => Promise<any>,
                         </div>
                     </div>,
                     confirmDialogElment);
-
-
-
             });
         }
 
