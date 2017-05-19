@@ -2,7 +2,7 @@
 import chitu = require('chitu');
 
 const REMOTE_HOST = 'service.alinq.cn:2800';//'localhost:2800';//
-const LOCAL_HOST = 'localhost:2800';
+const LOCAL_HOST = '192.168.1.9:2800';
 
 var services = {
     local: {
@@ -30,15 +30,9 @@ let config = {
     appToken: '58424776034ff82470d06d3d',
     storeId: '58401d1906c02a2b8877bd13',
     get userToken() {
-        // return localStorage.getItem('userToken');
         return userData.userToken.value;
     },
     set userToken(value) {
-        // if (!value) {
-        //     localStorage.removeItem('userToken');
-        //     return;
-        // }
-        // localStorage.setItem('userToken', value);
         userData.userToken.value = value;
     },
     /** 调用服务接口超时时间，单位为秒 */
@@ -88,21 +82,6 @@ function storeId() {
     return '58401d1906c02a2b8877bd13';
 }
 
-function parseDate(value: string): Date {
-    const prefix = '/Date(';
-    if (value.startsWith(prefix)) {
-        let star = prefix.length;
-        let len = value.length - prefix.length - ')/'.length;
-        let str = value.substr(star, len);
-        let num = parseInt(str);
-        let date = new Date(num);
-        return date;
-    }
-
-    throw new Error('not implment.');
-
-}
-
 function imageUrl(path: string) {
     if (path.startsWith(`http://localhost:${location.port}`)) {
         path = path.substr(`http://localhost:${location.port}`.length);
@@ -145,7 +124,7 @@ interface DataSourceSelectResult<T> {
 export type News = { Id: string, Title: string, ImgUrl: string, Date: Date, Content: string };
 
 export abstract class Service {
-    private datePrefix = '/Date(';
+    // private datePrefix = '/Date(';
     error = chitu.Callbacks<Service, Error>();
     ajax<T>(url: string, options: FetchOptions): Promise<T> {
 
@@ -155,38 +134,38 @@ export abstract class Service {
                 options.headers['user-token'] = user_token;
             }
 
-            try {
-                let response = await fetch(url, options);
-                if (response.status >= 300) {
-                    let err = new AjaxError(options.method);
-                    err.name = `${response.status}`;
-                    err.message = response.statusText;
-                    throw err
-                }
-                let responseText = response.text();
-                let p: Promise<string>;
-                if (typeof responseText == 'string') {
-                    p = new Promise<string>((reslove, reject) => {
-                        reslove(responseText);
-                    })
-                }
-                else {
-                    p = responseText as Promise<string>;
-                }
-
-                let text = await responseText;
-                let textObject = JSON.parse(text);
-                let err = isError(textObject);
-                if (err)
-                    throw err;
-
-                textObject = this.travelJSON(textObject);
-                return textObject;
+            // try {
+            let response = await fetch(url, options);
+            if (response.status >= 300) {
+                let err = new AjaxError(options.method);
+                err.name = `${response.status}`;
+                err.message = response.statusText;
+                throw err
             }
-            catch (err) {
-                this.error.fire(this, err);
+            let responseText = response.text();
+            let p: Promise<string>;
+            if (typeof responseText == 'string') {
+                p = new Promise<string>((reslove, reject) => {
+                    reslove(responseText);
+                })
+            }
+            else {
+                p = responseText as Promise<string>;
+            }
+
+            let text = await responseText;
+            let textObject = JSON.parse(text);
+            let err = isError(textObject);
+            if (err)
                 throw err;
-            }
+
+            textObject = this.travelJSON(textObject);
+            return textObject;
+            // }
+            // catch (err) {
+            //     this.error.fire(this, err);
+            //     throw err;
+            // }
         }
 
 
@@ -220,21 +199,14 @@ export abstract class Service {
         })
     }
 
-    private parseStringToDate(value: string) {
-        let prefix = this.datePrefix;
-        var star = prefix.length;
-        var len = value.length - prefix.length - ')/'.length;
-        var str = value.substr(star, len);
-        var num = parseInt(str);
-        var date = new Date(num);
-        return date;
-    }
+    private datePattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
     private travelJSON(result: any) {
-        var prefix = this.datePrefix;
-        if (typeof result === 'string') {
-            if (result.substr(0, prefix.length) == prefix)
-                result = this.parseStringToDate(result);
-            return result;
+        // var prefix = this.datePrefix;
+        if (typeof result === 'string' && value.match(this.datePattern)) {
+            // if (result.substr(0, prefix.length) == prefix)
+            //     result = this.parseStringToDate(result);
+            // return result;
+            return new Date(result);
         }
         var stack = new Array();
         stack.push(result);
@@ -255,8 +227,8 @@ export abstract class Service {
                     stack.push(value);
                     continue;
                 }
-                if (typeof value == 'string' && value.substr(0, prefix.length) == prefix) {
-                    item[key] = this.parseStringToDate(value);
+                if (typeof value == 'string' && value.match(this.datePattern)) {
+                    item[key] = new Date(value);
                 }
             }
         }
@@ -343,7 +315,6 @@ export class StationService extends Service {
         let url = StationService.url('Info/GetNews');
         return this.get<News>(url, { newsId }).then(item => {
             item.ImgUrl = imageUrl(item.ImgUrl);
-            //item.Date = parseDate(item.Date).toLocaleDateString();
             let div = document.createElement('div');
             div.innerHTML = item.Content;
             let imgs = div.querySelectorAll('img');
@@ -420,7 +391,6 @@ export interface ProductCategory {
 export interface Order {
     Id: string,
     Amount: number,
-    BalanceAmount: number,
     CouponTitle: string,
     Discount: number,
     Freight: number,
@@ -435,7 +405,7 @@ export interface Order {
     Sum: number,
 }
 export interface OrderDetail {
-    Id: string,
+    // Id: string,
     ImageUrl: string,
     ProductId: string,
     ProductName: string,
@@ -472,12 +442,21 @@ export interface ProductComent {
     Status: 'Evaluated' | 'ToEvaluate',
     OrderDetailId: string,
 }
-export interface CouponCode {
+export interface Coupon {
     Id: string,
     Amount: number,
     Discount: number,
+    Remark: string,
+    Title: string,
+    ValidBegin: Date,
+    ValidEnd: Date,
+}
+export interface CouponCode {
+    Id: string,
+    Amount: number,
+    Code: string,
+    Discount: number,
     CouponId: string,
-    Picture: string,
     Remark: string,
     ReceiveBegin: Date,
     ReceiveEnd: Date,
@@ -577,10 +556,10 @@ export class ShoppingService extends Service {
     }
     //=====================================================================
     // 订单
-    balancePay(orderId: string, amount: number) {
-        type TResult = { Id: string, Amount: number, BalanceAmount: number };
-        return this.post<TResult>(this.url('Order/BalancePay'), { orderId: orderId, amount: amount });
-    }
+    // balancePay(orderId: string, amount: number) {
+    //     type TResult = { Id: string, Amount: number, BalanceAmount: number };
+    //     return this.post<TResult>(this.url('Order/BalancePay'), { orderId: orderId, amount: amount });
+    // }
     confirmOrder(orderId: string, remark: string, invoice: string) {
         let args = { orderId, remark, invoice };
         var result = this.post<Order>(this.url('Order/ConfirmOrder'), args);
@@ -650,28 +629,43 @@ export class ShoppingService extends Service {
 
     //=====================================================================
     // 优惠券
-    couponStatusText(status: string) {
+    couponStatusText(status: 'available' | 'used' | 'expired') {
         switch (status) {
             case 'available':
                 return '未使用'
             case 'used':
                 return '已使用';
-            case 'exprired':
+            case 'expired':
                 return '已过期';
             default:
                 return ''
         }
     }
     /** 获取个人优惠码 */
-    getMyCoupons(pageIndex: number, status: string) {
+    myCoupons(pageIndex: number, status: string) {
         let url = this.url('Coupon/GetMyCoupons');
-        return this.get<CouponCode[]>(url, { pageIndex, status }).then(items => {
-            items.forEach(o => {
-                o.ValidBegin = new Date(o.ValidBegin);
-                o.ValidEnd = new Date(o.ValidEnd);
-            })
-            return items;
-        });
+        return this.get<CouponCode[]>(url, { pageIndex, status });
+    }
+    storeCoupons() {
+        let url = this.url('Coupon/GetCoupons');
+        return this.get<Coupon[]>(url);
+    }
+    /** 领取优惠卷 */
+    receiveCoupon(couponId: string) {
+        let url = this.url('Coupon/ReceiveCouponCode');
+        return this.post(url, { couponId });
+    }
+
+    /** 获取订单可用的优惠劵 */
+    orderAvailableCoupons(orderId: string) {
+        let url = this.url('Coupon/GetAvailableCouponCodes');
+        return this.get<CouponCode[]>(url, { orderId });
+    }
+
+    /** 获取店铺优惠劵数量 */
+    storeCouponsCount() {
+        let url = this.url('Coupon/GetStoreCouponsCount');
+        return this.get<number>(url, {});
     }
 
     private resizeImage(img: HTMLImageElement, max_width: number, max_height: number): string {
@@ -852,25 +846,17 @@ export class ShoppingCartService extends Service {
     }
 }
 
-interface UserInfo1 {
-    Id: string,
-    Email: string,
-    Mobile: string,
-    OpenId: string,
-    PasswordSetted: boolean,
-    PaymentPasswordSetted: boolean,
-    UserName: string,
-    HeadImageUrl: string,
-}
-
-interface UserInfo2 {
-    Balance: number,
-    NotPaidCount: number,
-    Score: number,
-    SendCount: number,
-    ShoppingCartItemsCount: number,
-    NickName: string,
-    ToEvaluateCount: number,
+export interface UserInfo {
+    Id: string;
+    NickName: string;
+    Country: string;
+    Province: string;
+    City: string;
+    HeadImageUrl: string;
+    Gender: string;
+    UserId: string;
+    CreateDateTime: string;
+    Mobile: string
 }
 
 export interface RegisterModel {
@@ -879,8 +865,7 @@ export interface RegisterModel {
     verifyCode: string
 }
 
-export type UserInfo = UserInfo1 & UserInfo2;
-
+export type VerifyCodeType = 'reigster' | 'changeMobile';
 
 export class MemberService extends Service {
     constructor() {
@@ -888,25 +873,46 @@ export class MemberService extends Service {
     }
 
     private url(path: string) {
-        return `${config.service.member}${path}?storeId=${storeId()}`;
+        return `${config.service.shop}${path}?storeId=${storeId()}`;
     }
 
-    userInfo() {
-        let url1 = this.url('Member/GetMember');
-        // let url2 = this.url('User/GetUserInfo');
-        return this.get<UserInfo1>(url1);
+    userInfo(): Promise<UserInfo> {
+        let url1 = this.url('Member/CurrentUserInfo');
+        let url2 = `http://${config.service.host}/user/userInfo`;
+        return Promise.all([this.get<UserInfo>(url1), this.get<{ mobile }>(url2)])
+            .then((data) => {
+                data[0].Mobile = data[1].mobile;
+                return data[0];
+            });
+    }
+
+    saveUserInfo(userInfo): Promise<any> {
+        let url = this.url('Member/SaveUserInfo');
+        return this.put(url, { userInfo });
     }
 
     logout() {
         config.userToken = '';
     }
 
+    sentVerifyCode(mobile: string, type: VerifyCodeType): Promise<{ smsId: string }> {
+        console.assert(mobile != null);
+        let url = `http://${config.service.host}/sms/sendVerifyCode`;
+        return this.get(url, { mobile, type });
+    }
+
+    checkVerifyCode(smsId: string, verifyCode: string) {
+        let url = `http://${config.service.host}/sms/checkVerifyCode`;
+        return this.get(url, { smsId, verifyCode });
+    }
+
 
     /** 发送验证码到指定的手机 */
     sentRegisterVerifyCode(mobile: string): Promise<{ smsId: string }> {
-        console.assert(mobile != null);
-        let url = `http://${config.service.host}/sms/sendVerifyCode`;
-        return this.get(url, { mobile, type: 'register' });
+        // console.assert(mobile != null);
+        // let url = `http://${config.service.host}/sms/sendVerifyCode`;
+        // return this.get(url, { mobile, type: 'register' });
+        return this.sentVerifyCode(mobile, 'reigster');
     }
 
     /** 用户注册 */
@@ -927,14 +933,27 @@ export class MemberService extends Service {
         });
     }
 
-    resetPassword(data: RegisterModel) {
-        console.assert(data != null);
+    resetPassword(mobile: string, password: string, smsId: string, verifyCode: string) {
         let url = `http://${config.service.host}/user/resetPassword`;
-        return this.post(url, data).then(data => {
+        return this.put(url, { mobile, password, smsId, verifyCode }).then(data => {
             debugger;
             return data;
         });
     }
+
+    changePassword(password: string, smsId: string, verifyCode: string) {
+        let url = `http://${config.service.host}/user/changePassword`;
+        return this.put(url, { password, smsId, verifyCode }).then(data => {
+            debugger;
+            return data;
+        });
+    }
+
+    changeMobile(mobile: string, smsId: string, verifyCode: string) {
+        let url = `http://${config.service.host}/user/changeMobile`;
+        return this.put(url, { mobile, smsId, verifyCode });
+    }
+
 }
 
 export interface BalanceDetail {
@@ -951,6 +970,10 @@ export interface ScoreDetail {
     CreateDateTime: Date,
     Balance: number,
 }
+export interface Account {
+    UserId: string;
+    Balance: number;
+}
 export class AccountService extends Service {
     private url(path: string) {
         return `${config.service.account}${path}?storeId=${storeId()}`;
@@ -960,9 +983,7 @@ export class AccountService extends Service {
      * 获取用户账户的余额
      */
     balance = () => {
-        return this.get<UserInfo2>(this.url('Account/GetAccount')).then(function (data) {
-            return (new Number(data.Balance)).valueOf();
-        });
+        return userData.balance
     }
 
     balanceDetails(): Promise<BalanceDetail[]> {
@@ -971,6 +992,15 @@ export class AccountService extends Service {
 
     scoreDetails(): Promise<ScoreDetail[]> {
         return this.get<ScoreDetail[]>(this.url('Account/GetScoreDetails'), {});
+    }
+
+    account(): Promise<Account> {
+        return this.get<Account>(this.url('Account/GetAccount'));
+    }
+
+    payOrder(orderId: string, amount: number) {
+        let url = this.url('Account/PayOrder');
+        return this.put(url, { orderId, amount });
     }
 }
 
@@ -1081,13 +1111,18 @@ userData.userToken.add(() => {
     })
 
     let member = new MemberService();
-    // member.userInfo().then(o => {
-    //     userData.toEvaluateCount.value = o.ToEvaluateCount;
-    //     userData.sendCount.value = o.SendCount;
-    //     userData.notPaidCount.value = o.NotPaidCount;
-    //     userData.balance.value = o.Balance;
-    //     userData.nickName.value = o.NickName;
-    // })
+    member.userInfo().then((o: UserInfo) => {
+        // userData.toEvaluateCount.value = o.ToEvaluateCount;
+        // userData.sendCount.value = o.SendCount;
+        // userData.notPaidCount.value = o.NotPaidCount;
+        // userData.balance.value = 0;
+        userData.nickName.value = o.NickName;
+    })
+
+    let account = new AccountService();
+    account.account().then(o => {
+        userData.balance.value = o.Balance;
+    });
 
     let shopping = new ShoppingService();
     shopping.ordersSummary().then(data => {
