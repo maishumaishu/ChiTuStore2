@@ -8,11 +8,6 @@ declare module 'chitu.mobile' {
     export = cm;
 }
 
-declare module 'validate' {
-    import m = require('modules/core/validate');
-    export = m;
-}
-
 // declare module 'ui' {
 //     import m = require('modules/core/ui');
 //     export = m;
