@@ -32,7 +32,7 @@ export default function (page: Page) {
             <PageComponent>
                 <PageHeader>
                     <nav className="bg-primary">
-                        <a href="#Home_Search" className="search">
+                        <a href="#home_search" className="search">
                             <div name="search_box" className="form-control" style={{ borderWidth: 0, borderRadius: 4 }}>
                                 寻找商品、品牌、品类
                             </div>
