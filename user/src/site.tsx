@@ -1,6 +1,6 @@
 import { Service, ShoppingCartService, AjaxError, userData, ValueStore } from 'services';
 import { Application as BaseApplication } from 'chitu.mobile';
-
+import * as ui from 'ui';
 
 import * as chitu from 'chitu';
 
@@ -177,7 +177,7 @@ export class Page extends chitu.Page {
         return <header>{(navBar)}</header>;
     }
 
-    createService<T extends Service>(serviceType: { new (): T }): T {
+    createService<T extends Service>(serviceType: { new(): T }): T {
         let result = new serviceType();
         result.error.add((sender, error) => {
             this.processError(error);
@@ -207,7 +207,8 @@ export class Page extends chitu.Page {
             this.renderError();
         }
         else {
-            alert(err.message);
+            // alert(err.message);
+            ui.alert({ title: '错误', message: err.message });
             console.log(err);
         }
     }
