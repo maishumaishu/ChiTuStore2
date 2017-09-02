@@ -27,7 +27,7 @@ var services = {
 
 let config = {
     service: services.local,
-    appToken: '58424776034ff82470d06d3d',
+    appToken: '59a0d63ab58cf427f90c7d3e',
     storeId: '58401d1906c02a2b8877bd13',
     get userToken() {
         return userData.userToken.value;
@@ -63,8 +63,8 @@ function isError(responseData: any): Error {
         if (responseData.Code == 'Success') {
             return null;
         }
-        let err = new Error(responseData.Message);
-        err.name = responseData.Code;
+        let err = new Error(responseData.Code);
+        err.message = responseData.Message;
         return err;
     }
 
@@ -136,12 +136,7 @@ export abstract class Service {
 
             // try {
             let response = await fetch(url, options);
-            if (response.status >= 300) {
-                let err = new AjaxError(options.method);
-                err.name = `${response.status}`;
-                err.message = response.statusText;
-                throw err
-            }
+
             let responseText = response.text();
             let p: Promise<string>;
             if (typeof responseText == 'string') {
@@ -153,13 +148,32 @@ export abstract class Service {
                 p = responseText as Promise<string>;
             }
 
-            let text = await responseText;
-            let textObject = JSON.parse(text);
-            let err = isError(textObject);
-            if (err)
-                throw err;
 
-            textObject = this.travelJSON(textObject);
+            let text = await responseText;
+            let textObject;
+            let isJSONContextType = (response.headers.get('content-type') || '').indexOf('json') >= 0;
+            if (isJSONContextType) {
+                textObject = JSON.parse(text);
+                textObject = this.travelJSON(textObject);
+            }
+            else {
+                textObject = text;
+            }
+
+
+            if (response.status >= 300) {
+                let err = new Error();
+                err.name = `${response.status}`;
+                err.message = isJSONContextType ? textObject.Message : textObject;
+                err.message = err.message || response.statusText;
+
+                throw err
+            }
+
+            // let err = isError(textObject);
+            // if (err)
+            //     throw err;
+
             return textObject;
             // }
             // catch (err) {
@@ -337,7 +351,7 @@ export class StationService extends Service {
     }
 
     advertItems(): Promise<{ ImgUrl: string, Id: string }[]> {
-        return this.get<{ ImgUrl: string }[]>(StationService.url('Home/GetAdvertItems')).then(items => {
+        return this.get<{ ImgUrl: string, Id: string }[]>(StationService.url('Home/GetAdvertItems')).then(items => {
             items.forEach(o => o.ImgUrl = imageUrl(o.ImgUrl));
             return items;
         });
@@ -873,7 +887,7 @@ export class MemberService extends Service {
     }
 
     private url(path: string) {
-        return `${config.service.shop}${path}?storeId=${storeId()}`;
+        return `${config.service.member}${path}?storeId=${storeId()}`;
     }
 
     userInfo(): Promise<UserInfo> {
