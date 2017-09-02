@@ -63,6 +63,9 @@ requirejs.config({
         },
         'controls/scrollView': {
             deps: ['hammer', 'bezier-easing']
+        },
+        ui: {
+            exports: 'ui'
         }
     },
     paths: {
@@ -72,6 +75,7 @@ requirejs.config({
         fetch: 'js/fetch',
         hammer: 'js/hammer',
         react: 'js/react',
+        ui: 'js/ui',
         'react-dom': 'js/react-dom',
         text: 'js/text',
         // controls: 'controls',
