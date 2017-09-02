@@ -224,8 +224,10 @@ export default async function (page: Page) {
                                     ))}
                                 </div> : null
                             }
-
-                            {couponsCount ?
+                        </div>
+                        {couponsCount ? <hr /> : null}
+                        {couponsCount ?
+                            <div className="container">
                                 <a className="col-xs-12" style={{ padding: '0px 0px 10px 0px' }} href="#shopping_storeCoupons">
                                     <div className="pull-left">
                                         店铺优惠劵
@@ -234,8 +236,9 @@ export default async function (page: Page) {
                                         <span className="badge bg-primary" style={{ marginRight: 10 }}>{couponsCount}</span>
                                         <i className="icon-chevron-right"></i>
                                     </div>
-                                </a> : null}
-                        </div>
+                                </a>
+                            </div>
+                            : null}
                         <hr />
                         <div className="container">
                             <h4 style={{ fontWeight: 'bold', width: '100%' }}>商品信息</h4>
