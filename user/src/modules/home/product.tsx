@@ -179,7 +179,7 @@ export default async function (page: Page) {
                         }}>
                         <div name="productImages" className="swiper-container">
                             <div className="swiper-wrapper">
-                                {p.ImageUrls.map(o => (
+                                {p.ImagePaths.map(o => (
                                     <div key={o} className="swiper-slide" style={{ textAlign: "center" }}>
                                         <ImageBox src={o} className="img-responsive-100 img-full">
                                         </ImageBox>
@@ -364,7 +364,7 @@ export default async function (page: Page) {
                             </nav>
                             <div style={{ paddingTop: "10px" }}>
                                 <div className="pull-left" style={{ width: 80, height: 80, marginLeft: 10 }}>
-                                    <ImageBox src={p.ImageUrl} className="img-responsive" />
+                                    <ImageBox src={p.ImagePath} className="img-responsive" />
                                 </div>
                                 <div style={{ marginLeft: 100, marginRight: 70 }}>
                                     <div>{p.Name}</div>

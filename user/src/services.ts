@@ -2,7 +2,7 @@
 import chitu = require('chitu');
 
 const REMOTE_HOST = 'service.alinq.cn:2800';//'localhost:2800';//
-const LOCAL_HOST = '192.168.1.9:2800';
+const LOCAL_HOST = 'localhost:2800';
 
 var services = {
     local: {
@@ -26,7 +26,7 @@ var services = {
 
 
 let config = {
-    service: services.local,
+    service: services.server,
     appToken: '59a0d63ab58cf427f90c7d3e',
     storeId: '58401d1906c02a2b8877bd13',
     get userToken() {
@@ -83,25 +83,30 @@ function storeId() {
 }
 
 function imageUrl(path: string) {
-    if (path.startsWith(`http://localhost:${location.port}`)) {
-        path = path.substr(`http://localhost:${location.port}`.length);
-    }
-    else if (path.startsWith('http://localhost')) {
-        path = path.substr('http://localhost'.length);
-    }
-    else if (path.startsWith('file://')) {
-        path = path.substr('file://'.length);
-    }
-    const imageBasePath = 'http://service.alinq.cn:2800/AdminServices/Shop';
-    let url: string;
-    if (!path.startsWith('http')) {
-        url = imageBasePath + path;
-    }
-    else {
-        url = path;
-    }
-    url = url + `?application-key=${config.appToken}&storeId=${storeId()}`;
-    return url;
+    // if (path.startsWith(`http://localhost:${location.port}`)) {
+    //     path = path.substr(`http://localhost:${location.port}`.length);
+    // }
+    // else if (path.startsWith('http://localhost')) {
+    //     path = path.substr('http://localhost'.length);
+    // }
+    // else if (path.startsWith('file://')) {
+    //     path = path.substr('file://'.length);
+    // }
+    // const imageBasePath = 'http://service.alinq.cn:2800/AdminServices/Shop';
+    // let url: string;
+    // if (!path.startsWith('http')) {
+    //     url = imageBasePath + path;
+    // }
+    // else {
+    //     url = path;
+    // }
+    // url = url + `?application-key=${config.appToken}&storeId=${storeId()}`;
+    // return url;
+    path = path || ' ';
+    if (path[0] == '/')
+        path = path.substr(1);
+
+    return path;
 }
 
 // 公用函数 模块结束
@@ -380,7 +385,7 @@ export interface Product {
     BrandId: string, BrandName: string, Price: number,
     Score: number, Unit: string, MemberPrice: number,
     Fields: Array<{ key: string, value: string }>,
-    GroupId: string, ImageUrl: string, ImageUrls: Array<string>,
+    GroupId: string, ImagePath: string, ImagePaths: Array<string>,
     ProductCategoryId: string, Name: string, //IsFavored?: boolean,
     ProductCategoryName: string,
     CustomProperties: Array<CustomProperty>,
@@ -499,10 +504,10 @@ export class ShoppingService extends Service {
             .then(o => this.processProduct(o));
     }
     private processProduct(product: Product): Product {
-        if (!product.ImageUrls && product.ImageUrl != null)
-            product.ImageUrls = (<string>product.ImageUrl).split(',').map(o => imageUrl(o));
+        if (!product.ImagePaths && product.ImagePath != null)
+            product.ImagePaths = (<string>product.ImagePath).split(',').map(o => imageUrl(o));
 
-        product.ImageUrl = product.ImageUrls[0];
+        product.ImagePath = product.ImagePaths[0];
         product.Arguments = product.Arguments || [];
         product.Fields = product.Fields || [];
 
@@ -519,7 +524,7 @@ export class ShoppingService extends Service {
             startRowIndex: pageIndex * 20
         }).then(o => {
             o.Products.forEach(o => {
-                o.ImageUrl = imageUrl(o.ImageUrl);
+                o.ImagePath = imageUrl(o.ImagePath);
             });
             return o.Products;
         });
@@ -895,7 +900,7 @@ export class MemberService extends Service {
         let url2 = `http://${config.service.host}/user/userInfo`;
         return Promise.all([this.get<UserInfo>(url1), this.get<{ mobile }>(url2)])
             .then((data) => {
-                data[0].Mobile = data[1].mobile;
+                data[0].Mobile = (data[1] || {} as any).mobile;
                 return data[0];
             });
     }

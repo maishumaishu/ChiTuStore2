@@ -28,6 +28,7 @@ module.exports = function (grunt) {
                 files: [
                     { expand: true, cwd: `${dest_user_root}`, src: [`modules/**/*.js`], dest: 'www_es5' },
                     { expand: true, cwd: `${dest_user_root}`, src: [`js/chitu.js`], dest: 'www_es5' },
+                    { expand: true, cwd: `${dest_user_root}`, src: [`js/ui.js`], dest: 'www_es5' },
                     { expand: true, cwd: `${dest_user_root}`, src: [`index.js`], dest: 'www_es5' },
                 ]
             }
@@ -51,7 +52,7 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true, cwd: dest_user_root, dest: 'www_es5',
-                        src: ['js/**/*.js', '!js/chitu.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'index.html'],
+                        src: ['js/**/*.js', '!js/chitu.js', '!js/ui.js', 'content/**/*.css', 'content/font/*.*', 'images/**/*.*', 'index.html'],
                     },
                 ],
             },

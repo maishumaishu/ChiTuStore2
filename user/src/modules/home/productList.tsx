@@ -36,7 +36,7 @@ export default function (page: Page) {
                         <DataList className="products" scroller={() => this.dataView} loadData={this.loadProducts}
                             dataItem={(o: Product) => (
                                 <a key={o.Id} href={`#home_product?id=${o.Id}`} className="col-xs-6 text-center item">
-                                    <ImageBox src={o.ImageUrl} />
+                                    <ImageBox src={o.ImagePath} />
                                     <div className="bottom">
                                         <div className="interception">{o.Name}</div>
                                         <div>
