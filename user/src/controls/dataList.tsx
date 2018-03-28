@@ -63,7 +63,7 @@ namespace controls {
             if (scroller == null) {
                 scroller = this.element.parentElement;
             }
-            scrollOnBottom(scroller, this.loadData.bind(this));
+            scrollOnBottom(scroller, () => this.loadData());
         }
 
         createDataItem(data: any, index: number) {

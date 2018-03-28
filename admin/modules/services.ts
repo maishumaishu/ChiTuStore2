@@ -1,6 +1,6 @@
 import * as chitu from 'chitu';
 
-const SERVICE_HOST = 'http://service.alinq.cn:2800/';//'http://localhost:2800/';//
+const SERVICE_HOST = 'http://service.alinq.cn/';//'http://localhost:2800/';//
 const imgUrl = 'http://shop.alinq.cn/AdminServices/Shop/';
 
 let config = {

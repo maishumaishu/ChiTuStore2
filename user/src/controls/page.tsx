@@ -232,7 +232,7 @@ namespace controls {
                     </PullUpIndicator>
             }
             return (
-                <section ref={(o: HTMLElement) => this.element = o} className={this.props.className} style={this.props.style}>
+                <section ref={(o: HTMLElement) => this.element = o || this.element} className={this.props.className} style={this.props.style}>
                     {pullDownIndicator}
                     {children.map(o => (o))}
                     {pullUpIndicator}

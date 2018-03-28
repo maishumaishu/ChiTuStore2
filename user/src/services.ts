@@ -1,25 +1,25 @@
 
 import chitu = require('chitu');
 
-const REMOTE_HOST = 'service.alinq.cn:2800';//'localhost:2800';//
+const REMOTE_HOST = 'service.alinq.cn';//'localhost:2800';//
 const LOCAL_HOST = 'localhost:2800';
-
+let { protocol } = location;
 var services = {
     local: {
         host: LOCAL_HOST,
-        shop: `http://${LOCAL_HOST}/UserShopTest/`,
-        site: `http://${LOCAL_HOST}/UserSiteTest/`,
-        member: `http://${LOCAL_HOST}/UserMemberTest/`,
-        weixin: `http://${LOCAL_HOST}/UserWeiXinTest/`,
-        account: `http://${LOCAL_HOST}/UserAccountTest/`,
+        shop: `${protocol}//${LOCAL_HOST}/UserShopTest/`,
+        site: `${protocol}//${LOCAL_HOST}/UserSiteTest/`,
+        member: `${protocol}//${LOCAL_HOST}/UserMemberTest/`,
+        weixin: `${protocol}//${LOCAL_HOST}/UserWeiXinTest/`,
+        account: `${protocol}//${LOCAL_HOST}/UserAccountTest/`,
     },
     server: {
         host: REMOTE_HOST,
-        shop: `http://${REMOTE_HOST}/UserShop/`,
-        site: `http://${REMOTE_HOST}/UserSite/`,
-        member: `http://${REMOTE_HOST}/UserMember/`,
-        weixin: `http://${REMOTE_HOST}/UserWeiXin/`,
-        account: `http://${REMOTE_HOST}/UserAccount/`,
+        shop: `${protocol}//${REMOTE_HOST}/UserShop/`,
+        site: `${protocol}//${REMOTE_HOST}/UserSite/`,
+        member: `${protocol}//${REMOTE_HOST}/UserMember/`,
+        weixin: `${protocol}//${REMOTE_HOST}/UserWeiXin/`,
+        account: `${protocol}//${REMOTE_HOST}/UserAccount/`,
     }
 }
 
@@ -897,7 +897,7 @@ export class MemberService extends Service {
 
     userInfo(): Promise<UserInfo> {
         let url1 = this.url('Member/CurrentUserInfo');
-        let url2 = `http://${config.service.host}/user/userInfo`;
+        let url2 = `${protocol}//${config.service.host}/user/userInfo`;
         return Promise.all([this.get<UserInfo>(url1), this.get<{ mobile }>(url2)])
             .then((data) => {
                 data[0].Mobile = (data[1] || {} as any).mobile;
@@ -916,12 +916,12 @@ export class MemberService extends Service {
 
     sentVerifyCode(mobile: string, type: VerifyCodeType): Promise<{ smsId: string }> {
         console.assert(mobile != null);
-        let url = `http://${config.service.host}/sms/sendVerifyCode`;
+        let url = `${protocol}//${config.service.host}/sms/sendVerifyCode`;
         return this.get(url, { mobile, type });
     }
 
     checkVerifyCode(smsId: string, verifyCode: string) {
-        let url = `http://${config.service.host}/sms/checkVerifyCode`;
+        let url = `${protocol}//${config.service.host}/sms/checkVerifyCode`;
         return this.get(url, { smsId, verifyCode });
     }
 
@@ -937,7 +937,7 @@ export class MemberService extends Service {
     /** 用户注册 */
     register(data: RegisterModel) {
         console.assert(data != null);
-        let url = `http://${config.service.host}/user/register`;
+        let url = `${protocol}//${config.service.host}/user/register`;
         return this.post<{ token: string, userId: string }>(url, data).then((data) => {
             config.userToken = data.token;
             return data;
@@ -945,7 +945,7 @@ export class MemberService extends Service {
     }
 
     login(username: string, password: string): Promise<{ token: string, userId: string }> {
-        let url = `http://${config.service.host}/user/login`;
+        let url = `${protocol}//${config.service.host}/user/login`;
         return this.post<{ token: string, userId: string }>(url, { username, password }).then((result) => {
             config.userToken = result.token;
             return result;
@@ -953,7 +953,7 @@ export class MemberService extends Service {
     }
 
     resetPassword(mobile: string, password: string, smsId: string, verifyCode: string) {
-        let url = `http://${config.service.host}/user/resetPassword`;
+        let url = `${protocol}//${config.service.host}/user/resetPassword`;
         return this.put(url, { mobile, password, smsId, verifyCode }).then(data => {
             debugger;
             return data;
@@ -961,7 +961,7 @@ export class MemberService extends Service {
     }
 
     changePassword(password: string, smsId: string, verifyCode: string) {
-        let url = `http://${config.service.host}/user/changePassword`;
+        let url = `${protocol}//${config.service.host}/user/changePassword`;
         return this.put(url, { password, smsId, verifyCode }).then(data => {
             debugger;
             return data;
@@ -969,7 +969,7 @@ export class MemberService extends Service {
     }
 
     changeMobile(mobile: string, smsId: string, verifyCode: string) {
-        let url = `http://${config.service.host}/user/changeMobile`;
+        let url = `${protocol}//${config.service.host}/user/changeMobile`;
         return this.put(url, { mobile, smsId, verifyCode });
     }
 
@@ -1177,7 +1177,7 @@ export class LocationService extends Service {
     }
 
     getLocation = (data) => {
-        return this.get<Provinces[]>("http://restapi.amap.com/v3/ip", data).then(function (result) {
+        return this.get<Provinces[]>(`${protocol}//restapi.amap.com/v3/ip`, data).then(function (result) {
             return result;
         });
     }

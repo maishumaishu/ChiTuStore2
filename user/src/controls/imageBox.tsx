@@ -11,11 +11,12 @@ namespace controls {
 
     /** 加载图片到 HTMLImageElement */
     export function loadImage(element: HTMLImageElement, imageUrl: string, imageText?: string): Promise<string> {
+        if (element == null) throw new Error(`Paramter element is null`);
         // imageText = imageText || config.imageDisaplyText;
         var PREVIEW_IMAGE_DEFAULT_WIDTH = 200;
         var PREVIEW_IMAGE_DEFAULT_HEIGHT = 200;
 
-        let src = imageUrl;
+        let src = imageUrl || '';
         var img_width = PREVIEW_IMAGE_DEFAULT_WIDTH;
         var img_height = PREVIEW_IMAGE_DEFAULT_HEIGHT;
         var match = src.match(/_\d+_\d+/);
@@ -83,11 +84,20 @@ namespace controls {
         },
         { src: string }> {
 
+        private element: HTMLImageElement;
         private unmount = false;
 
         constructor(props) {
             super(props);
             this.state = { src: this.props.src };
+        }
+
+        componentDidMount() {
+            loadImage(this.element, this.state.src || '', this.props.text || config.imageDisaplyText)
+                .then(data => {
+                    if (!this.props.onChange) return;
+                    this.props.onChange(data);
+                });
         }
 
         componentWillUnmount() {
@@ -97,14 +107,7 @@ namespace controls {
         render() {
             return (
                 <img className={this.props.className} style={this.props.style}
-                    ref={(o: HTMLImageElement) => {
-                        if (!o) return;
-                        loadImage(o, this.state.src || '', this.props.text || config.imageDisaplyText)
-                            .then(data => {
-                                if (!this.props.onChange) return;
-                                this.props.onChange(data);
-                            });
-                    }} ></img>
+                    ref={(o: HTMLImageElement) => this.element = o || this.element} ></img>
             );
         }
     }
